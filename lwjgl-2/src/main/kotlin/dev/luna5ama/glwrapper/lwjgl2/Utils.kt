@@ -2,6 +2,7 @@
 
 package dev.luna5ama.glwrapper.lwjgl2
 
+import org.lwjgl.PointerBuffer
 import org.lwjgl.opengl.GLContext
 import sun.misc.Unsafe
 import java.lang.invoke.MethodHandles
@@ -20,7 +21,7 @@ private val MARK_OFFSET = unsafe.objectFieldOffset(Buffer::class.java.getDeclare
 private val LIMIT_OFFSET = unsafe.objectFieldOffset(Buffer::class.java.getDeclaredField("limit"))
 private val CAPACITY_OFFSET = unsafe.objectFieldOffset(Buffer::class.java.getDeclaredField("capacity"))
 
-private var Buffer.address
+internal var Buffer.address
     get() = unsafe.getLong(this, ADDRESS_OFFSET)
     set(value) {
         unsafe.putLong(this, ADDRESS_OFFSET, value)
@@ -142,6 +143,15 @@ internal fun wrapBuffer(buffer: DoubleBuffer, address: Long, length: Int): Doubl
 
 internal fun wrapBuffer(buffer: DoubleBuffer, address: Long): DoubleBuffer {
     buffer.address = address
+
+    return buffer
+}
+
+internal fun wrapBuffer(buffer: PointerBuffer, address: Long, length: Int): PointerBuffer {
+    val byteBuffer = buffer.buffer
+    byteBuffer.address = address
+    byteBuffer.limit = length * 8
+    byteBuffer.capacity = length * 8
 
     return buffer
 }

@@ -13,6 +13,42 @@ open class GL43LWJGL2(override val tempArr: Arr) : IGL43 {
         GL43.glDispatchComputeIndirect(indirect)
     }
 
+    override fun glCopyImageSubData(
+        srcName: Int,
+        srcTarget: Int,
+        srcLevel: Int,
+        srcX: Int,
+        srcY: Int,
+        srcZ: Int,
+        dstName: Int,
+        dstTarget: Int,
+        dstLevel: Int,
+        dstX: Int,
+        dstY: Int,
+        dstZ: Int,
+        srcWidth: Int,
+        srcHeight: Int,
+        srcDepth: Int
+    ) {
+        GL43.glCopyImageSubData(
+            srcName,
+            srcTarget,
+            srcLevel,
+            srcX,
+            srcY,
+            srcZ,
+            dstName,
+            dstTarget,
+            dstLevel,
+            dstX,
+            dstY,
+            dstZ,
+            srcWidth,
+            srcHeight,
+            srcDepth
+        )
+    }
+
     override fun glInvalidateTextSubImage(
         texture: Int,
         level: Int,

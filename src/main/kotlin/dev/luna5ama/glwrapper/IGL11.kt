@@ -296,6 +296,11 @@ interface IGL11 : GLBase {
     fun glPolygonMode(face: Int, mode: Int)
     fun glPolygonOffset(factor: Float, units: Float)
 
+    fun glReadBuffer(src: Int)
+
+    @Unsafe
+    fun glReadPixels(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: Long)
+
     fun glScissor(x: Int, y: Int, width: Int, height: Int)
 
     fun glStencilFunc(func: Int, ref: Int, mask: Int)
@@ -392,5 +397,9 @@ interface IGL11 : GLBase {
         val ptr = tempArr.ptr
         glGetDoublev(pname, ptr)
         return ptr.getDouble()
+    }
+
+    fun glReadPixels(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: Ptr) {
+        glReadPixels(x, y, width, height, format, type, pixels.address)
     }
 }

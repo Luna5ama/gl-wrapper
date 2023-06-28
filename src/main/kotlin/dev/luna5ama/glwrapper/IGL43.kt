@@ -309,6 +309,24 @@ interface IGL43 : GLBase {
     fun glDispatchCompute(num_groups_x: Int, num_groups_y: Int, num_groups_z: Int)
     fun glDispatchComputeIndirect(indirect: Long)
 
+    fun glCopyImageSubData(
+        srcName: Int,
+        srcTarget: Int,
+        srcLevel: Int,
+        srcX: Int,
+        srcY: Int,
+        srcZ: Int,
+        dstName: Int,
+        dstTarget: Int,
+        dstLevel: Int,
+        dstX: Int,
+        dstY: Int,
+        dstZ: Int,
+        srcWidth: Int,
+        srcHeight: Int,
+        srcDepth: Int
+    )
+
     fun glInvalidateTextSubImage(
         texture: Int,
         level: Int,

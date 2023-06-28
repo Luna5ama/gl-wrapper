@@ -49,22 +49,17 @@ open class GL44LWJGL2(override val tempArr: Arr) : IGL44 {
     }
 
     private val glBindBuffersRange_buffers = createBuffer().asIntBuffer()
-    private val glBindBuffersRange_offsets = createBuffer()
-    private val glBindBuffersRange_offsets_ptr = PointerBuffer(glBindBuffersRange_offsets)
-    private val glBindBuffersRange_sizes = createBuffer()
-    private val glBindBuffersRange_sizes_ptr = PointerBuffer(glBindBuffersRange_sizes)
+    private val glBindBuffersRange_offsets = PointerBuffer(createBuffer())
+    private val glBindBuffersRange_sizes = PointerBuffer(createBuffer())
 
     override fun glBindBuffersRange(target: Int, first: Int, count: Int, buffers: Long, offsets: Long, sizes: Long) {
-        wrapBuffer(glBindBuffersRange_offsets, offsets, count * 8)
-        wrapBuffer(glBindBuffersRange_sizes, sizes, count * 8)
-
         GL44.glBindBuffersRange(
             target,
             first,
             count,
             wrapBuffer(glBindBuffersRange_buffers, buffers, count),
-            glBindBuffersRange_offsets_ptr,
-            glBindBuffersRange_sizes_ptr
+            wrapBuffer(glBindBuffersRange_offsets, offsets, count),
+            wrapBuffer(glBindBuffersRange_sizes, sizes, count)
         )
     }
 

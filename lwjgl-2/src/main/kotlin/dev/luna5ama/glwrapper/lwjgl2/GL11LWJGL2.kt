@@ -179,6 +179,16 @@ open class GL11LWJGL2(override val tempArr: Arr) : IGL11 {
         GL11.glPolygonOffset(factor, units)
     }
 
+    override fun glReadBuffer(src: Int) {
+        GL11.glReadBuffer(src)
+    }
+
+    private val glReadPixels = createBuffer()
+
+    override fun glReadPixels(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: Long) {
+        GL11.glReadPixels(x, y, width, height, format, type, wrapBuffer(glReadPixels, pixels))
+    }
+
     override fun glScissor(x: Int, y: Int, width: Int, height: Int) {
         GL11.glScissor(x, y, width, height)
     }
