@@ -9,6 +9,7 @@ plugins {
     java
     kotlin("jvm")
     id("dev.fastmc.maven-repo").version("1.0.0")
+    id("com.google.devtools.ksp")
 }
 
 allprojects {
@@ -76,6 +77,8 @@ base {
 
 dependencies {
     api("dev.luna5ama:kmogus-core:1.0.0-SNAPSHOT")
+    ksp(project(":codegen"))
+    compileOnly("it.unimi.dsi:fastutil:7.1.0")
 }
 
 publishing {
