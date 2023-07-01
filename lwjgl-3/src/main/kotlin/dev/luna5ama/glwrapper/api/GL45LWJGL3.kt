@@ -50,10 +50,6 @@ open class GL45LWJGL3(override val tempArr: Arr) : IGL45 {
         GL45C.nglClearNamedBufferSubData(buffer, internalFormat, offset, size, format, type, data)
     }
 
-    override fun glMapNamedBufferUnsafe(buffer: Int, access: Int): Long {
-        return GL45C.nglMapNamedBuffer(buffer, access)
-    }
-
     override fun glMapNamedBufferRangeUnsafe(buffer: Int, offset: Long, length: Long, access: Int): Long {
         return GL45C.nglMapNamedBufferRange(buffer, offset, length, access)
     }

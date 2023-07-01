@@ -2,6 +2,7 @@
 
 package dev.luna5ama.glwrapper.api
 
+import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.ensureCapacity
 import dev.luna5ama.kmogus.memcpy
@@ -72,9 +73,6 @@ interface IGL45 : GLBase {
         type: Int,
         data: Long
     )
-
-    @Unsafe
-    fun glMapNamedBufferUnsafe(buffer: Int, access: Int): Long
 
     @Unsafe
     fun glMapNamedBufferRangeUnsafe(buffer: Int, offset: Long, length: Long, access: Int): Long
@@ -410,12 +408,9 @@ interface IGL45 : GLBase {
         glClearNamedBufferSubData(buffer, internalFormat, offset, size, format, type, data.address)
     }
 
-    fun glMapNamedBuffer(buffer: Int, access: Int): Ptr {
-        return Ptr(glMapNamedBufferUnsafe(buffer, access))
-    }
-
-    fun glMapNamedBufferRange(buffer: Int, offset: Long, length: Long, access: Int): Ptr {
-        return Ptr(glMapNamedBufferRangeUnsafe(buffer, offset, length, access))
+    fun glMapNamedBufferRange(buffer: Int, offset: Long, length: Long, access: Int): Arr {
+        val address = glMapNamedBufferRangeUnsafe(buffer, offset, length, access)
+        return Arr.wrap(address, if (address == 0L) 0L else length)
     }
 
     fun glGetNamedBufferParameteriv(buffer: Int, pname: Int, params: Ptr) {

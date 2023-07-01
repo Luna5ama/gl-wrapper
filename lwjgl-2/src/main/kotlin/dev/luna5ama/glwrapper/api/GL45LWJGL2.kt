@@ -78,10 +78,6 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         )
     }
 
-    override fun glMapNamedBufferUnsafe(buffer: Int, access: Int): Long {
-        return GL45.glMapNamedBuffer(buffer, access, null).address
-    }
-
     private val glMapNamedBufferRangeUnsafe = createBuffer()
 
     override fun glMapNamedBufferRangeUnsafe(buffer: Int, offset: Long, length: Long, access: Int): Long {
