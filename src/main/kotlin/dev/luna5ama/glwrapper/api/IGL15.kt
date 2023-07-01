@@ -6,47 +6,48 @@ import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.ensureCapacity
 import dev.luna5ama.kmogus.memcpy
 
-const val GL_SRC1_ALPHA = 0x8589
-
-const val GL_ARRAY_BUFFER = 0x8892
-const val GL_ELEMENT_ARRAY_BUFFER = 0x8893
-
-const val GL_ARRAY_BUFFER_BINDING = 0x8894
-const val GL_ELEMENT_ARRAY_BUFFER_BINDING = 0x8895
-
-const val GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 0x889F
-
-const val GL_STREAM_DRAW = 0x88E0
-const val GL_STREAM_READ = 0x88E1
-const val GL_STREAM_COPY = 0x88E2
-const val GL_STATIC_DRAW = 0x88E4
-const val GL_STATIC_READ = 0x88E5
-const val GL_STATIC_COPY = 0x88E6
-const val GL_DYNAMIC_DRAW = 0x88E8
-const val GL_DYNAMIC_READ = 0x88E9
-const val GL_DYNAMIC_COPY = 0x88EA
-
-const val GL_READ_ONLY = 0x88B8
-const val GL_WRITE_ONLY = 0x88B9
-const val GL_READ_WRITE = 0x88BA
-
-const val GL_BUFFER_SIZE = 0x8764
-const val GL_BUFFER_USAGE = 0x8765
-const val GL_BUFFER_ACCESS = 0x88BB
-const val GL_BUFFER_MAPPED = 0x88BC
-
-const val GL_BUFFER_MAP_POINTER = 0x88BD
-
-const val GL_SAMPLES_PASSED = 0x8914
-
-const val GL_QUERY_COUNTER_BITS = 0x8864
-const val GL_CURRENT_QUERY = 0x8865
-
-const val GL_QUERY_RESULT = 0x8866
-const val GL_QUERY_RESULT_AVAILABLE = 0x8867
-
-
 interface IGL15 : GLBase {
+    companion object {
+        const val GL_SRC1_ALPHA = 0x8589
+
+        const val GL_ARRAY_BUFFER = 0x8892
+        const val GL_ELEMENT_ARRAY_BUFFER = 0x8893
+
+        const val GL_ARRAY_BUFFER_BINDING = 0x8894
+        const val GL_ELEMENT_ARRAY_BUFFER_BINDING = 0x8895
+
+        const val GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 0x889F
+
+        const val GL_STREAM_DRAW = 0x88E0
+        const val GL_STREAM_READ = 0x88E1
+        const val GL_STREAM_COPY = 0x88E2
+        const val GL_STATIC_DRAW = 0x88E4
+        const val GL_STATIC_READ = 0x88E5
+        const val GL_STATIC_COPY = 0x88E6
+        const val GL_DYNAMIC_DRAW = 0x88E8
+        const val GL_DYNAMIC_READ = 0x88E9
+        const val GL_DYNAMIC_COPY = 0x88EA
+
+        const val GL_READ_ONLY = 0x88B8
+        const val GL_WRITE_ONLY = 0x88B9
+        const val GL_READ_WRITE = 0x88BA
+
+        const val GL_BUFFER_SIZE = 0x8764
+        const val GL_BUFFER_USAGE = 0x8765
+        const val GL_BUFFER_ACCESS = 0x88BB
+        const val GL_BUFFER_MAPPED = 0x88BC
+
+        const val GL_BUFFER_MAP_POINTER = 0x88BD
+
+        const val GL_SAMPLES_PASSED = 0x8914
+
+        const val GL_QUERY_COUNTER_BITS = 0x8864
+        const val GL_CURRENT_QUERY = 0x8865
+
+        const val GL_QUERY_RESULT = 0x8866
+        const val GL_QUERY_RESULT_AVAILABLE = 0x8867
+    }
+
     fun glBindBuffer(target: Int, buffer: Int)
 
     @Unsafe

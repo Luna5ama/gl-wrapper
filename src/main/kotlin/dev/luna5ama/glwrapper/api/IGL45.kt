@@ -7,43 +7,44 @@ import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.ensureCapacity
 import dev.luna5ama.kmogus.memcpy
 
-const val GL_NEGATIVE_ONE_TO_ONE = 0x935E
-const val GL_ZERO_TO_ONE = 0x935F
-
-const val GL_CLIP_ORIGIN = 0x935C
-const val GL_CLIP_DEPTH_MODE = 0x935D
-
-const val GL_QUERY_WAIT_INVERTED = 0x8E17
-const val GL_QUERY_NO_WAIT_INVERTED = 0x8E18
-const val GL_QUERY_BY_REGION_WAIT_INVERTED = 0x8E19
-const val GL_QUERY_BY_REGION_NO_WAIT_INVERTED = 0x8E1A
-
-const val GL_MAX_CULL_DISTANCES = 0x82F9
-const val GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES = 0x82FA
-
-const val GL_TEXTURE_TARGET = 0x1006
-
-const val GL_QUERY_TARGET = 0x82EA
-
-const val GL_CONTEXT_RELEASE_BEHAVIOR = 0x82FB
-
-const val GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH = 0x82FC
-
-const val GL_GUILTY_CONTEXT_RESET = 0x8253
-const val GL_INNOCENT_CONTEXT_RESET = 0x8254
-const val GL_UNKNOWN_CONTEXT_RESET = 0x8255
-
-const val GL_RESET_NOTIFICATION_STRATEGY = 0x8256
-
-const val GL_LOSE_CONTEXT_ON_RESET = 0x8252
-const val GL_NO_RESET_NOTIFICATION = 0x8261
-
-const val GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT = 0x4
-
-const val GL_CONTEXT_LOST = 0x507
-
-
 interface IGL45 : GLBase {
+    companion object {
+        const val GL_NEGATIVE_ONE_TO_ONE = 0x935E
+        const val GL_ZERO_TO_ONE = 0x935F
+
+        const val GL_CLIP_ORIGIN = 0x935C
+        const val GL_CLIP_DEPTH_MODE = 0x935D
+
+        const val GL_QUERY_WAIT_INVERTED = 0x8E17
+        const val GL_QUERY_NO_WAIT_INVERTED = 0x8E18
+        const val GL_QUERY_BY_REGION_WAIT_INVERTED = 0x8E19
+        const val GL_QUERY_BY_REGION_NO_WAIT_INVERTED = 0x8E1A
+
+        const val GL_MAX_CULL_DISTANCES = 0x82F9
+        const val GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES = 0x82FA
+
+        const val GL_TEXTURE_TARGET = 0x1006
+
+        const val GL_QUERY_TARGET = 0x82EA
+
+        const val GL_CONTEXT_RELEASE_BEHAVIOR = 0x82FB
+
+        const val GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH = 0x82FC
+
+        const val GL_GUILTY_CONTEXT_RESET = 0x8253
+        const val GL_INNOCENT_CONTEXT_RESET = 0x8254
+        const val GL_UNKNOWN_CONTEXT_RESET = 0x8255
+
+        const val GL_RESET_NOTIFICATION_STRATEGY = 0x8256
+
+        const val GL_LOSE_CONTEXT_ON_RESET = 0x8252
+        const val GL_NO_RESET_NOTIFICATION = 0x8261
+
+        const val GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT = 0x4
+
+        const val GL_CONTEXT_LOST = 0x507
+    }
+
     fun glClipControl(origin: Int, depth: Int)
 
     @Unsafe

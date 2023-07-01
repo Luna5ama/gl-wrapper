@@ -6,56 +6,57 @@ import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.ensureCapacity
 import dev.luna5ama.kmogus.memcpy
 
-const val GL_SHADER_COMPILER = 0x8DFA
-const val GL_SHADER_BINARY_FORMATS = 0x8DF8
-const val GL_NUM_SHADER_BINARY_FORMATS = 0x8DF9
-const val GL_MAX_VERTEX_UNIFORM_VECTORS = 0x8DFB
-const val GL_MAX_VARYING_VECTORS = 0x8DFC
-const val GL_MAX_FRAGMENT_UNIFORM_VECTORS = 0x8DFD
-const val GL_IMPLEMENTATION_COLOR_READ_TYPE = 0x8B9A
-const val GL_IMPLEMENTATION_COLOR_READ_FORMAT = 0x8B9B
-
-const val GL_FIXED = 0x140C
-
-const val GL_LOW_FLOAT = 0x8DF0
-const val GL_MEDIUM_FLOAT = 0x8DF1
-const val GL_HIGH_FLOAT = 0x8DF2
-const val GL_LOW_INT = 0x8DF3
-const val GL_MEDIUM_INT = 0x8DF4
-const val GL_HIGH_INT = 0x8DF5
-
-const val GL_RGB565 = 0x8D62
-
-const val GL_PROGRAM_BINARY_RETRIEVABLE_HINT = 0x8257
-
-const val GL_PROGRAM_BINARY_LENGTH = 0x8741
-
-const val GL_NUM_PROGRAM_BINARY_FORMATS = 0x87FE
-const val GL_PROGRAM_BINARY_FORMATS = 0x87FF
-
-const val GL_VERTEX_SHADER_BIT = 0x1
-const val GL_FRAGMENT_SHADER_BIT = 0x2
-const val GL_GEOMETRY_SHADER_BIT = 0x4
-const val GL_TESS_CONTROL_SHADER_BIT = 0x8
-const val GL_TESS_EVALUATION_SHADER_BIT = 0x10
-const val GL_ALL_SHADER_BITS = -0x1
-
-const val GL_PROGRAM_SEPARABLE = 0x8258
-
-const val GL_ACTIVE_PROGRAM = 0x8259
-
-const val GL_PROGRAM_PIPELINE_BINDING = 0x825A
-
-const val GL_MAX_VIEWPORTS = 0x825B
-const val GL_VIEWPORT_SUBPIXEL_BITS = 0x825C
-const val GL_VIEWPORT_BOUNDS_RANGE = 0x825D
-const val GL_LAYER_PROVOKING_VERTEX = 0x825E
-const val GL_VIEWPORT_INDEX_PROVOKING_VERTEX = 0x825F
-
-const val GL_UNDEFINED_VERTEX = 0x8260
-
-
 interface IGL41 : GLBase {
+    companion object {
+        const val GL_SHADER_COMPILER = 0x8DFA
+        const val GL_SHADER_BINARY_FORMATS = 0x8DF8
+        const val GL_NUM_SHADER_BINARY_FORMATS = 0x8DF9
+        const val GL_MAX_VERTEX_UNIFORM_VECTORS = 0x8DFB
+        const val GL_MAX_VARYING_VECTORS = 0x8DFC
+        const val GL_MAX_FRAGMENT_UNIFORM_VECTORS = 0x8DFD
+        const val GL_IMPLEMENTATION_COLOR_READ_TYPE = 0x8B9A
+        const val GL_IMPLEMENTATION_COLOR_READ_FORMAT = 0x8B9B
+
+        const val GL_FIXED = 0x140C
+
+        const val GL_LOW_FLOAT = 0x8DF0
+        const val GL_MEDIUM_FLOAT = 0x8DF1
+        const val GL_HIGH_FLOAT = 0x8DF2
+        const val GL_LOW_INT = 0x8DF3
+        const val GL_MEDIUM_INT = 0x8DF4
+        const val GL_HIGH_INT = 0x8DF5
+
+        const val GL_RGB565 = 0x8D62
+
+        const val GL_PROGRAM_BINARY_RETRIEVABLE_HINT = 0x8257
+
+        const val GL_PROGRAM_BINARY_LENGTH = 0x8741
+
+        const val GL_NUM_PROGRAM_BINARY_FORMATS = 0x87FE
+        const val GL_PROGRAM_BINARY_FORMATS = 0x87FF
+
+        const val GL_VERTEX_SHADER_BIT = 0x1
+        const val GL_FRAGMENT_SHADER_BIT = 0x2
+        const val GL_GEOMETRY_SHADER_BIT = 0x4
+        const val GL_TESS_CONTROL_SHADER_BIT = 0x8
+        const val GL_TESS_EVALUATION_SHADER_BIT = 0x10
+        const val GL_ALL_SHADER_BITS = -0x1
+
+        const val GL_PROGRAM_SEPARABLE = 0x8258
+
+        const val GL_ACTIVE_PROGRAM = 0x8259
+
+        const val GL_PROGRAM_PIPELINE_BINDING = 0x825A
+
+        const val GL_MAX_VIEWPORTS = 0x825B
+        const val GL_VIEWPORT_SUBPIXEL_BITS = 0x825C
+        const val GL_VIEWPORT_BOUNDS_RANGE = 0x825D
+        const val GL_LAYER_PROVOKING_VERTEX = 0x825E
+        const val GL_VIEWPORT_INDEX_PROVOKING_VERTEX = 0x825F
+
+        const val GL_UNDEFINED_VERTEX = 0x8260
+    }
+
     fun glProgramUniform1f(program: Int, location: Int, v0: Float)
     fun glProgramUniform2f(program: Int, location: Int, v0: Float, v1: Float)
     fun glProgramUniform3f(program: Int, location: Int, v0: Float, v1: Float, v2: Float)
