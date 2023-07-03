@@ -19,9 +19,11 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val glBase = resolver.getClassDeclarationByName("dev.luna5ama.glwrapper.api.GLBase")!!.asType(emptyList())
 
-        resolver.getNewFiles().toList()
+        val classList = resolver.getNewFiles().toList()
             .flatMap { it.declarations }
             .filterIsInstance<KSClassDeclaration>()
+
+        classList
             .filter { it.classKind == ClassKind.INTERFACE }
             .filter { it.getAllSuperTypes().contains(glBase) }
             .forEach { genAccessors(it) }
