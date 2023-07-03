@@ -7,12 +7,12 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 class VertexArrayObject : IGLObject, IGLBinding {
     override val id: Int = glCreateVertexArrays()
 
-    private var ibo: BufferObject? = null
+    private var ebo: BufferObject? = null
     private val vboBindings = Object2ObjectOpenHashMap<BufferObject, VBOBinding>()
 
-    fun attachIbo(ibo: BufferObject) {
-        glVertexArrayElementBuffer(id, ibo.id)
-        this.ibo = ibo
+    fun attachEbo(ebo: BufferObject) {
+        glVertexArrayElementBuffer(id, ebo.id)
+        this.ebo = ebo
     }
 
     fun attachVbo(vbo: BufferObject, vertexAttribute: VertexAttribute, offset: Long = 0) {
@@ -47,8 +47,8 @@ class VertexArrayObject : IGLObject, IGLBinding {
 
     override fun destroy() {
         glDeleteVertexArrays(id)
-        ibo?.destroy()
-        ibo = null
+        ebo?.destroy()
+        ebo = null
         vboBindings.keys.forEach {
             it.destroy()
         }
@@ -56,9 +56,9 @@ class VertexArrayObject : IGLObject, IGLBinding {
     }
 
     fun clear() {
-        if (ibo != null) {
+        if (ebo != null) {
             glVertexArrayElementBuffer(id, 0)
-            ibo = null
+            ebo = null
         }
         glVertexArrayVertexBuffers(id, 0, vboBindings.size, Ptr.NULL, Ptr.NULL, Ptr.NULL)
         vboBindings.clear()
@@ -66,7 +66,7 @@ class VertexArrayObject : IGLObject, IGLBinding {
 
     fun destroyVao() {
         glDeleteVertexArrays(id)
-        ibo = null
+        ebo = null
         vboBindings.clear()
     }
 

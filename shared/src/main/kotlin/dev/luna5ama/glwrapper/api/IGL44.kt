@@ -8,37 +8,37 @@ import dev.luna5ama.kmogus.memcpy
 
 interface IGL44 : GLBase {
     companion object {
-        const val GL_MAX_VERTEX_ATTRIB_STRIDE = 0x82E5
+        internal const val GL_MAX_VERTEX_ATTRIB_STRIDE = 0x82E5
 
-        const val GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED = 0x8221
+        internal const val GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED = 0x8221
 
-        const val GL_TEXTURE_BUFFER_BINDING = 0x8C2A
+        internal const val GL_TEXTURE_BUFFER_BINDING = 0x8C2A
 
-        const val GL_MAP_PERSISTENT_BIT = 0x40
-        const val GL_MAP_COHERENT_BIT = 0x80
-        const val GL_DYNAMIC_STORAGE_BIT = 0x100
-        const val GL_CLIENT_STORAGE_BIT = 0x200
+        internal const val GL_MAP_PERSISTENT_BIT = 0x40
+        internal const val GL_MAP_COHERENT_BIT = 0x80
+        internal const val GL_DYNAMIC_STORAGE_BIT = 0x100
+        internal const val GL_CLIENT_STORAGE_BIT = 0x200
 
-        const val GL_BUFFER_IMMUTABLE_STORAGE = 0x821F
-        const val GL_BUFFER_STORAGE_FLAGS = 0x8220
+        internal const val GL_BUFFER_IMMUTABLE_STORAGE = 0x821F
+        internal const val GL_BUFFER_STORAGE_FLAGS = 0x8220
 
-        const val GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT = 0x4000
+        internal const val GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT = 0x4000
 
-        const val GL_CLEAR_TEXTURE = 0x9365
+        internal const val GL_CLEAR_TEXTURE = 0x9365
 
-        const val GL_LOCATION_COMPONENT = 0x934A
-        const val GL_TRANSFORM_FEEDBACK_BUFFER_INDEX = 0x934B
-        const val GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE = 0x934C
+        internal const val GL_LOCATION_COMPONENT = 0x934A
+        internal const val GL_TRANSFORM_FEEDBACK_BUFFER_INDEX = 0x934B
+        internal const val GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE = 0x934C
 
-        const val GL_QUERY_RESULT_NO_WAIT = 0x9194
+        internal const val GL_QUERY_RESULT_NO_WAIT = 0x9194
 
-        const val GL_QUERY_BUFFER = 0x9192
+        internal const val GL_QUERY_BUFFER = 0x9192
 
-        const val GL_QUERY_BUFFER_BINDING = 0x9193
+        internal const val GL_QUERY_BUFFER_BINDING = 0x9193
 
-        const val GL_QUERY_BUFFER_BARRIER_BIT = 0x8000
+        internal const val GL_QUERY_BUFFER_BARRIER_BIT = 0x8000
 
-        const val GL_MIRROR_CLAMP_TO_EDGE = 0x8743
+        internal const val GL_MIRROR_CLAMP_TO_EDGE = 0x8743
     }
 
     @Unsafe
