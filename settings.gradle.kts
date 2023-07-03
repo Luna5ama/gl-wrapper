@@ -22,3 +22,4 @@ pluginManagement {
 include("shared", "shared:codegen")
 include("lwjgl-2", "lwjgl-3")
 include("forge-1.12.2")
+include("architectury-1.18.2", "architectury-1.18.2:common", "architectury-1.18.2:fabric", "architectury-1.18.2:forge")
