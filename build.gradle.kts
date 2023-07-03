@@ -37,6 +37,10 @@ subprojects {
     base {
         archivesName.set("${rootProject.name.lowercase()}-${project.name}")
     }
+
+    java {
+        withSourcesJar()
+    }
 }
 
 allprojects {
