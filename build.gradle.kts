@@ -67,12 +67,12 @@ allprojects {
 
 subprojects {
     base {
-        archivesName.set("${rootProject.name.toLowerCase()}-${project.name}")
+        archivesName.set("${rootProject.name.lowercase()}-${project.name}")
     }
 }
 
 base {
-    archivesName.set("${rootProject.name.toLowerCase()}-core")
+    archivesName.set("${rootProject.name.lowercase()}-core")
 }
 
 dependencies {
