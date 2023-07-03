@@ -3,7 +3,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":"))
+    api(project(":shared"))
     compileOnly("org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209") {
         isTransitive = false
     }

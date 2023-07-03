@@ -19,6 +19,6 @@ pluginManagement {
     }
 }
 
-include("codegen")
+include("shared", "shared:codegen")
 include("lwjgl-2", "lwjgl-3")
 include("forge-1.12.2")

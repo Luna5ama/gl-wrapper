@@ -8,14 +8,11 @@ allprojects {
 plugins {
     java
     kotlin("jvm")
+    id("dev.fastmc.mod-setup").version("1.3-SNAPSHOT")
     id("dev.fastmc.maven-repo").version("1.0.0")
-    id("com.google.devtools.ksp")
 }
 
 allprojects {
-    group = "dev.luna5ama"
-    version = "1.0-SNAPSHOT"
-
     apply {
         plugin("kotlin")
         plugin("dev.fastmc.maven-repo")
@@ -68,24 +65,5 @@ allprojects {
 subprojects {
     base {
         archivesName.set("${rootProject.name.lowercase()}-${project.name}")
-    }
-}
-
-base {
-    archivesName.set("${rootProject.name.lowercase()}-core")
-}
-
-dependencies {
-    api("dev.luna5ama:kmogus-core:1.0.0-SNAPSHOT")
-    ksp(project(":codegen"))
-    compileOnly("it.unimi.dsi:fastutil:7.1.0")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
     }
 }

@@ -44,8 +44,25 @@ configure<UserDevExtension> {
     mappings(mappingsChannel, mappingsVersion)
 }
 
-afterEvaluate {
-    tasks.getByName("reobfJar").enabled = false
+tasks {
+    listOf(
+        remapRuntime,
+        generateConstants,
+        compileConstants,
+        fastRemapJar,
+        optimizeFatJar,
+        modPackaging,
+        modLoaderJar,
+        fatJar
+    ).forEach {
+        it.configure {
+            isEnabled = false
+        }
+    }
+
+    jar {
+        archiveClassifier.set("")
+    }
 }
 
 publishing {
