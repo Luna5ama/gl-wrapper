@@ -78,7 +78,7 @@ open class ShaderProgram(
         return bindBuffer(target, buffer, blockName, -1, -1)
     }
 
-    fun bindBuffer(target: Int, buffer: BufferObject, blockName: String, offset: Int, size: Int): Boolean {
+    fun bindBuffer(target: Int, buffer: BufferObject, blockName: String, offset: Long, size: Long): Boolean {
         var bindingIndex: Int
 
         if (target == GL_ATOMIC_COUNTER_BUFFER || target == GL_TRANSFORM_FEEDBACK_BUFFER) {
@@ -108,10 +108,10 @@ open class ShaderProgram(
             }
         }
 
-        if (offset == -1 || size == -1) {
+        if (offset == -1L || size == -1L) {
             glBindBufferBase(target, bindingIndex, buffer.id)
         } else {
-            glBindBufferRange(target, bindingIndex, buffer.id, offset.toLong(), size.toLong())
+            glBindBufferRange(target, bindingIndex, buffer.id, offset, size)
         }
 
         return true
