@@ -38,3 +38,29 @@ subprojects {
         archivesName.set("${rootProject.name.lowercase()}-${project.name}")
     }
 }
+
+allprojects {
+    tasks {
+        listOf(
+            "remapRuntime",
+            "generateConstants",
+            "compileConstants",
+            "fastRemapJar",
+            "optimizeFatJar",
+            "modPackaging",
+            "modLoaderJar",
+            "fatJar",
+            "remapJar",
+            "devModJar"
+        ).forEach {
+            findByName(it)?.enabled = false
+        }
+
+        afterEvaluate {
+            jar {
+                archiveClassifier.set("")
+                archiveClassifier.disallowChanges()
+            }
+        }
+    }
+}
