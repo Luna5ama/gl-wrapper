@@ -19,7 +19,7 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val glBase = resolver.getClassDeclarationByName("dev.luna5ama.glwrapper.api.GLBase")!!.asType(emptyList())
 
-        val classList = resolver.getAllFiles()
+        resolver.getAllFiles()
             .flatMap { it.declarations }
             .filterIsInstance<KSClassDeclaration>()
             .filter { it.classKind == ClassKind.INTERFACE }
@@ -68,7 +68,7 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
                         .forEach {
                             val fieldName = it.simpleName.asString()
                             addProperty(
-                                PropertySpec.builder(fieldName, it.type.resolve().toClassName())
+                                PropertySpec.builder(fieldName, it.type.resolve().toClassName(), KModifier.CONST)
                                     .initializer("$clazzName.$fieldName")
                                     .build()
                             )
