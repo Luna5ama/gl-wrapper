@@ -2,7 +2,9 @@ package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.asByteBuffer
 import dev.luna5ama.kmogus.ensureCapacity
+import dev.luna5ama.kmogus.nullByteBuffer
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.lang.ref.SoftReference
@@ -105,8 +107,8 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     abstract class Provider<T : ShaderSource> protected constructor() {
         private val cacheMap = Object2ObjectOpenHashMap<String, SoftReference<Cache>>()
 
-        private val cachedByteBuffer = Arr.malloc(1024)
-        private val buffer = createBuffer()
+        private val bufferArr = Arr.malloc(1024)
+        private val byteBuffer = nullByteBuffer()
 
         protected abstract fun newInstance(name: String, codeSrc: CharSequence): T
 
@@ -157,8 +159,8 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
                 DigestInputStream(inputStream, md5).use {
                     var byte = it.read()
                     while (byte != -1) {
-                        cachedByteBuffer.ensureCapacity(offset + 1L, false)
-                        cachedByteBuffer.ptr.setByte(offset++, byte.toByte())
+                        bufferArr.ensureCapacity(offset + 1L, false)
+                        bufferArr.ptr.setByte(offset++, byte.toByte())
                         byte = it.read()
                     }
                 }
@@ -176,7 +178,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
                         .onUnmappableCharacter(CodingErrorAction.REPORT)
 
                     val lines =
-                        decoder.decode(wrapBuffer(buffer, cachedByteBuffer.ptr.address, offset.toInt())).lineSequence()
+                        decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
                             .mapTo(ObjectArrayList()) {
                                 if (it.startsWith("#include")) {
                                     val importPath = it.substring(it.indexOf('/'))

@@ -19,12 +19,11 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val glBase = resolver.getClassDeclarationByName("dev.luna5ama.glwrapper.api.GLBase")!!.asType(emptyList())
 
-        resolver.getNewFiles()
+        resolver.getNewFiles().toList()
             .flatMap { it.declarations }
             .filterIsInstance<KSClassDeclaration>()
             .filter { it.classKind == ClassKind.INTERFACE }
             .filter { it.getAllSuperTypes().contains(glBase) }
-            .toList()
             .forEach { genAccessors(it) }
 
         return emptyList()
@@ -34,6 +33,7 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
         val clazzName = clazz.simpleName.asString()
         val glVer = clazzName.removePrefix("I")
         val glVerLower = glVer.lowercase()
+
         FileSpec.builder("dev.luna5ama.glwrapper.api", glVer)
             .addAnnotation(AnnotationSpec.builder(JvmName::class).addMember(""""$glVer"""").build())
             .addAnnotation(AnnotationSpec.builder(Suppress::class).addMember(""""NOTHING_TO_INLINE"""").build())
