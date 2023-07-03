@@ -31,11 +31,6 @@ internal fun getSetter(clazz: Class<*>, vararg names: String): MethodHandle {
     return trustedLookUp.findSetter(clazz, field.name, field.type)
 }
 
-internal fun getStaticSetter(clazz: Class<*>, vararg names: String): MethodHandle {
-    val field = tryGetField(clazz, *names)
-    return trustedLookUp.findStaticSetter(clazz, field.name, field.type)
-}
-
 @Suppress("UNCHECKED_CAST")
 private val textureStates = run {
     val field = tryGetField(
@@ -53,17 +48,11 @@ private val textureStates = run {
 
 private val setTextureName = run {
     val textureStateClass = textureStates.javaClass.componentType
-    val textureNameField = tryGetField(
+    getSetter(
         textureStateClass,
         "field_5167",
         "field_179059_b",
         "boundTexture"
-    )
-
-    trustedLookUp.findSetter(
-        textureStateClass,
-        textureNameField.name,
-        textureNameField.type
     )
 }
 

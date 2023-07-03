@@ -7,7 +7,7 @@ base {
 }
 
 dependencies {
-    api("dev.luna5ama:kmogus-core:1.0.0-SNAPSHOT")
+    api("dev.luna5ama:kmogus-core:1.0-SNAPSHOT")
     ksp(project(":shared:codegen"))
     compileOnly("it.unimi.dsi:fastutil:7.1.0")
 }

@@ -4,7 +4,9 @@ package dev.luna5ama.glwrapper.api
 
 import net.minecraft.client.renderer.GlStateManager
 import sun.misc.Unsafe
+import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.lang.reflect.Field
 
 internal val unsafe = run {
     val theUnsafe = Unsafe::class.java.getDeclaredField("theUnsafe")
@@ -20,14 +22,22 @@ internal val trustedLookUp = run {
     ) as MethodHandles.Lookup
 }
 
+internal fun tryGetField(clazz: Class<*>, vararg names: String): Field {
+    return names.firstNotNullOf { runCatching { clazz.getDeclaredField(it) }.getOrNull() }
+}
+
+internal fun getSetter(clazz: Class<*>, vararg names: String): MethodHandle {
+    val field = tryGetField(clazz, *names)
+    return trustedLookUp.findSetter(clazz, field.name, field.type)
+}
 
 @Suppress("UNCHECKED_CAST")
 private val textureStates = run {
-    val field = try {
-        GlStateManager::class.java.getDeclaredField("field_179174_p")
-    } catch (e: NoSuchFieldException) {
-        GlStateManager::class.java.getDeclaredField("textureState")
-    }
+    val field = tryGetField(
+        GlStateManager::class.java,
+        "field_179174_p",
+        "textureState"
+    )
 
     unsafe.getObject(
         unsafe.staticFieldBase(field),
@@ -37,16 +47,11 @@ private val textureStates = run {
 
 private val setTextureName = run {
     val textureStateClass = textureStates.javaClass.componentType
-    val textureNameField = try {
-        textureStateClass.getDeclaredField("field_179059_b")
-    } catch (e: NoSuchFieldException) {
-        textureStateClass.getDeclaredField("textureName")
-    }
 
-    trustedLookUp.findSetter(
+    getSetter(
         textureStateClass,
-        textureNameField.name,
-        textureNameField.type
+        "field_179059_b",
+        "textureName"
     )
 }
 

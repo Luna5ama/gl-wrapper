@@ -52,17 +52,12 @@ private val textureStates = run {
 
 private val setTextureName = run {
     val textureStateClass = textureStates.javaClass.componentType
-    val textureNameField = tryGetField(
+
+    getSetter(
         textureStateClass,
         "field_5167",
         "f_84801_",
         "boundTexture"
-    )
-
-    trustedLookUp.findSetter(
-        textureStateClass,
-        textureNameField.name,
-        textureNameField.type
     )
 }
 
