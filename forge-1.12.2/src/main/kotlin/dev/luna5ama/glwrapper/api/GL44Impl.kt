@@ -1,13 +1,10 @@
 package dev.luna5ama.glwrapper.api
 
-import dev.luna5ama.kmogus.Arr
-import dev.luna5ama.kmogus.Ptr
-import dev.luna5ama.kmogus.ensureCapacity
-import dev.luna5ama.kmogus.memcpy
+import dev.luna5ama.kmogus.*
 import org.lwjgl.opengl.GL44
 
 open class GL44Impl(tempArr: Arr) : GL44LWJGL2(tempArr) {
-    private val glBindTextures = createBuffer().asIntBuffer()
+    private val glBindTextures = nullIntBuffer()
 
     override fun glBindTextures(first: Int, count: Int, textures: Long) {
         glBindTextures(first, count, Ptr(textures))
@@ -18,7 +15,7 @@ open class GL44Impl(tempArr: Arr) : GL44LWJGL2(tempArr) {
             setTextureUnit(i + first, textures.getInt(i * 4L))
         }
 
-        GL44.glBindTextures(first, count, wrapBuffer(glBindTextures, textures.address, count))
+        GL44.glBindTextures(first, count, textures.asIntBuffer(count, glBindTextures))
     }
 
     override fun glBindTextures(first: Int, vararg textures: Int) {
@@ -30,7 +27,7 @@ open class GL44Impl(tempArr: Arr) : GL44LWJGL2(tempArr) {
         tempArr.ensureCapacity(length, true)
         val ptr = tempArr.ptr
         memcpy(textures, ptr, length)
-        GL44.glBindTextures(first, textures.size, wrapBuffer(glBindTextures, ptr.address, textures.size))
+        GL44.glBindTextures(first, textures.size, ptr.asIntBuffer(textures.size, glBindTextures))
     }
 
     override fun glBindTextures(first: Int, textures: IntArray, offset: Int, length: Int) {
@@ -42,6 +39,6 @@ open class GL44Impl(tempArr: Arr) : GL44LWJGL2(tempArr) {
         tempArr.ensureCapacity(byteLength, true)
         val ptr = tempArr.ptr
         memcpy(textures, offset * 4L, ptr, 0L, byteLength)
-        GL44.glBindTextures(first, length, wrapBuffer(glBindTextures, ptr.address, length))
+        GL44.glBindTextures(first, length, ptr.asIntBuffer(length, glBindTextures))
     }
 }
