@@ -180,13 +180,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
                     val lines =
                         decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
                             .mapTo(ObjectArrayList()) {
-                                if (it.startsWith("#include")) {
-                                    val importPath = it.substring(it.indexOf('/'))
-                                    val importContent = Lib(importPath).codeSrc
-                                    importContent
-                                } else {
-                                    it
-                                }
+                                processLines(it)
                             }
 
                     source = Cache(path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.')), lines, hash)
@@ -195,6 +189,20 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
 
                 return source
             }
+        }
+
+        private val includeRegex = "#include\\s+\"([^\"]+)\"".toRegex()
+
+        private fun processLines(input: String): CharSequence {
+            var line = input
+
+            line = includeRegex.replace(line) {
+                val includePath = it.groupValues[1]
+                val importContent = Lib(includePath).codeSrc
+                importContent
+            }
+
+            return line
         }
 
         private inner class Cache(val name: String, val lines: List<CharSequence>, val hash: MD5Hash) {

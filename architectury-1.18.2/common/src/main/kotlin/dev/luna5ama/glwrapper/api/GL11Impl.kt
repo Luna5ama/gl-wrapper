@@ -6,8 +6,8 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11C
 
 open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
-    override fun glEnable(cap: Int) {
-        when (cap) {
+    override fun glEnable(target: Int) {
+        when (target) {
             GL11C.GL_SCISSOR_TEST -> GlStateManager._enableScissorTest()
             GL11C.GL_DEPTH_TEST -> GlStateManager._enableDepthTest()
             GL11C.GL_BLEND -> GlStateManager._enableBlend()
@@ -15,12 +15,12 @@ open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
             GL11C.GL_POLYGON_OFFSET_FILL -> GlStateManager._enablePolygonOffset()
             GL11C.GL_COLOR_LOGIC_OP -> GlStateManager._enableColorLogicOp()
             GL11C.GL_TEXTURE_2D -> GlStateManager._enableTexture()
-            else -> GL11.glEnable(cap)
+            else -> GL11.glEnable(target)
         }
     }
 
-    override fun glDisable(cap: Int) {
-        when (cap) {
+    override fun glDisable(target: Int) {
+        when (target) {
             GL11C.GL_SCISSOR_TEST -> GlStateManager._disableScissorTest()
             GL11C.GL_DEPTH_TEST -> GlStateManager._disableDepthTest()
             GL11C.GL_BLEND -> GlStateManager._disableBlend()
@@ -28,7 +28,7 @@ open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
             GL11C.GL_POLYGON_OFFSET_FILL -> GlStateManager._disablePolygonOffset()
             GL11C.GL_COLOR_LOGIC_OP -> GlStateManager._disableColorLogicOp()
             GL11C.GL_TEXTURE_2D -> GlStateManager._disableTexture()
-            else -> GL11.glDisable(cap)
+            else -> GL11.glDisable(target)
         }
     }
 

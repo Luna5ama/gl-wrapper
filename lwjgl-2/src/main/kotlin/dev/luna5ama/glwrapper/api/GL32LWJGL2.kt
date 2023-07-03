@@ -5,7 +5,6 @@ package dev.luna5ama.glwrapper.api
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.Ptr
 import org.lwjgl.PointerWrapperAbstract
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL32
 import org.lwjgl.opengl.GLSync
 import java.lang.invoke.MethodType
@@ -70,7 +69,7 @@ open class GL32LWJGL2(override val tempArr: Arr) : IGL32 {
 
     private val glFenceSync = getFunctionAddress("glFenceSync")
     private val nglFenceSync = trustedLookUp.findStatic(
-        GL11::class.java,
+        GL32::class.java,
         "nglFenceSync",
         MethodType.methodType(
             Long::class.java,

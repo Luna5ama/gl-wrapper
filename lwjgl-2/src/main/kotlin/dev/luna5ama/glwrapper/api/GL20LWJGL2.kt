@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 import java.lang.invoke.MethodType
 
@@ -70,7 +69,7 @@ open class GL20LWJGL2(override val tempArr: Arr) : IGL20 {
 
     private val glGetProgramiv = getFunctionAddress("glGetProgramiv")
     private val nglGetProgramiv = trustedLookUp.findStatic(
-        GL11::class.java,
+        GL20::class.java,
         "nglGetProgramiv",
         MethodType.methodType(
             Void.TYPE,
@@ -99,7 +98,7 @@ open class GL20LWJGL2(override val tempArr: Arr) : IGL20 {
 
     private val glDrawBuffers = getFunctionAddress("glDrawBuffers")
     private val nglDrawBuffers = trustedLookUp.findStatic(
-        GL11::class.java,
+        GL20::class.java,
         "nglDrawBuffers",
         MethodType.methodType(
             Void.TYPE,

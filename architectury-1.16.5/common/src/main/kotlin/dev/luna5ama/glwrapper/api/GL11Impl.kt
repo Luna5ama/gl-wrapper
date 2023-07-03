@@ -8,8 +8,8 @@ import org.lwjgl.opengl.GL12
 
 @Suppress("DEPRECATION")
 open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
-    override fun glEnable(cap: Int) {
-        when (cap) {
+    override fun glEnable(target: Int) {
+        when (target) {
             GL11.GL_ALPHA_TEST -> GlStateManager.enableAlphaTest()
             GL11.GL_LIGHTING -> GlStateManager.enableLighting()
             GL11.GL_COLOR_MATERIAL -> GlStateManager.enableColorMaterial()
@@ -23,12 +23,12 @@ open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
             GL11C.GL_COLOR_LOGIC_OP -> GlStateManager.enableColorLogicOp()
             GL11C.GL_TEXTURE_2D -> GlStateManager.enableTexture()
             GL12.GL_RESCALE_NORMAL -> GlStateManager.enableRescaleNormal()
-            else -> GL11.glEnable(cap)
+            else -> GL11.glEnable(target)
         }
     }
 
-    override fun glDisable(cap: Int) {
-        when (cap) {
+    override fun glDisable(target: Int) {
+        when (target) {
             GL11.GL_ALPHA_TEST -> GlStateManager.disableAlphaTest()
             GL11.GL_LIGHTING -> GlStateManager.disableLighting()
             GL11.GL_COLOR_MATERIAL -> GlStateManager.disableColorMaterial()
@@ -42,7 +42,7 @@ open class GL11Impl(tempArr: Arr) : GL11LWJGL3(tempArr) {
             GL11C.GL_COLOR_LOGIC_OP -> GlStateManager.disableColorLogicOp()
             GL11C.GL_TEXTURE_2D -> GlStateManager.disableTexture()
             GL12.GL_RESCALE_NORMAL -> GlStateManager.disableRescaleNormal()
-            else -> GL11.glDisable(cap)
+            else -> GL11.glDisable(target)
         }
     }
 
