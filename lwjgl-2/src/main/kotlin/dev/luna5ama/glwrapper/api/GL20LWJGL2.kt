@@ -1,6 +1,9 @@
 package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.Ptr
+import dev.luna5ama.kmogus.asIntBuffer
+import dev.luna5ama.kmogus.nullIntBuffer
 import org.lwjgl.opengl.GL20
 import java.lang.invoke.MethodType
 
@@ -61,10 +64,14 @@ open class GL20LWJGL2(override val tempArr: Arr) : IGL20 {
         GL20.glValidateProgram(program)
     }
 
-    private val glGetShaderiv = wrapBuffer(createBuffer().asIntBuffer(), 1)
+    private val glGetShaderiv = nullIntBuffer()
 
     override fun glGetShaderiv(shader: Int, pname: Int, params: Long) {
-        GL20.glGetShader(shader, pname, wrapBuffer(glGetShaderiv, params))
+        glGetShaderiv(shader, pname, Ptr(params))
+    }
+
+    override fun glGetShaderiv(shader: Int, pname: Int, params: Ptr) {
+        GL20.glGetShader(shader, pname, params.asIntBuffer(4, glGetShaderiv))
     }
 
     private val glGetProgramiv = getFunctionAddress("glGetProgramiv")

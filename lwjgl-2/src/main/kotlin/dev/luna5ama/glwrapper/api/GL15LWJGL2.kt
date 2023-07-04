@@ -1,6 +1,9 @@
 package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.Ptr
+import dev.luna5ama.kmogus.asIntBuffer
+import dev.luna5ama.kmogus.nullIntBuffer
 import org.lwjgl.opengl.GL15
 
 open class GL15LWJGL2(override val tempArr: Arr) : IGL15 {
@@ -8,10 +11,14 @@ open class GL15LWJGL2(override val tempArr: Arr) : IGL15 {
         GL15.glBindBuffer(target, buffer)
     }
 
-    private val glDeleteBuffers = createBuffer().asIntBuffer()
+    private val glDeleteBuffers = nullIntBuffer()
 
     override fun glDeleteBuffers(n: Int, buffers: Long) {
-        GL15.glDeleteBuffers(wrapBuffer(glDeleteBuffers, buffers, n))
+        glDeleteBuffers(n, Ptr(buffers))
+    }
+
+    override fun glDeleteBuffers(n: Int, buffers: Ptr) {
+        GL15.glDeleteBuffers(buffers.asIntBuffer(n, glDeleteBuffers))
     }
 
     override fun glIsBuffer(buffer: Int): Boolean {

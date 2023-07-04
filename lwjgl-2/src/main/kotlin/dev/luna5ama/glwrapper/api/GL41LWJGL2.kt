@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
-import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.*
 import org.lwjgl.opengl.GL41
 
 open class GL41LWJGL2(override val tempArr: Arr) : IGL41 {
@@ -53,174 +53,258 @@ open class GL41LWJGL2(override val tempArr: Arr) : IGL41 {
     }
 
 
-    private val glProgramUniform1fv = createBuffer().asFloatBuffer()
+    private val glProgramUniform1fv = nullFloatBuffer()
 
     override fun glProgramUniform1fv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform1(program, location, wrapBuffer(glProgramUniform1fv, value, count))
+        glProgramUniform1fv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform2fv = createBuffer().asFloatBuffer()
+    override fun glProgramUniform1fv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform1(program, location, value.asFloatBuffer(count, glProgramUniform1fv))
+    }
+
+    private val glProgramUniform2fv = nullFloatBuffer()
 
     override fun glProgramUniform2fv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform2(program, location, wrapBuffer(glProgramUniform2fv, value, count))
+        glProgramUniform2fv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform3fv = createBuffer().asFloatBuffer()
+    override fun glProgramUniform2fv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform2(program, location, value.asFloatBuffer(count * 2, glProgramUniform2fv))
+    }
+
+    private val glProgramUniform3fv = nullFloatBuffer()
 
     override fun glProgramUniform3fv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform3(program, location, wrapBuffer(glProgramUniform3fv, value, count))
+        glProgramUniform3fv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform4fv = createBuffer().asFloatBuffer()
+    override fun glProgramUniform3fv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform3(program, location, value.asFloatBuffer(count * 3, glProgramUniform3fv))
+    }
+
+    private val glProgramUniform4fv = nullFloatBuffer()
 
     override fun glProgramUniform4fv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform4(program, location, wrapBuffer(glProgramUniform4fv, value, count))
+        glProgramUniform4fv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform1iv = createBuffer().asIntBuffer()
+    override fun glProgramUniform4fv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform4(program, location, value.asFloatBuffer(count * 4, glProgramUniform4fv))
+    }
+
+    private val glProgramUniform1iv = nullIntBuffer()
 
     override fun glProgramUniform1iv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform1(program, location, wrapBuffer(glProgramUniform1iv, value, count))
+        glProgramUniform1iv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform2iv = createBuffer().asIntBuffer()
+    override fun glProgramUniform1iv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform1(program, location, value.asIntBuffer(count, glProgramUniform1iv))
+    }
+
+    private val glProgramUniform2iv = nullIntBuffer()
 
     override fun glProgramUniform2iv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform2(program, location, wrapBuffer(glProgramUniform2iv, value, count))
+        glProgramUniform2iv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform3iv = createBuffer().asIntBuffer()
+    override fun glProgramUniform2iv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform2(program, location, value.asIntBuffer(count * 2, glProgramUniform2iv))
+    }
+
+    private val glProgramUniform3iv = nullIntBuffer()
 
     override fun glProgramUniform3iv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform3(program, location, wrapBuffer(glProgramUniform3iv, value, count))
+        glProgramUniform3iv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform4iv = createBuffer().asIntBuffer()
+    override fun glProgramUniform3iv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform3(program, location, value.asIntBuffer(count * 3, glProgramUniform3iv))
+    }
+
+    private val glProgramUniform4iv = nullIntBuffer()
 
     override fun glProgramUniform4iv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform4(program, location, wrapBuffer(glProgramUniform4iv, value, count))
+        glProgramUniform4iv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform1uiv = createBuffer().asIntBuffer()
+    override fun glProgramUniform4iv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform4(program, location, value.asIntBuffer(count * 4, glProgramUniform4iv))
+    }
+
+    private val glProgramUniform1uiv = nullIntBuffer()
 
     override fun glProgramUniform1uiv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform1u(program, location, wrapBuffer(glProgramUniform1uiv, value, count))
+        glProgramUniform1uiv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform2uiv = createBuffer().asIntBuffer()
+    override fun glProgramUniform1uiv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform1(program, location, value.asIntBuffer(count, glProgramUniform1uiv))
+    }
+
+    private val glProgramUniform2uiv = nullIntBuffer()
 
     override fun glProgramUniform2uiv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform2u(program, location, wrapBuffer(glProgramUniform2uiv, value, count))
+        glProgramUniform2uiv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform3uiv = createBuffer().asIntBuffer()
+    override fun glProgramUniform2uiv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform2(program, location, value.asIntBuffer(count * 2, glProgramUniform2uiv))
+    }
+
+    private val glProgramUniform3uiv = nullIntBuffer()
 
     override fun glProgramUniform3uiv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform3u(program, location, wrapBuffer(glProgramUniform3uiv, value, count))
+        glProgramUniform3uiv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniform4uiv = createBuffer().asIntBuffer()
+    override fun glProgramUniform3uiv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform3(program, location, value.asIntBuffer(count * 3, glProgramUniform3uiv))
+    }
+
+    private val glProgramUniform4uiv = nullIntBuffer()
 
     override fun glProgramUniform4uiv(program: Int, location: Int, count: Int, value: Long) {
-        GL41.glProgramUniform4u(program, location, wrapBuffer(glProgramUniform4uiv, value, count))
+        glProgramUniform4uiv(program, location, count, Ptr(value))
     }
 
-    private val glProgramUniformMatrix2fv = createBuffer().asFloatBuffer()
+    override fun glProgramUniform4uiv(program: Int, location: Int, count: Int, value: Ptr) {
+        GL41.glProgramUniform4(program, location, value.asIntBuffer(count * 4, glProgramUniform4uiv))
+    }
+
+    private val glProgramUniformMatrix2fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix2fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix2(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix2fv, value, count * 2 * 2)
+            value.asFloatBuffer(count * 2 * 2, glProgramUniformMatrix2fv)
         )
     }
 
-    private val glProgramUniformMatrix3fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix3fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix3fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix3(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix3fv, value, count * 3 * 3)
+            value.asFloatBuffer(count * 3 * 3, glProgramUniformMatrix3fv)
         )
     }
 
-    private val glProgramUniformMatrix4fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix4fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix4fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix4(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix4fv, value, count * 4 * 4)
+            value.asFloatBuffer(count * 4 * 4, glProgramUniformMatrix4fv)
         )
     }
 
-    private val glProgramUniformMatrix2x3fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix2x3fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix2x3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix2x3fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix2x3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix2x3(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix2x3fv, value, count * 2 * 3)
+            value.asFloatBuffer(count * 2 * 3, glProgramUniformMatrix2x3fv)
         )
     }
 
-    private val glProgramUniformMatrix3x2fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix3x2fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix3x2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix3x2fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix3x2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix3x2(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix3x2fv, value, count * 3 * 2)
+            value.asFloatBuffer(count * 3 * 2, glProgramUniformMatrix3x2fv)
         )
     }
 
-    private val glProgramUniformMatrix2x4fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix2x4fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix2x4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix2x4fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix2x4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix2x4(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix2x4fv, value, count * 2 * 4)
+            value.asFloatBuffer(count * 2 * 4, glProgramUniformMatrix2x4fv)
         )
     }
 
-    private val glProgramUniformMatrix4x2fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix4x2fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix4x2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix4x2fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix4x2fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix4x2(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix4x2fv, value, count * 4 * 2)
+            value.asFloatBuffer(count * 4 * 2, glProgramUniformMatrix4x2fv)
         )
     }
 
-    private val glProgramUniformMatrix3x4fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix3x4fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix3x4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix3x4fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix3x4fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix3x4(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix3x4fv, value, count * 3 * 4)
+            value.asFloatBuffer(count * 3 * 4, glProgramUniformMatrix3x4fv)
         )
     }
 
-    private val glProgramUniformMatrix4x3fv = createBuffer().asFloatBuffer()
+    private val glProgramUniformMatrix4x3fv = nullFloatBuffer()
 
     override fun glProgramUniformMatrix4x3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Long) {
+        glProgramUniformMatrix4x3fv(program, location, count, transpose, Ptr(value))
+    }
+
+    override fun glProgramUniformMatrix4x3fv(program: Int, location: Int, count: Int, transpose: Boolean, value: Ptr) {
         GL41.glProgramUniformMatrix4x3(
             program,
             location,
             transpose,
-            wrapBuffer(glProgramUniformMatrix4x3fv, value, count * 4 * 3)
+            value.asFloatBuffer(count * 4 * 3, glProgramUniformMatrix4x3fv)
         )
     }
 }

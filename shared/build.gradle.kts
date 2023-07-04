@@ -12,6 +12,10 @@ dependencies {
     compileOnly("it.unimi.dsi:fastutil:7.1.0")
 }
 
+afterEvaluate {
+    tasks["kspKotlin"].outputs.upToDateWhen { false }
+}
+
 publishing {
     publications {
         create<MavenPublication>(project.name) {

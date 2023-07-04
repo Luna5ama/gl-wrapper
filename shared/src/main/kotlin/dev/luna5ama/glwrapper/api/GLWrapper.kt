@@ -28,9 +28,13 @@ abstract class GLWrapper : GLBase {
     abstract val gl46: IGL46
 
     companion object {
-        private val instance0 = ThreadLocal.withInitial<GLWrapper?> { null }
+        private lateinit var backupClass: Class<GLWrapper>
         private lateinit var instanceFastPath: GLWrapper
         private lateinit var instanceFastPathThread: Thread
+
+        private val instance0 = ThreadLocal.withInitial {
+            backupClass.getConstructor().newInstance()
+        }
 
         val instance: GLWrapper
             get() = if (Thread.currentThread() === instanceFastPathThread) {
@@ -41,6 +45,7 @@ abstract class GLWrapper : GLBase {
 
         fun init(glWrapper: GLWrapper) {
             if (!::instanceFastPath.isInitialized) {
+                backupClass = glWrapper.javaClass
                 instanceFastPath = glWrapper
                 instanceFastPathThread = Thread.currentThread()
             }

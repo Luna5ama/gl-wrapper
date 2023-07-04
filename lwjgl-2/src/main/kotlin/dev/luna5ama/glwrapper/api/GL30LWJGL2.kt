@@ -1,6 +1,9 @@
 package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.Ptr
+import dev.luna5ama.kmogus.asIntBuffer
+import dev.luna5ama.kmogus.nullIntBuffer
 import org.lwjgl.opengl.GL30
 
 open class GL30LWJGL2(override val tempArr: Arr) : IGL30 {
@@ -16,10 +19,14 @@ open class GL30LWJGL2(override val tempArr: Arr) : IGL30 {
         GL30.glBindRenderbuffer(target, renderbuffer)
     }
 
-    private val glDeleteRenderbuffers = createBuffer().asIntBuffer()
+    private val glDeleteRenderbuffers = nullIntBuffer()
 
     override fun glDeleteRenderbuffers(n: Int, renderbuffers: Long) {
-        GL30.glDeleteFramebuffers(wrapBuffer(glDeleteRenderbuffers, renderbuffers, n))
+        glDeleteRenderbuffers(n, Ptr(renderbuffers))
+    }
+
+    override fun glDeleteRenderbuffers(n: Int, renderbuffers: Ptr) {
+        GL30.glDeleteRenderbuffers(renderbuffers.asIntBuffer(n, glDeleteRenderbuffers))
     }
 
     override fun glIsFramebuffer(framebuffer: Int): Boolean {
@@ -30,10 +37,14 @@ open class GL30LWJGL2(override val tempArr: Arr) : IGL30 {
         GL30.glBindFramebuffer(target, framebuffer)
     }
 
-    private val glDeleteFramebuffers = createBuffer().asIntBuffer()
+    private val glDeleteFramebuffers = nullIntBuffer()
 
     override fun glDeleteFramebuffers(n: Int, framebuffers: Long) {
-        GL30.glDeleteFramebuffers(wrapBuffer(glDeleteFramebuffers, framebuffers, n))
+        glDeleteFramebuffers(n, Ptr(framebuffers))
+    }
+
+    override fun glDeleteFramebuffers(n: Int, framebuffers: Ptr) {
+        GL30.glDeleteFramebuffers(framebuffers.asIntBuffer(n, glDeleteFramebuffers))
     }
 
     override fun glColorMaski(buf: Int, r: Boolean, g: Boolean, b: Boolean, a: Boolean) {
@@ -52,10 +63,14 @@ open class GL30LWJGL2(override val tempArr: Arr) : IGL30 {
         GL30.glBindVertexArray(array)
     }
 
-    private val glDeleteVertexArrays = createBuffer().asIntBuffer()
+    private val glDeleteVertexArrays = nullIntBuffer()
 
     override fun glDeleteVertexArrays(n: Int, arrays: Long) {
-        GL30.glDeleteVertexArrays(wrapBuffer(glDeleteVertexArrays, arrays, n))
+        glDeleteVertexArrays(n, Ptr(arrays))
+    }
+
+    override fun glDeleteVertexArrays(n: Int, arrays: Ptr) {
+        GL30.glDeleteVertexArrays(arrays.asIntBuffer(n, glDeleteVertexArrays))
     }
 
     override fun glIsVertexArray(array: Int): Boolean {

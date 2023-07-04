@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
-import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.*
 import org.lwjgl.PointerBuffer
 import org.lwjgl.opengl.GL45
 import java.lang.invoke.MethodType
@@ -10,28 +10,54 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glClipControl(origin, depth)
     }
 
-    private val glCreateBuffers = createBuffer().asIntBuffer()
+//    private val glPointParameteriv = nullIntBuffer()
+//
+//    override fun glPointParameteriv(pname: Int, params: Long) {
+//        glPointParameteriv(pname, Ptr(params))
+//    }
+//
+//    override fun glPointParameteriv(pname: Int, params: Ptr) {
+//        GL14.glPointParameter(pname, params.asIntBuffer(4, glPointParameteriv))
+//    }
+
+    private val glCreateBuffers = nullIntBuffer()
 
     override fun glCreateBuffers(n: Int, buffers: Long) {
-        GL45.glCreateBuffers(wrapBuffer(glCreateBuffers, buffers, n))
+        glCreateBuffers(n, Ptr(buffers))
     }
 
-    private val glNamedBufferStorage = createBuffer()
+    override fun glCreateBuffers(n: Int, buffers: Ptr) {
+        GL45.glCreateBuffers(buffers.asIntBuffer(n, glCreateBuffers))
+    }
+
+    private val glNamedBufferStorage = nullByteBuffer()
 
     override fun glNamedBufferStorage(buffer: Int, size: Long, data: Long, flags: Int) {
-        GL45.glNamedBufferStorage(buffer, wrapBuffer(glNamedBufferStorage, data, size.toInt()), flags)
+        glNamedBufferStorage(buffer, size, Ptr(data), flags)
     }
 
-    private val glNamedBufferData = createBuffer()
+    override fun glNamedBufferStorage(buffer: Int, size: Long, data: Ptr, flags: Int) {
+        GL45.glNamedBufferStorage(buffer, data.asByteBuffer(size.toInt(), glNamedBufferStorage), flags)
+    }
+
+    private val glNamedBufferData = nullByteBuffer()
 
     override fun glNamedBufferData(buffer: Int, size: Long, data: Long, usage: Int) {
-        GL45.glNamedBufferData(buffer, wrapBuffer(glNamedBufferData, data, size.toInt()), usage)
+        glNamedBufferData(buffer, size, Ptr(data), usage)
     }
 
-    private val glNamedBufferSubData = createBuffer()
+    override fun glNamedBufferData(buffer: Int, size: Long, data: Ptr, usage: Int) {
+        GL45.glNamedBufferData(buffer, data.asByteBuffer(size.toInt(), glNamedBufferData), usage)
+    }
+
+    private val glNamedBufferSubData = nullByteBuffer()
 
     override fun glNamedBufferSubData(buffer: Int, offset: Long, size: Long, data: Long) {
-        GL45.glNamedBufferSubData(buffer, offset, wrapBuffer(glNamedBufferSubData, data, size.toInt()))
+        glNamedBufferSubData(buffer, offset, size, Ptr(data))
+    }
+
+    override fun glNamedBufferSubData(buffer: Int, offset: Long, size: Long, data: Ptr) {
+        GL45.glNamedBufferSubData(buffer, offset, data.asByteBuffer(size.toInt(), glNamedBufferSubData))
     }
 
     override fun glCopyNamedBufferSubData(
@@ -44,19 +70,29 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glCopyNamedBufferSubData(readBuffer, writeBuffer, readOffset, writeOffset, size)
     }
 
-    private val glClearNamedBufferData = wrapBuffer(createBuffer(), 0L, 8)
+    private val glClearNamedBufferData = nullByteBuffer()
 
     override fun glClearNamedBufferData(buffer: Int, internalFormat: Int, format: Int, type: Int, data: Long) {
+        glClearNamedBufferData(
+            buffer,
+            internalFormat,
+            format,
+            type,
+            Ptr(data)
+        )
+    }
+
+    override fun glClearNamedBufferData(buffer: Int, internalFormat: Int, format: Int, type: Int, data: Ptr) {
         GL45.glClearNamedBufferData(
             buffer,
             internalFormat,
             format,
             type,
-            wrapBuffer(glClearNamedBufferData, data, internalFormat)
+            data.asByteBuffer(0, glClearNamedBufferData)
         )
     }
 
-    private val glClearNamedBufferSubData = wrapBuffer(createBuffer(), 0L, 8)
+    private val glClearNamedBufferSubData = nullByteBuffer()
 
     override fun glClearNamedBufferSubData(
         buffer: Int,
@@ -67,6 +103,26 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         type: Int,
         data: Long
     ) {
+        glClearNamedBufferSubData(
+            buffer,
+            internalFormat,
+            offset,
+            size,
+            format,
+            type,
+            Ptr(data)
+        )
+    }
+
+    override fun glClearNamedBufferSubData(
+        buffer: Int,
+        internalFormat: Int,
+        offset: Long,
+        size: Long,
+        format: Int,
+        type: Int,
+        data: Ptr
+    ) {
         GL45.glClearNamedBufferSubData(
             buffer,
             internalFormat,
@@ -74,11 +130,11 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
             size,
             format,
             type,
-            wrapBuffer(glClearNamedBufferSubData, data, internalFormat)
+            data.asByteBuffer(0, glClearNamedBufferSubData)
         )
     }
 
-    private val glMapNamedBufferRangeUnsafe = createBuffer()
+    private val glMapNamedBufferRangeUnsafe = nullByteBuffer()
 
     override fun glMapNamedBufferRangeUnsafe(buffer: Int, offset: Long, length: Long, access: Int): Long {
         return GL45.glMapNamedBufferRange(
@@ -86,7 +142,7 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
             offset,
             length,
             access,
-            wrapBuffer(glMapNamedBufferRangeUnsafe, 0L, length.toInt())
+            Ptr.NULL.asByteBuffer(length.toInt(), glMapNamedBufferRangeUnsafe)
         ).address
     }
 
@@ -102,32 +158,48 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         return GL45.glGetNamedBufferParameteri(buffer, pname)
     }
 
-    private val glGetNamedBufferParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glGetNamedBufferParameteriv = nullIntBuffer()
 
     override fun glGetNamedBufferParameteriv(buffer: Int, pname: Int, params: Long) {
-        GL45.glGetNamedBufferParameter(buffer, pname, wrapBuffer(glGetNamedBufferParameteriv, params))
+        glGetNamedBufferParameteriv(buffer, pname, Ptr(params))
+    }
+
+    override fun glGetNamedBufferParameteriv(buffer: Int, pname: Int, params: Ptr) {
+        GL45.glGetNamedBufferParameter(buffer, pname, params.asIntBuffer(4, glGetNamedBufferParameteriv))
     }
 
     override fun glGetNamedBufferParameteri64(buffer: Int, pname: Int): Long {
         return GL45.glGetNamedBufferParameteri64(buffer, pname)
     }
 
-    private val glGetNamedBufferParameteri64v = wrapBuffer(createBuffer().asLongBuffer(), 0L, 8)
+    private val glGetNamedBufferParameteri64v = nullLongBuffer()
 
     override fun glGetNamedBufferParameteri64v(buffer: Int, pname: Int, params: Long) {
-        GL45.glGetNamedBufferParameter(buffer, pname, wrapBuffer(glGetNamedBufferParameteri64v, params))
+        glGetNamedBufferParameteri64v(buffer, pname, Ptr(params))
     }
 
-    private val glGetNamedBufferSubData = createBuffer()
+    override fun glGetNamedBufferParameteri64v(buffer: Int, pname: Int, params: Ptr) {
+        GL45.glGetNamedBufferParameter(buffer, pname, params.asLongBuffer(4, glGetNamedBufferParameteri64v))
+    }
+
+    private val glGetNamedBufferSubData = nullByteBuffer()
 
     override fun glGetNamedBufferSubData(buffer: Int, offset: Long, size: Long, data: Long) {
-        GL45.glGetNamedBufferSubData(buffer, offset, wrapBuffer(glGetNamedBufferSubData, data, size.toInt()))
+        glGetNamedBufferSubData(buffer, offset, size, Ptr(data))
     }
 
-    private val glCreateFramebuffers = createBuffer().asIntBuffer()
+    override fun glGetNamedBufferSubData(buffer: Int, offset: Long, size: Long, data: Ptr) {
+        GL45.glGetNamedBufferSubData(buffer, offset, data.asByteBuffer(size.toInt(), glGetNamedBufferSubData))
+    }
+
+    private val glCreateFramebuffers = nullIntBuffer()
 
     override fun glCreateFramebuffers(n: Int, framebuffers: Long) {
-        GL45.glCreateFramebuffers(wrapBuffer(glCreateFramebuffers, framebuffers, n))
+        glCreateFramebuffers(n, Ptr(framebuffers))
+    }
+
+    override fun glCreateFramebuffers(n: Int, framebuffers: Ptr) {
+        GL45.glCreateFramebuffers(framebuffers.asIntBuffer(n, glCreateFramebuffers))
     }
 
     override fun glNamedFramebufferRenderbuffer(
@@ -161,26 +233,34 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glNamedFramebufferDrawBuffer(framebuffer, buf)
     }
 
-    private val glNamedFramebufferDrawBuffers = createBuffer().asIntBuffer()
+    private val glNamedFramebufferDrawBuffers = nullIntBuffer()
 
     override fun glNamedFramebufferDrawBuffers(framebuffer: Int, n: Int, bufs: Long) {
-        GL45.glNamedFramebufferDrawBuffers(framebuffer, wrapBuffer(glNamedFramebufferDrawBuffers, bufs, n))
+        glNamedFramebufferDrawBuffers(framebuffer, n, Ptr(bufs))
+    }
+
+    override fun glNamedFramebufferDrawBuffers(framebuffer: Int, n: Int, bufs: Ptr) {
+        GL45.glNamedFramebufferDrawBuffers(framebuffer, bufs.asIntBuffer(n, glNamedFramebufferDrawBuffers))
     }
 
     override fun glNamedFramebufferReadBuffer(framebuffer: Int, src: Int) {
         GL45.glNamedFramebufferReadBuffer(framebuffer, src)
     }
 
-    private val glInvalidateNamedFramebufferData = createBuffer().asIntBuffer()
+    private val glInvalidateNamedFramebufferData = nullIntBuffer()
 
     override fun glInvalidateNamedFramebufferData(framebuffer: Int, numAttachments: Int, attachments: Long) {
+        glInvalidateNamedFramebufferData(framebuffer, numAttachments, Ptr(attachments))
+    }
+
+    override fun glInvalidateNamedFramebufferData(framebuffer: Int, numAttachments: Int, attachments: Ptr) {
         GL45.glInvalidateNamedFramebufferData(
             framebuffer,
-            wrapBuffer(glInvalidateNamedFramebufferData, attachments, numAttachments)
+            attachments.asIntBuffer(numAttachments, glInvalidateNamedFramebufferData)
         )
     }
 
-    private val glInvalidateNamedFramebufferSubData = createBuffer().asIntBuffer()
+    private val glInvalidateNamedFramebufferSubData = nullIntBuffer()
 
     override fun glInvalidateNamedFramebufferSubData(
         framebuffer: Int,
@@ -191,9 +271,21 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         width: Int,
         height: Int
     ) {
+        glInvalidateNamedFramebufferSubData(framebuffer, numAttachments, Ptr(attachments), x, y, width, height)
+    }
+
+    override fun glInvalidateNamedFramebufferSubData(
+        framebuffer: Int,
+        numAttachments: Int,
+        attachments: Ptr,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int
+    ) {
         GL45.glInvalidateNamedFramebufferSubData(
             framebuffer,
-            wrapBuffer(glInvalidateNamedFramebufferSubData, attachments, numAttachments),
+            attachments.asIntBuffer(numAttachments, glInvalidateNamedFramebufferSubData),
             x,
             y,
             width,
@@ -201,37 +293,44 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         )
     }
 
-    private val glClearNamedFramebufferiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glClearNamedFramebufferiv = nullIntBuffer()
 
     override fun glClearNamedFramebufferiv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Long) {
+        glClearNamedFramebufferiv(framebuffer, buffer, drawbuffer, Ptr(value))
+    }
+
+    override fun glClearNamedFramebufferiv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Ptr) {
         GL45.glClearNamedFramebuffer(
             framebuffer,
             buffer,
             drawbuffer,
-            wrapBuffer(glClearNamedFramebufferiv, value, 4)
+            value.asIntBuffer(4, glClearNamedFramebufferiv)
         )
     }
 
-    private val glClearNamedFramebufferuiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glClearNamedFramebufferuiv = nullIntBuffer()
 
     override fun glClearNamedFramebufferuiv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Long) {
+        glClearNamedFramebufferuiv(framebuffer, buffer, drawbuffer, Ptr(value))
+    }
+
+    override fun glClearNamedFramebufferuiv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Ptr) {
         GL45.glClearNamedFramebuffer(
             framebuffer,
             buffer,
             drawbuffer,
-            wrapBuffer(glClearNamedFramebufferuiv, value, 4)
+            value.asIntBuffer(4, glClearNamedFramebufferuiv)
         )
     }
 
-    private val glClearNamedFramebufferfv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glClearNamedFramebufferfv = nullFloatBuffer()
 
     override fun glClearNamedFramebufferfv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Long) {
-        GL45.glClearNamedFramebuffer(
-            framebuffer,
-            buffer,
-            drawbuffer,
-            wrapBuffer(glClearNamedFramebufferfv, value, 4)
-        )
+        glClearNamedFramebufferfv(framebuffer, buffer, drawbuffer, Ptr(value))
+    }
+
+    override fun glClearNamedFramebufferfv(framebuffer: Int, buffer: Int, drawbuffer: Int, value: Ptr) {
+        GL45.glClearNamedFramebuffer(framebuffer, buffer, drawbuffer, value.asFloatBuffer(4, glClearNamedFramebufferfv))
     }
 
     override fun glClearNamedFramebufferfi(framebuffer: Int, buffer: Int, drawbuffer: Int, depth: Float, stencil: Int) {
@@ -276,21 +375,21 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         return GL45.glGetNamedFramebufferParameter(framebuffer, pname)
     }
 
-    private val glGetNamedFramebufferParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glGetNamedFramebufferParameteriv = nullIntBuffer()
 
     override fun glGetNamedFramebufferParameteriv(framebuffer: Int, pname: Int, params: Long) {
-        GL45.glGetNamedFramebufferParameter(
-            framebuffer,
-            pname,
-            wrapBuffer(glGetNamedFramebufferParameteriv, params)
-        )
+        glGetNamedFramebufferParameteriv(framebuffer, pname, Ptr(params))
+    }
+
+    override fun glGetNamedFramebufferParameteriv(framebuffer: Int, pname: Int, params: Ptr) {
+        GL45.glGetNamedFramebufferParameter(framebuffer, pname, params.asIntBuffer(4, glGetNamedFramebufferParameteriv))
     }
 
     override fun glGetNamedFramebufferAttachmentParameteri(framebuffer: Int, attachment: Int, pname: Int): Int {
         return GL45.glGetNamedFramebufferAttachmentParameter(framebuffer, attachment, pname)
     }
 
-    private val glGetNamedFramebufferAttachmentParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glGetNamedFramebufferAttachmentParameteriv = nullIntBuffer()
 
     override fun glGetNamedFramebufferAttachmentParameteriv(
         framebuffer: Int,
@@ -298,18 +397,31 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         pname: Int,
         params: Long
     ) {
+        glGetNamedFramebufferAttachmentParameteriv(framebuffer, attachment, pname, Ptr(params))
+    }
+
+    override fun glGetNamedFramebufferAttachmentParameteriv(
+        framebuffer: Int,
+        attachment: Int,
+        pname: Int,
+        params: Ptr
+    ) {
         GL45.glGetNamedFramebufferAttachmentParameter(
             framebuffer,
             attachment,
             pname,
-            wrapBuffer(glGetNamedFramebufferAttachmentParameteriv, params)
+            params.asIntBuffer(4, glGetNamedFramebufferAttachmentParameteriv)
         )
     }
 
-    private val glCreateRenderbuffers = createBuffer().asIntBuffer()
+    private val glCreateRenderbuffers = nullIntBuffer()
 
     override fun glCreateRenderbuffers(n: Int, renderbuffers: Long) {
-        GL45.glCreateRenderbuffers(wrapBuffer(glCreateRenderbuffers, renderbuffers, n))
+        glCreateRenderbuffers(n, Ptr(renderbuffers))
+    }
+
+    override fun glCreateRenderbuffers(n: Int, renderbuffers: Ptr) {
+        GL45.glCreateRenderbuffers(renderbuffers.asIntBuffer(n, glCreateRenderbuffers))
     }
 
     override fun glNamedRenderbufferStorage(renderbuffer: Int, internalformat: Int, width: Int, height: Int) {
@@ -330,16 +442,28 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         return GL45.glGetNamedRenderbufferParameter(renderbuffer, pname)
     }
 
-    private val glGetNamedRenderbufferParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    private val glGetNamedRenderbufferParameteriv = nullIntBuffer()
 
     override fun glGetNamedRenderbufferParameteriv(renderbuffer: Int, pname: Int, params: Long) {
-        GL45.glGetNamedRenderbufferParameter(renderbuffer, pname, wrapBuffer(glGetNamedRenderbufferParameteriv, params))
+        glGetNamedRenderbufferParameteriv(renderbuffer, pname, Ptr(params))
     }
 
-    private val glCreateTextures = createBuffer().asIntBuffer()
+    override fun glGetNamedRenderbufferParameteriv(renderbuffer: Int, pname: Int, params: Ptr) {
+        GL45.glGetNamedRenderbufferParameter(
+            renderbuffer,
+            pname,
+            params.asIntBuffer(4, glGetNamedRenderbufferParameteriv)
+        )
+    }
+
+    private val glCreateTextures = nullIntBuffer()
 
     override fun glCreateTextures(target: Int, n: Int, textures: Long) {
-        GL45.glCreateTextures(target, wrapBuffer(glCreateTextures, textures, n))
+        glCreateTextures(target, n, Ptr(textures))
+    }
+
+    override fun glCreateTextures(target: Int, n: Int, textures: Ptr) {
+        GL45.glCreateTextures(target, textures.asIntBuffer(n, glCreateTextures))
     }
 
     override fun glTextureBuffer(texture: Int, internalformat: Int, buffer: Int) {
@@ -695,28 +819,44 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glTextureParameteri(texture, pname, param)
     }
 
-    private val glTextureParameterfv = wrapBuffer(createBuffer().asFloatBuffer(), 0L, 4)
+    private val glTextureParameterfv = nullFloatBuffer()
 
     override fun glTextureParameterfv(texture: Int, pname: Int, params: Long) {
-        GL45.glTextureParameter(texture, pname, wrapBuffer(glTextureParameterfv, params))
+        glTextureParameterfv(texture, pname, Ptr(params))
     }
 
-    private val glTextureParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glTextureParameterfv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glTextureParameter(texture, pname, params.asFloatBuffer(4, glTextureParameterfv))
+    }
+
+    private val glTextureParameteriv = nullIntBuffer()
 
     override fun glTextureParameteriv(texture: Int, pname: Int, params: Long) {
-        GL45.glTextureParameter(texture, pname, wrapBuffer(glTextureParameteriv, params))
+        glTextureParameteriv(texture, pname, Ptr(params))
     }
 
-    private val glTextureParameterIiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glTextureParameteriv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glTextureParameter(texture, pname, params.asIntBuffer(4, glTextureParameteriv))
+    }
+
+    private val glTextureParameterIiv = nullIntBuffer()
 
     override fun glTextureParameterIiv(texture: Int, pname: Int, params: Long) {
-        GL45.glTextureParameterI(texture, pname, wrapBuffer(glTextureParameterIiv, params))
+        glTextureParameterIiv(texture, pname, Ptr(params))
     }
 
-    private val glTextureParameterIuiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glTextureParameterIiv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glTextureParameterI(texture, pname, params.asIntBuffer(4, glTextureParameterIiv))
+    }
+
+    private val glTextureParameterIuiv = nullIntBuffer()
 
     override fun glTextureParameterIuiv(texture: Int, pname: Int, params: Long) {
-        GL45.glTextureParameterIu(texture, pname, wrapBuffer(glTextureParameterIuiv, params))
+        glTextureParameterIuiv(texture, pname, Ptr(params))
+    }
+
+    override fun glTextureParameterIuiv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glTextureParameterIu(texture, pname, params.asIntBuffer(4, glTextureParameterIuiv))
     }
 
     override fun glGenerateTextureMipmap(texture: Int) {
@@ -727,16 +867,42 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glBindTextureUnit(unit, texture)
     }
 
-    private val glGetTextureImage = createBuffer()
+    private val glGetTextureImage = getFunctionAddress("glGetTextureImage")
+    private val nglGetTextureImage = trustedLookUp.findStatic(
+        GL45::class.java,
+        "nglGetTextureImage",
+        MethodType.methodType(
+            Void.TYPE,
+            Int::class.java,
+            Int::class.java,
+            Int::class.java,
+            Int::class.java,
+            Int::class.java,
+            Long::class.java,
+            Long::class.java
+        )
+    )
 
     override fun glGetTextureImage(texture: Int, level: Int, format: Int, type: Int, bufSize: Int, pixels: Long) {
-        GL45.glGetTextureImage(texture, level, format, type, wrapBuffer(glGetTextureImage, pixels))
+        nglGetTextureImage.invokeExact(texture, level, format, type, bufSize, pixels, glGetTextureImage)
     }
 
-    private val glGetCompressedTextureImage = createBuffer()
+    private val glGetCompressedTextureImage = getFunctionAddress("glGetCompressedTextureImage")
+    private val nglGetCompressedTextureImage = trustedLookUp.findStatic(
+        GL45::class.java,
+        "nglGetCompressedTextureImage",
+        MethodType.methodType(
+            Void.TYPE,
+            Int::class.java,
+            Int::class.java,
+            Int::class.java,
+            Long::class.java,
+            Long::class.java
+        )
+    )
 
     override fun glGetCompressedTextureImage(texture: Int, level: Int, bufSize: Int, pixels: Long) {
-        GL45.glGetCompressedTextureImage(texture, level, wrapBuffer(glGetCompressedTextureImage, pixels))
+        nglGetCompressedTextureImage.invokeExact(texture, level, bufSize, pixels, glGetCompressedTextureImage)
     }
 
     override fun glGetTextureLevelParameterf(texture: Int, level: Int, pname: Int): Float {
@@ -747,16 +913,24 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         return GL45.glGetTextureLevelParameteri(texture, level, pname)
     }
 
-    private val glGetTextureLevelParameterfv = wrapBuffer(createBuffer().asFloatBuffer(), 0L, 4)
+    private val glGetTextureLevelParameterfv = nullFloatBuffer()
 
     override fun glGetTextureLevelParameterfv(texture: Int, level: Int, pname: Int, params: Long) {
-        GL45.glGetTextureLevelParameter(texture, level, pname, wrapBuffer(glGetTextureLevelParameterfv, params))
+        glGetTextureLevelParameterfv(texture, level, pname, Ptr(params))
     }
 
-    private val glGetTextureLevelParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glGetTextureLevelParameterfv(texture: Int, level: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureLevelParameter(texture, level, pname, params.asFloatBuffer(4, glGetTextureLevelParameterfv))
+    }
+
+    private val glGetTextureLevelParameteriv = nullIntBuffer()
 
     override fun glGetTextureLevelParameteriv(texture: Int, level: Int, pname: Int, params: Long) {
-        GL45.glGetTextureLevelParameter(texture, level, pname, wrapBuffer(glGetTextureLevelParameteriv, params))
+        glGetTextureLevelParameteriv(texture, level, pname, Ptr(params))
+    }
+
+    override fun glGetTextureLevelParameteriv(texture: Int, level: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureLevelParameter(texture, level, pname, params.asIntBuffer(4, glGetTextureLevelParameteriv))
     }
 
     override fun glGetTextureParameterf(texture: Int, pname: Int): Float {
@@ -767,34 +941,54 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         return GL45.glGetTextureParameteri(texture, pname)
     }
 
-    private val glGetTextureParameterfv = wrapBuffer(createBuffer().asFloatBuffer(), 0L, 4)
+    private val glGetTextureParameterfv = nullFloatBuffer()
 
     override fun glGetTextureParameterfv(texture: Int, pname: Int, params: Long) {
-        GL45.glGetTextureParameter(texture, pname, wrapBuffer(glGetTextureParameterfv, params))
+        glGetTextureParameterfv(texture, pname, Ptr(params))
     }
 
-    private val glGetTextureParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glGetTextureParameterfv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureParameter(texture, pname, params.asFloatBuffer(4, glGetTextureParameterfv))
+    }
+
+    private val glGetTextureParameteriv = nullIntBuffer()
 
     override fun glGetTextureParameteriv(texture: Int, pname: Int, params: Long) {
-        GL45.glGetTextureParameter(texture, pname, wrapBuffer(glGetTextureParameteriv, params))
+        glGetTextureParameteriv(texture, pname, Ptr(params))
     }
 
-    private val glGetTextureParameterIiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glGetTextureParameteriv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureParameter(texture, pname, params.asIntBuffer(4, glGetTextureParameteriv))
+    }
+
+    private val glGetTextureParameterIiv = nullIntBuffer()
 
     override fun glGetTextureParameterIiv(texture: Int, pname: Int, params: Long) {
-        GL45.glGetTextureParameterI(texture, pname, wrapBuffer(glGetTextureParameterIiv, params))
+        glGetTextureParameterIiv(texture, pname, Ptr(params))
     }
 
-    private val glGetTextureParameterIuiv = wrapBuffer(createBuffer().asIntBuffer(), 0L, 4)
+    override fun glGetTextureParameterIiv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureParameterI(texture, pname, params.asIntBuffer(4, glGetTextureParameterIiv))
+    }
+
+    private val glGetTextureParameterIuiv = nullIntBuffer()
 
     override fun glGetTextureParameterIuiv(texture: Int, pname: Int, params: Long) {
-        GL45.glGetTextureParameterIu(texture, pname, wrapBuffer(glGetTextureParameterIuiv, params))
+        glGetTextureParameterIuiv(texture, pname, Ptr(params))
     }
 
-    private val glCreateVertexArrays = createBuffer().asIntBuffer()
+    override fun glGetTextureParameterIuiv(texture: Int, pname: Int, params: Ptr) {
+        GL45.glGetTextureParameterIu(texture, pname, params.asIntBuffer(4, glGetTextureParameterIuiv))
+    }
+
+    private val glCreateVertexArrays = nullIntBuffer()
 
     override fun glCreateVertexArrays(n: Int, arrays: Long) {
-        GL45.glCreateVertexArrays(wrapBuffer(glCreateVertexArrays, arrays, n))
+        glCreateVertexArrays(n, Ptr(arrays))
+    }
+
+    override fun glCreateVertexArrays(n: Int, arrays: Ptr) {
+        GL45.glCreateVertexArrays(arrays.asIntBuffer(n, glCreateVertexArrays))
     }
 
     override fun glDisableVertexArrayAttrib(vaobj: Int, index: Int) {
@@ -813,9 +1007,9 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glVertexArrayVertexBuffer(vaobj, bindingindex, buffer, offset, stride)
     }
 
-    private val glVertexArrayVertexBuffers_buffers = createBuffer().asIntBuffer()
-    private val glVertexArrayVertexBuffers_offsets = PointerBuffer(createBuffer())
-    private val glVertexArrayVertexBuffers_strides = createBuffer().asIntBuffer()
+    private val vertexarrayvertexbuffersBuffers = nullIntBuffer()
+    private val vertexarrayvertexbuffersOffsets = PointerBuffer(nullByteBuffer())
+    private val glvertexarrayvertexbuffersStrides = nullIntBuffer()
 
     override fun glVertexArrayVertexBuffers(
         vaobj: Int,
@@ -825,13 +1019,31 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         offsets: Long,
         strides: Long
     ) {
+        glVertexArrayVertexBuffers(
+            vaobj,
+            first,
+            count,
+            Ptr(buffers),
+            Ptr(offsets),
+            Ptr(strides)
+        )
+    }
+
+    override fun glVertexArrayVertexBuffers(
+        vaobj: Int,
+        first: Int,
+        count: Int,
+        buffers: Ptr,
+        offsets: Ptr,
+        strides: Ptr
+    ) {
         GL45.glVertexArrayVertexBuffers(
             vaobj,
             first,
             count,
-            wrapBuffer(glVertexArrayVertexBuffers_buffers, buffers, count),
-            wrapBuffer(glVertexArrayVertexBuffers_offsets, offsets, count),
-            wrapBuffer(glVertexArrayVertexBuffers_strides, offsets, count),
+            buffers.asIntBuffer(count, vertexarrayvertexbuffersBuffers),
+            offsets.asPointerBuffer(count, vertexarrayvertexbuffersOffsets),
+            strides.asIntBuffer(count, glvertexarrayvertexbuffersStrides)
         )
     }
 
@@ -862,10 +1074,14 @@ open class GL45LWJGL2(override val tempArr: Arr) : IGL45 {
         GL45.glVertexArrayBindingDivisor(vaobj, bindingindex, divisor)
     }
 
-    private val glCreateSamplers = createBuffer().asIntBuffer()
+    private val glCreateSamplers = nullIntBuffer()
 
     override fun glCreateSamplers(n: Int, samplers: Long) {
-        GL45.glCreateSamplers(wrapBuffer(glCreateSamplers, samplers, n))
+        glCreateSamplers(n, Ptr(samplers))
+    }
+
+    override fun glCreateSamplers(n: Int, samplers: Ptr) {
+        GL45.glCreateSamplers(samplers.asIntBuffer(n, glCreateSamplers))
     }
 
     override fun glMemoryBarrierByRegion(barriers: Int) {

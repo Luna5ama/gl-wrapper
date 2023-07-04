@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
-import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.*
 import org.lwjgl.opengl.GL14
 
 open class GL14LWJGL2(override val tempArr: Arr) : IGL14 {
@@ -12,14 +12,18 @@ open class GL14LWJGL2(override val tempArr: Arr) : IGL14 {
         GL14.glBlendEquation(mode)
     }
 
-    private val glMultiDrawArrays_first = createBuffer().asIntBuffer()
-    private val glMultiDrawArrays_count = createBuffer().asIntBuffer()
+    private val glMultiDrawArrays_first = nullIntBuffer()
+    private val glMultiDrawArrays_count = nullIntBuffer()
 
     override fun glMultiDrawArrays(mode: Int, first: Long, count: Long, drawcount: Int) {
+        glMultiDrawArrays(mode, Ptr(first), Ptr(count), drawcount)
+    }
+
+    override fun glMultiDrawArrays(mode: Int, first: Ptr, count: Ptr, drawcount: Int) {
         GL14.glMultiDrawArrays(
             mode,
-            wrapBuffer(glMultiDrawArrays_first, first, drawcount),
-            wrapBuffer(glMultiDrawArrays_count, count, drawcount)
+            first.asIntBuffer(drawcount, glMultiDrawArrays_first),
+            count.asIntBuffer(drawcount, glMultiDrawArrays_count)
         )
     }
 
@@ -28,16 +32,24 @@ open class GL14LWJGL2(override val tempArr: Arr) : IGL14 {
     }
 
 
-    private val glPointParameterfv = wrapBuffer(createBuffer().asFloatBuffer(), 4)
+    private val glPointParameterfv = nullFloatBuffer()
 
     override fun glPointParameterfv(pname: Int, params: Long) {
-        GL14.glPointParameter(pname, wrapBuffer(glPointParameterfv, params))
+        glPointParameterfv(pname, Ptr(params))
     }
 
-    private val glPointParameteriv = wrapBuffer(createBuffer().asIntBuffer(), 4)
+    override fun glPointParameterfv(pname: Int, params: Ptr) {
+        GL14.glPointParameter(pname, params.asFloatBuffer(4, glPointParameterfv))
+    }
+
+    private val glPointParameteriv = nullIntBuffer()
 
     override fun glPointParameteriv(pname: Int, params: Long) {
-        GL14.glPointParameter(pname, wrapBuffer(glPointParameteriv, params))
+        glPointParameteriv(pname, Ptr(params))
+    }
+
+    override fun glPointParameteriv(pname: Int, params: Ptr) {
+        GL14.glPointParameter(pname, params.asIntBuffer(4, glPointParameteriv))
     }
 
     override fun glBlendFuncSeparate(sfactorRGB: Int, dfactorRGB: Int, sfactorAlpha: Int, dfactorAlpha: Int) {

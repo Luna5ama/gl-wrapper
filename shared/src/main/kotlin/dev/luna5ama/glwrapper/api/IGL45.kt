@@ -879,8 +879,8 @@ interface IGL45 : GLBase {
         )
     }
 
-    fun glTextureParameterfv(texture: Int, pname: Int, param: Ptr) {
-        glTextureParameterfv(texture, pname, param.address)
+    fun glTextureParameterfv(texture: Int, pname: Int, params: Ptr) {
+        glTextureParameterfv(texture, pname, params.address)
     }
 
     fun glTextureParameterfv(texture: Int, pname: Int, v0: Float, v1: Float, v2: Float, v3: Float) {
@@ -892,8 +892,8 @@ interface IGL45 : GLBase {
         glTextureParameterfv(texture, pname, ptr)
     }
 
-    fun glTextureParameteriv(texture: Int, pname: Int, param: Ptr) {
-        glTextureParameteriv(texture, pname, param.address)
+    fun glTextureParameteriv(texture: Int, pname: Int, params: Ptr) {
+        glTextureParameteriv(texture, pname, params.address)
     }
 
     fun glTextureParameteriv(texture: Int, pname: Int, v0: Int, v1: Int, v2: Int, v3: Int) {
@@ -905,12 +905,12 @@ interface IGL45 : GLBase {
         glTextureParameteriv(texture, pname, ptr)
     }
 
-    fun glTextureParameterIiv(texture: Int, pname: Int, param: Ptr) {
-        glTextureParameterIiv(texture, pname, param.address)
+    fun glTextureParameterIiv(texture: Int, pname: Int, params: Ptr) {
+        glTextureParameterIiv(texture, pname, params.address)
     }
 
-    fun glTextureParameterIuiv(texture: Int, pname: Int, param: Ptr) {
-        glTextureParameterIuiv(texture, pname, param.address)
+    fun glTextureParameterIuiv(texture: Int, pname: Int, params: Ptr) {
+        glTextureParameterIuiv(texture, pname, params.address)
     }
 
     fun glGetTextureImage(texture: Int, level: Int, format: Int, type: Int, bufSize: Int, pixels: Ptr) {
@@ -920,6 +920,15 @@ interface IGL45 : GLBase {
     fun glGetCompressedTextureImage(texture: Int, level: Int, bufSize: Int, pixels: Ptr) {
         glGetCompressedTextureImage(texture, level, bufSize, pixels.address)
     }
+
+    fun glGetTextureLevelParameterfv(texture: Int, level: Int, pname: Int, params: Ptr) {
+        glGetTextureLevelParameterfv(texture, level, pname, params.address)
+    }
+
+    fun glGetTextureLevelParameteriv(texture: Int, level: Int, pname: Int, params: Ptr) {
+        glGetTextureLevelParameteriv(texture, level, pname, params.address)
+    }
+
 
     fun glGetTextureParameterfv(texture: Int, pname: Int, params: Ptr) {
         glGetTextureParameterfv(texture, pname, params.address)

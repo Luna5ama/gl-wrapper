@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
-import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.*
 import org.lwjgl.opengl.GL11
 import java.lang.invoke.MethodType
 
@@ -92,53 +92,70 @@ open class GL11LWJGL2(override val tempArr: Arr) : IGL11 {
         GL11.glFrontFace(mode)
     }
 
-    private val glDeleteTextures = createBuffer().asIntBuffer()
+    private val glDeleteTextures = nullIntBuffer()
 
     override fun glDeleteTextures(n: Int, textures: Long) {
-        GL11.glDeleteTextures(wrapBuffer(glDeleteTextures, textures, n))
+        glDeleteTextures(n, Ptr(textures))
+    }
+
+    override fun glDeleteTextures(n: Int, textures: Ptr) {
+        GL11.glDeleteTextures(textures.asIntBuffer(n, glDeleteTextures))
     }
 
     override fun glDeleteTextures(texture: Int) {
         GL11.glDeleteTextures(texture)
     }
 
-    private val glGetBooleanv = wrapBuffer(createBuffer(), 16)
+    private val glGetBooleanv = nullByteBuffer()
 
     override fun glGetBooleanv(pname: Int, params: Long) {
-        GL11.glGetBoolean(pname, wrapBuffer(glGetBooleanv, params))
+        glGetBooleanv(pname, Ptr(params))
+    }
+
+    override fun glGetBooleanv(pname: Int, params: Ptr) {
+        GL11.glGetBoolean(pname, params.asByteBuffer(16, glGetBooleanv))
     }
 
     override fun glGetBoolean(pname: Int): Boolean {
         return GL11.glGetBoolean(pname)
     }
 
-    private val glGetIntegerv =
-        wrapBuffer(createBuffer().asIntBuffer(), 16)
+    private val glGetIntegerv = nullIntBuffer()
 
     override fun glGetIntegerv(pname: Int, params: Long) {
-        GL11.glGetInteger(pname, wrapBuffer(glGetIntegerv, params))
+        glGetIntegerv(pname, Ptr(params))
+    }
+
+    override fun glGetIntegerv(pname: Int, params: Ptr) {
+        GL11.glGetInteger(pname, params.asIntBuffer(16, glGetIntegerv))
     }
 
     override fun glGetInteger(pname: Int): Int {
         return GL11.glGetInteger(pname)
     }
 
-    private val glGetFloatv =
-        wrapBuffer(createBuffer().asFloatBuffer(), 16)
+    private val glGetFloatv = nullFloatBuffer()
 
     override fun glGetFloatv(pname: Int, params: Long) {
-        GL11.glGetFloat(pname, wrapBuffer(glGetFloatv, params))
+        glGetFloatv(pname, Ptr(params))
+    }
+
+    override fun glGetFloatv(pname: Int, params: Ptr) {
+        GL11.glGetFloat(pname, params.asFloatBuffer(16, glGetFloatv))
     }
 
     override fun glGetFloat(pname: Int): Float {
         return GL11.glGetFloat(pname)
     }
 
-    private val glGetDoublev =
-        wrapBuffer(createBuffer().asDoubleBuffer(), 16)
+    private val glGetDoublev = nullDoubleBuffer()
 
     override fun glGetDoublev(pname: Int, params: Long) {
-        GL11.glGetDouble(pname, wrapBuffer(glGetDoublev, params))
+        glGetDoublev(pname, Ptr(params))
+    }
+
+    override fun glGetDoublev(pname: Int, params: Ptr) {
+        GL11.glGetDouble(pname, params.asDoubleBuffer(16, glGetDoublev))
     }
 
     override fun glGetDouble(pname: Int): Double {
@@ -185,10 +202,30 @@ open class GL11LWJGL2(override val tempArr: Arr) : IGL11 {
         GL11.glReadBuffer(src)
     }
 
-    private val glReadPixels = createBuffer()
+    private val glReadPixels = nullByteBuffer()
 
-    override fun glReadPixels(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: Long) {
-        GL11.glReadPixels(x, y, width, height, format, type, wrapBuffer(glReadPixels, pixels))
+    override fun glReadPixels(
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        format: Int,
+        type: Int,
+        pixels: Long
+    ) {
+        glReadPixels(x, y, width, height, format, type, Ptr(pixels))
+    }
+
+    override fun glReadPixels(
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        format: Int,
+        type: Int,
+        pixels: Ptr
+    ) {
+        GL11.glReadPixels(x, y, width, height, format, type, pixels.asByteBuffer(width * height * 8, glReadPixels))
     }
 
     override fun glScissor(x: Int, y: Int, width: Int, height: Int) {
