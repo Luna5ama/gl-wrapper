@@ -3,11 +3,14 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.*
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
-class Framebuffer : IGLObject, IGLBinding, IGLTargetBinding {
+class FramebufferObject : IGLObject, IGLBinding, IGLTargetBinding, IGLSized2D {
     override val id = glCreateFramebuffers()
-    val colorAttachments = ObjectArrayList<IGLObject>()
-    var depthAttachment: IGLObject? = null; private set
-    var stencilAttachment: IGLObject? = null; private set
+    val colorAttachments = arrayOfNulls<Attachment>(32)
+    var depthAttachment: Attachment? = null; private set
+    var stencilAttachment: Attachment? = null; private set
+
+    override var sizeX = -1; private set
+    override var sizeY = -1; private set
 
     fun attach(texture: TextureObject.Texture2D, attachment: Int, level: Int = 0) {
         when (attachment) {
@@ -21,10 +24,15 @@ class Framebuffer : IGLObject, IGLBinding, IGLTargetBinding {
                 depthAttachment = texture
                 stencilAttachment = texture
             }
+            in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31 -> {
+                colorAttachments[attachment - GL_COLOR_ATTACHMENT0] = texture
+            }
             else -> {
-                colorAttachments.add(texture)
+                throw IllegalArgumentException("Invalid attachment: $attachment")
             }
         }
+
+        checkAndUpdateSize(texture)
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
 
@@ -40,11 +48,28 @@ class Framebuffer : IGLObject, IGLBinding, IGLTargetBinding {
                 depthAttachment = renderbuffer
                 stencilAttachment = renderbuffer
             }
+            in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31 -> {
+                colorAttachments[attachment - GL_COLOR_ATTACHMENT0] = renderbuffer
+            }
             else -> {
-                colorAttachments.add(renderbuffer)
+                throw IllegalArgumentException("Invalid attachment: $attachment")
             }
         }
+
+        checkAndUpdateSize(renderbuffer)
         glNamedFramebufferRenderbuffer(id, attachment, GL_RENDERBUFFER, renderbuffer.id)
+    }
+
+    private fun checkAndUpdateSize(attachment: Attachment) {
+        if (sizeX != -1 && sizeY != -1) {
+            require(sizeX == attachment.sizeX && sizeY == attachment.sizeY) {
+                "Framebuffer attachments size mismatch: $sizeX x $sizeY != ${attachment.sizeX} x ${attachment.sizeY}"
+            }
+            return
+        }
+
+        sizeX = attachment.sizeX
+        sizeY = attachment.sizeY
     }
 
     fun check() {
@@ -70,16 +95,19 @@ class Framebuffer : IGLObject, IGLBinding, IGLTargetBinding {
     override fun destroy() {
         glDeleteFramebuffers(id)
         for (i in colorAttachments.indices) {
-            colorAttachments[i].destroy()
+            colorAttachments[i]?.destroy()
         }
-        colorAttachments.clear()
+        colorAttachments.fill(null)
         val depth = depthAttachment
         depthAttachment = null
+
         val stencil = stencilAttachment
         stencilAttachment = null
+
         if (depth != null) {
             depth.destroy()
         }
+
         if (stencil != null && stencil !== depth) {
             stencil.destroy()
         }
@@ -87,8 +115,10 @@ class Framebuffer : IGLObject, IGLBinding, IGLTargetBinding {
 
     fun destroyFbo() {
         glDeleteFramebuffers(id)
-        colorAttachments.clear()
+        colorAttachments.fill(null)
         depthAttachment = null
         stencilAttachment = null
     }
+
+    interface Attachment : IGLSized2D
 }
