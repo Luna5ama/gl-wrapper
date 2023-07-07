@@ -11,14 +11,18 @@ class RenderbufferObject : IGLObject, FramebufferObject.Attachment {
     override var sizeX = 0; private set
     override var sizeY = 0; private set
 
-    fun allocate(width: Int, height: Int, internalFormat: Int) {
+    fun allocate(width: Int, height: Int, internalFormat: Int): RenderbufferObject {
         sizeX = width
         sizeY = height
         glNamedRenderbufferStorage(id, internalFormat, width, height)
+        return this
     }
 
-    fun allocateMultisample(samples: Int, width: Int, height: Int, internalFormat: Int) {
+    fun allocateMultisample(samples: Int, width: Int, height: Int, internalFormat: Int): RenderbufferObject {
+        sizeX = width
+        sizeY = height
         glNamedRenderbufferStorageMultisample(id, samples, internalFormat, width, height)
+        return this
     }
 
     override fun destroy() {
