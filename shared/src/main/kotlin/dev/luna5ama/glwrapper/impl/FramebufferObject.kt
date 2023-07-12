@@ -36,6 +36,30 @@ class FramebufferObject : IGLObject, IGLBinding, IGLTargetBinding, IGLSized2D {
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
 
+    fun attach(texture: TextureObject.Texture3D, attachment: Int, layer: Int, level: Int = 0) {
+        when (attachment) {
+            GL_DEPTH_ATTACHMENT -> {
+                depthAttachment = texture
+            }
+            GL_STENCIL_ATTACHMENT -> {
+                stencilAttachment = texture
+            }
+            GL_DEPTH_STENCIL_ATTACHMENT -> {
+                depthAttachment = texture
+                stencilAttachment = texture
+            }
+            in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31 -> {
+                colorAttachments[attachment - GL_COLOR_ATTACHMENT0] = texture
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid attachment: $attachment")
+            }
+        }
+
+        checkAndUpdateSize(texture)
+        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
+    }
+
     fun attach(renderbuffer: RenderbufferObject, attachment: Int) {
         when (attachment) {
             GL_DEPTH_ATTACHMENT -> {
@@ -73,7 +97,7 @@ class FramebufferObject : IGLObject, IGLBinding, IGLTargetBinding, IGLSized2D {
     }
 
     fun check() {
-        require(glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+        check(glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
     }
 
     override fun bind() {

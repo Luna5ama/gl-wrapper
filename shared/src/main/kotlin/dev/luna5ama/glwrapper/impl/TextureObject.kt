@@ -26,7 +26,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         glDeleteTextures(id)
     }
 
-    class Texture1D : TextureObject(GL_TEXTURE_1D), IGLSized1D {
+    class Texture1D(target: Int = GL_TEXTURE_1D) : TextureObject(target), IGLSized1D {
         override var sizeX = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int): Texture1D {
@@ -60,7 +60,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         }
     }
 
-    class Texture2D : TextureObject(GL_TEXTURE_2D), IGLSized2D, FramebufferObject.Attachment {
+    class Texture2D(target: Int = GL_TEXTURE_2D) : TextureObject(target), IGLSized2D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
 
@@ -100,7 +100,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         }
     }
 
-    class Texture3D : TextureObject(GL_TEXTURE_3D), IGLSized3D {
+    class Texture3D(target: Int = GL_TEXTURE_3D) : TextureObject(target), IGLSized3D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
         override var sizeZ = 0; private set
