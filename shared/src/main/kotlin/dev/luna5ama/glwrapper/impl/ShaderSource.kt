@@ -180,7 +180,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
                     val lines =
                         decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
                             .mapTo(ObjectArrayList()) {
-                                processLines(it)
+                                processLines(path, it)
                             }
 
                     source = Cache(path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.')), lines, hash)
@@ -193,16 +193,28 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
 
         private val includeRegex = "#include\\s+\"([^\"]+)\"".toRegex()
 
-        private fun processLines(input: String): CharSequence {
+        private fun processLines(path: String, input: String): CharSequence {
             var line = input
 
             line = includeRegex.replace(line) {
                 val includePath = it.groupValues[1]
-                val importContent = Lib(includePath).codeSrc
+                val importContent = Lib(resolveIncludePath(path, includePath)).codeSrc
                 importContent
             }
 
             return line
+        }
+
+        fun resolveIncludePath(currentPath: String, includePath: String): String {
+            if (includePath[0] == '/') return includePath
+
+            val currentPathDir = currentPath.substring(0, currentPath.lastIndexOf('/'))
+            return if (includePath.startsWith("..")) {
+                val currentPathDirParent = currentPathDir.substring(0, currentPathDir.lastIndexOf('/'))
+                "$currentPathDirParent${includePath.substring(2)}"
+            } else {
+                "$currentPathDir/${includePath.substring(if (includePath[0] == '.') 2 else 0)}"
+            }
         }
 
         private inner class Cache(val name: String, val lines: List<CharSequence>, val hash: MD5Hash) {
