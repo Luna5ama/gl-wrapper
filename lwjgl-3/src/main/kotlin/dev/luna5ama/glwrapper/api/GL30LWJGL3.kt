@@ -36,6 +36,18 @@ open class GL30LWJGL3(override val tempArr: Arr) : IGL30 {
         GL30C.glColorMaski(buf, r, g, b, a)
     }
 
+    override fun glEnablei(cap: Int, index: Int) {
+        GL30C.glEnablei(cap, index)
+    }
+
+    override fun glDisablei(cap: Int, index: Int) {
+        GL30C.glDisablei(cap, index)
+    }
+
+    override fun glIsEnabledi(cap: Int, index: Int): Boolean {
+        return GL30C.glIsEnabledi(cap, index)
+    }
+
     override fun glBindBufferRange(target: Int, index: Int, buffer: Int, offset: Long, size: Long) {
         GL30C.glBindBufferRange(target, index, buffer, offset, size)
     }

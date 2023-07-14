@@ -310,6 +310,10 @@ interface IGL30 : GLBase {
 
     fun glColorMaski(buf: Int, r: Boolean, g: Boolean, b: Boolean, a: Boolean)
 
+    fun glEnablei(cap: Int, index: Int)
+    fun glDisablei(cap: Int, index: Int)
+    fun glIsEnabledi(cap: Int, index: Int): Boolean
+
     fun glBindBufferRange(target: Int, index: Int, buffer: Int, offset: Long, size: Long)
     fun glBindBufferBase(target: Int, index: Int, buffer: Int)
 
