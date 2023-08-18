@@ -5,6 +5,8 @@ import dev.luna5ama.kmogus.Ptr
 
 sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBinding {
     override val id = glCreateTextures(target)
+    var levels = 0; protected set
+    var internalformat = 0; protected set
 
     override fun bind(target: Int) {
         glBindTextureUnit(target, id)
@@ -30,6 +32,8 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         override var sizeX = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int): Texture1D {
+            this.levels = levels
+            this.internalformat = internalformat
             sizeX = width
             glTextureStorage1D(id, levels, internalformat, width)
             return this
@@ -65,6 +69,8 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         override var sizeY = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int, height: Int): Texture2D {
+            this.levels = levels
+            this.internalformat = internalformat
             sizeX = width
             sizeY = height
             glTextureStorage2D(id, levels, internalformat, width, height)
@@ -106,6 +112,8 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         override var sizeZ = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int, height: Int, depth: Int): Texture3D {
+            this.levels = levels
+            this.internalformat = internalformat
             sizeX = width
             sizeY = height
             sizeZ = depth
