@@ -36,7 +36,7 @@ class FramebufferObject : IGLObject, IGLBinding, IGLTargetBinding, IGLSized2D {
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
 
-    fun attach(texture: TextureObject.Texture3D, attachment: Int, layer: Int, level: Int = 0) {
+    fun attachLayer(texture: TextureObject.Texture3D, attachment: Int, layer: Int, level: Int = 0) {
         when (attachment) {
             GL_DEPTH_ATTACHMENT -> {
                 depthAttachment = texture
