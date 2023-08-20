@@ -4,12 +4,25 @@ import dev.luna5ama.glwrapper.api.*
 
 class VertexAttribute private constructor(val stride: Int, private val divisor: Int, private val entries: List<Entry>) {
     fun apply(vao: VertexArrayObject, binding: Int) {
-        entries.forEach {
-            it.apply(vao.id, binding)
-        }
+        if (GpuVendor.isIntel) {
+            val prevVao = glGetInteger(GL_VERTEX_ARRAY_BINDING)
+            vao.bind()
+            entries.forEach {
+                it.apply(vao.id, binding)
+            }
 
-        if (divisor != 0) {
-            glVertexArrayBindingDivisor(vao.id, binding, divisor)
+            if (divisor != 0) {
+                glVertexArrayBindingDivisor(vao.id, binding, divisor)
+            }
+            glBindVertexArray(prevVao)
+        } else {
+            entries.forEach {
+                it.apply(vao.id, binding)
+            }
+
+            if (divisor != 0) {
+                glVertexArrayBindingDivisor(vao.id, binding, divisor)
+            }
         }
     }
 
@@ -54,8 +67,8 @@ class VertexAttribute private constructor(val stride: Int, private val divisor: 
     ) : Entry {
         override fun apply(vaoID: Int, binding: Int) {
             glEnableVertexArrayAttrib(vaoID, index)
-            glVertexArrayAttribFormat(vaoID, index, size, type, normalized, offset)
             glVertexArrayAttribBinding(vaoID, index, binding)
+            glVertexArrayAttribFormat(vaoID, index, size, type, normalized, offset)
         }
     }
 
@@ -67,8 +80,8 @@ class VertexAttribute private constructor(val stride: Int, private val divisor: 
     ) : Entry {
         override fun apply(vaoID: Int, binding: Int) {
             glEnableVertexArrayAttrib(vaoID, index)
-            glVertexArrayAttribIFormat(vaoID, index, size, type, offset)
             glVertexArrayAttribBinding(vaoID, index, binding)
+            glVertexArrayAttribIFormat(vaoID, index, size, type, offset)
         }
     }
 
