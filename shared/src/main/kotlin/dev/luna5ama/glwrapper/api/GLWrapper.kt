@@ -3,6 +3,13 @@ package dev.luna5ama.glwrapper.api
 import dev.luna5ama.kmogus.Arr
 
 abstract class GLWrapper : GLBase {
+    val vendor: GpuVendor by lazy {
+        val vendorStr = glGetString(GL_VENDOR) ?: ""
+        GpuVendor.values().find {
+            vendorStr.contains(it.name, true)
+        } ?: GpuVendor.UNKNOWN
+    }
+
     final override val tempArr = Arr.malloc(128L)
 
     abstract val gl11: IGL11

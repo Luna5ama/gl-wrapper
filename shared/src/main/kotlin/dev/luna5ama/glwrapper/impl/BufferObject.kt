@@ -6,7 +6,7 @@ import dev.luna5ama.kmogus.Ptr
 sealed class BufferObject : IGLObject, IGLTargetBinding {
     final override var id = glCreateBuffers(); private set
 
-    var size = 0L; private set
+    var size = -1L; private set
 
     override fun create() {
         super.create()
@@ -14,12 +14,20 @@ sealed class BufferObject : IGLObject, IGLTargetBinding {
     }
 
     open fun allocate(size: Long, flags: Int): BufferObject {
+        // Intel workaround
+        if (GLWrapper.instance.vendor == GpuVendor.INTEL && size != -1L) {
+            destroy()
+        }
         tryCreate()
         this.size = size
         return this
     }
 
     open fun allocate(size: Long, data: Ptr, flags: Int): BufferObject {
+        // Intel workaround
+        if (GLWrapper.instance.vendor == GpuVendor.INTEL && size != -1L) {
+            destroy()
+        }
         tryCreate()
         this.size = size
         return this
@@ -28,6 +36,7 @@ sealed class BufferObject : IGLObject, IGLTargetBinding {
     override fun destroy() {
         if (id != 0) {
             glDeleteBuffers(id)
+            size = -1L
             id = 0
         }
     }
