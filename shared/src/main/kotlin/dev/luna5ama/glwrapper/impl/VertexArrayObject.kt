@@ -5,17 +5,24 @@ import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 
 class VertexArrayObject : IGLObject, IGLBinding {
-    override val id: Int = glCreateVertexArrays()
+    override var id = glCreateVertexArrays(); private set
 
     private var ebo: BufferObject? = null
     private val vboBindings = Object2ObjectOpenHashMap<BufferObject, VBOBinding>()
 
+    override fun create() {
+        super.create()
+        id = glCreateVertexArrays()
+    }
+
     fun attachEbo(ebo: BufferObject) {
+        tryCreate()
         glVertexArrayElementBuffer(id, ebo.id)
         this.ebo = ebo
     }
 
     fun attachVbo(vbo: BufferObject, vertexAttribute: VertexAttribute, offset: Long = 0) {
+        tryCreate()
         val prevBinding = vboBindings[vbo]
         if (prevBinding?.vbo == vbo && prevBinding.offset == offset && prevBinding.vertexAttribute == vertexAttribute) return
 
@@ -46,6 +53,8 @@ class VertexArrayObject : IGLObject, IGLBinding {
     }
 
     override fun destroy() {
+        if (id == 0) return
+
         glDeleteVertexArrays(id)
         ebo?.destroy()
         ebo = null
@@ -53,20 +62,26 @@ class VertexArrayObject : IGLObject, IGLBinding {
             it.destroy()
         }
         vboBindings.clear()
+        id = 0
+    }
+
+    fun destroyVao() {
+        if (id == 0) return
+
+        glDeleteVertexArrays(id)
+        ebo = null
+        vboBindings.clear()
+        id = 0
     }
 
     fun clear() {
+        if (id == 0) return
+
         if (ebo != null) {
             glVertexArrayElementBuffer(id, 0)
             ebo = null
         }
         glVertexArrayVertexBuffers(id, 0, vboBindings.size, Ptr.NULL, Ptr.NULL, Ptr.NULL)
-        vboBindings.clear()
-    }
-
-    fun destroyVao() {
-        glDeleteVertexArrays(id)
-        ebo = null
         vboBindings.clear()
     }
 

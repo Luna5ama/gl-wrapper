@@ -8,7 +8,20 @@ interface IGLBinding {
 interface IGLObject {
     val id: Int
 
+    fun create() {
+        check(id == 0) { "Object already created" }
+    }
     fun destroy()
+}
+
+internal fun IGLObject.tryCreate() {
+    if (id == 0) {
+        create()
+    }
+}
+
+internal fun IGLObject.checkCreated() {
+    check(id != 0) { "Object not created" }
 }
 
 interface IGLTargetBinding {
