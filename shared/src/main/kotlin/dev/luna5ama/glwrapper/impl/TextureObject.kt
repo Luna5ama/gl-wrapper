@@ -36,6 +36,43 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
         }
     }
 
+    fun clear() {
+        checkCreated()
+        val clearFormat = when (internalformat) {
+            GL_DEPTH_COMPONENT,
+            GL_DEPTH_COMPONENT16,
+            GL_DEPTH_COMPONENT24,
+            GL_DEPTH_COMPONENT32,
+            GL_DEPTH_COMPONENT32F -> GL_DEPTH_COMPONENT
+            GL_DEPTH_STENCIL,
+            GL_DEPTH24_STENCIL8,
+            GL_DEPTH32F_STENCIL8 -> GL_DEPTH_STENCIL
+            else -> GL_RGBA
+        }
+        val clearType = when (internalformat) {
+            GL_DEPTH_COMPONENT,
+            GL_DEPTH_COMPONENT16,
+            GL_DEPTH_COMPONENT24,
+            GL_DEPTH_COMPONENT32,
+            GL_DEPTH_COMPONENT32F -> GL_FLOAT
+            GL_DEPTH_STENCIL,
+            GL_DEPTH24_STENCIL8 -> GL_UNSIGNED_INT_24_8
+            GL_DEPTH32F_STENCIL8 -> GL_FLOAT_32_UNSIGNED_INT_24_8_REV
+            GL_R16F,
+            GL_RG16F,
+            GL_RGB16F,
+            GL_RGBA16F,
+            GL_R32F,
+            GL_RG32F,
+            GL_RGB32F,
+            GL_RGBA32F -> GL_FLOAT
+            else -> GL_UNSIGNED_BYTE
+        }
+        repeat(levels) {
+            glClearTexImage(id, it, clearFormat, clearType, Ptr.NULL)
+        }
+    }
+
     class Texture1D(target: Int = GL_TEXTURE_1D) : TextureObject(target), IGLSized1D {
         override var sizeX = 0; private set
 
@@ -45,6 +82,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
             this.internalformat = internalformat
             sizeX = width
             glTextureStorage1D(id, levels, internalformat, width)
+            clear()
             return this
         }
 
@@ -86,6 +124,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
             sizeX = width
             sizeY = height
             glTextureStorage2D(id, levels, internalformat, width, height)
+            clear()
             return this
         }
 
@@ -133,6 +172,7 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
             sizeY = height
             sizeZ = depth
             glTextureStorage3D(id, levels, internalformat, width, height, depth)
+            clear()
             return this
         }
 
