@@ -25,3 +25,5 @@ interface IGL21 : GLBase {
         internal const val GL_COMPRESSED_SRGB_ALPHA = 0x8C49
     }
 }
+
+abstract class PatchedGL21(protected val delegate: IGL21) : IGL21 by delegate

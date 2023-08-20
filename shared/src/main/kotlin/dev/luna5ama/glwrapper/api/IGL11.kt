@@ -404,3 +404,5 @@ interface IGL11 : GLBase {
         glReadPixels(x, y, width, height, format, type, pixels.address)
     }
 }
+
+abstract class PatchedGL11(protected val delegate: IGL11) : IGL11 by delegate

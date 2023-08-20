@@ -468,3 +468,5 @@ interface IGL30 : GLBase {
         glDeleteVertexArrays(length, ptr)
     }
 }
+
+abstract class PatchedGL30(protected val delegate: IGL30) : IGL30 by delegate

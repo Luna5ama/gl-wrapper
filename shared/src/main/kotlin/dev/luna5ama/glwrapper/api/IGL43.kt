@@ -351,3 +351,5 @@ interface IGL43 : GLBase {
     fun glShaderStorageBlockBinding(program: Int, storageBlockIndex: Int, storageBlockBinding: Int)
     fun glGetProgramResourceIndex(program: Int, programInterface: Int, name: String): Int
 }
+
+abstract class PatchedGL43(protected val delegate: IGL43) : IGL43 by delegate

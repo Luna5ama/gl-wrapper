@@ -619,3 +619,5 @@ interface IGL41 : GLBase {
         glProgramUniformMatrix4x3fv(program, location, count, transpose, ptr)
     }
 }
+
+abstract class PatchedGL41(protected val delegate: IGL41) : IGL41 by delegate

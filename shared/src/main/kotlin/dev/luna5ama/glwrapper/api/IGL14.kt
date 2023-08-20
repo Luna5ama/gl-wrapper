@@ -90,3 +90,5 @@ interface IGL14 : GLBase {
         glPointParameteriv(pname, ptr)
     }
 }
+
+abstract class PatchedGL14(protected val delegate: IGL14) : IGL14 by delegate

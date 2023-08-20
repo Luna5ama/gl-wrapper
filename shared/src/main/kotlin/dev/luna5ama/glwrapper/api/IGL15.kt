@@ -104,3 +104,5 @@ interface IGL15 : GLBase {
         glDeleteBuffers(length, ptr)
     }
 }
+
+abstract class PatchedGL15(protected val delegate: IGL15) : IGL15 by delegate

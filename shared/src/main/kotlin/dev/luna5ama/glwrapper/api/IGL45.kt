@@ -1015,3 +1015,5 @@ interface IGL45 : GLBase {
         glReadnPixels(x, y, width, height, format, type, bufSize, data.address)
     }
 }
+
+abstract class PatchedGL45(protected val delegate: IGL45) : IGL45 by delegate

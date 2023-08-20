@@ -162,3 +162,5 @@ interface IGL42 : GLBase {
 
     fun glMemoryBarrier(barriers: Int)
 }
+
+abstract class PatchedGL42(protected val delegate: IGL42) : IGL42 by delegate

@@ -221,3 +221,5 @@ interface IGL44 : GLBase {
         glBindImageTextures(first, length, ptr)
     }
 }
+
+abstract class PatchedGL44(protected val delegate: IGL44) : IGL44 by delegate

@@ -92,3 +92,5 @@ interface IGL33 : GLBase {
         glDeleteSamplers(length, ptr.address)
     }
 }
+
+abstract class PatchedGL33(protected val delegate: IGL33) : IGL33 by delegate

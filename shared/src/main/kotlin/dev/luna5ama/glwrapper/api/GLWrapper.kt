@@ -2,37 +2,30 @@ package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
 
-abstract class GLWrapper : GLBase {
-    val vendor: GpuVendor by lazy {
-        val vendorStr = glGetString(GL_VENDOR) ?: ""
-        GpuVendor.values().find {
-            vendorStr.contains(it.name, true)
-        } ?: GpuVendor.UNKNOWN
-    }
+interface GLWrapper : GLBase {
+    val vendor: GpuVendor
 
-    final override val tempArr = Arr.malloc(128L)
+    val gl11: IGL11
+    val gl12: IGL12
+    val gl13: IGL13
+    val gl14: IGL14
+    val gl15: IGL15
 
-    abstract val gl11: IGL11
-    abstract val gl12: IGL12
-    abstract val gl13: IGL13
-    abstract val gl14: IGL14
-    abstract val gl15: IGL15
+    val gl20: IGL20
+    val gl21: IGL21
 
-    abstract val gl20: IGL20
-    abstract val gl21: IGL21
+    val gl30: IGL30
+    val gl31: IGL31
+    val gl32: IGL32
+    val gl33: IGL33
 
-    abstract val gl30: IGL30
-    abstract val gl31: IGL31
-    abstract val gl32: IGL32
-    abstract val gl33: IGL33
-
-    abstract val gl40: IGL40
-    abstract val gl41: IGL41
-    abstract val gl42: IGL42
-    abstract val gl43: IGL43
-    abstract val gl44: IGL44
-    abstract val gl45: IGL45
-    abstract val gl46: IGL46
+    val gl40: IGL40
+    val gl41: IGL41
+    val gl42: IGL42
+    val gl43: IGL43
+    val gl44: IGL44
+    val gl45: IGL45
+    val gl46: IGL46
 
     companion object {
         private lateinit var backupClass: Class<GLWrapper>
@@ -40,7 +33,7 @@ abstract class GLWrapper : GLBase {
         private lateinit var instanceFastPathThread: Thread
 
         private val instance0 = ThreadLocal.withInitial {
-            backupClass.getConstructor().newInstance()
+            PatchedGLWrapper(backupClass.getConstructor().newInstance())
         }
 
         val instance: GLWrapper
@@ -53,10 +46,21 @@ abstract class GLWrapper : GLBase {
         fun init(glWrapper: GLWrapper) {
             if (!::instanceFastPath.isInitialized) {
                 backupClass = glWrapper.javaClass
-                instanceFastPath = glWrapper
+                instanceFastPath = PatchedGLWrapper(glWrapper)
                 instanceFastPathThread = Thread.currentThread()
             }
-            instance0.set(glWrapper)
+            instance0.set(PatchedGLWrapper(glWrapper))
         }
     }
+}
+
+abstract class AbstractGLWrapper : GLWrapper {
+    override val vendor: GpuVendor by lazy {
+        val vendorStr = gl11.glGetString(GL_VENDOR) ?: ""
+        GpuVendor.values().find {
+            vendorStr.contains(it.name, true)
+        } ?: GpuVendor.UNKNOWN
+    }
+
+    final override val tempArr = Arr.malloc(128L)
 }

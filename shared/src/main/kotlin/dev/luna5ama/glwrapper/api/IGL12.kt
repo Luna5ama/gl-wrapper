@@ -56,3 +56,4 @@ interface IGL12 : GLBase {
 
     fun glDrawRangeElements(mode: Int, start: Int, end: Int, count: Int, type: Int, indices: Long)
 }
+abstract class PatchedGL12(protected val delegate: IGL12) : IGL12 by delegate

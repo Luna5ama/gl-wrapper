@@ -94,3 +94,5 @@ interface IGL31 : GLBase {
     fun glPrimitiveRestartIndex(index: Int)
     fun glUniformBlockBinding(program: Int, uniformBlockIndex: Int, uniformBlockBinding: Int)
 }
+
+abstract class PatchedGL31(protected val delegate: IGL31) : IGL31 by delegate

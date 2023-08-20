@@ -120,3 +120,5 @@ interface IGL40 : GLBase {
 
     fun glMinSampleShading(value: Float)
 }
+
+abstract class PatchedGL40(protected val delegate: IGL40) : IGL40 by delegate

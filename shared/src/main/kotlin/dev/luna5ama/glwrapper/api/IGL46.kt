@@ -49,3 +49,5 @@ interface IGL46 : GLBase {
         stride: Int
     )
 }
+
+abstract class PatchedGL46(protected val delegate: IGL46) : IGL46 by delegate

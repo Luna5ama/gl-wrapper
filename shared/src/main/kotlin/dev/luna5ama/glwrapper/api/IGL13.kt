@@ -79,3 +79,5 @@ interface IGL13 : GLBase {
 
     fun glSampleCoverage(value: Float, invert: Boolean)
 }
+
+abstract class PatchedGL13(protected val delegate: IGL13) : IGL13 by delegate

@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.api
 
-class GLWrapperImpl : GLWrapper() {
+class GLWrapperImpl : AbstractGLWrapper() {
     override val gl11 = GL11Impl(tempArr)
     override val gl12 = GL12Impl(tempArr)
     override val gl13 = GL13Impl(tempArr)

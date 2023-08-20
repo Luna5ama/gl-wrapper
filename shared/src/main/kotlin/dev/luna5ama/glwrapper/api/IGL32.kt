@@ -155,3 +155,5 @@ interface IGL32 : GLBase {
         basevertex: Ptr
     )
 }
+
+abstract class PatchedGL32(protected val delegate: IGL32) : IGL32 by delegate

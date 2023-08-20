@@ -23,6 +23,7 @@ class CoreCodeGenProcessor(private val environment: SymbolProcessorEnvironment) 
             .flatMap { it.declarations }
             .filterIsInstance<KSClassDeclaration>()
             .filter { it.classKind == ClassKind.INTERFACE }
+            .filter { !it.simpleName.asString().contains("GLWrapper") }
             .filter { it.getAllSuperTypes().contains(glBase) }
             .forEach { genAccessors(it) }
 

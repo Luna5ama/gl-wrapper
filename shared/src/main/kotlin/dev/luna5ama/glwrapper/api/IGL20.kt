@@ -211,3 +211,4 @@ interface IGL20 : GLBase {
         glDrawBuffers(length, ptr)
     }
 }
+abstract class PatchedGL20(protected val delegate: IGL20) : IGL20 by delegate

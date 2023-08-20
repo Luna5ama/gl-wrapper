@@ -15,7 +15,7 @@ sealed class BufferObject : IGLObject, IGLTargetBinding {
 
     open fun allocate(size: Long, flags: Int): BufferObject {
         // Intel workaround
-        if (GLWrapper.instance.vendor == GpuVendor.INTEL && size != -1L) {
+        if (GpuVendor.get() == GpuVendor.INTEL && size != -1L) {
             destroy()
         }
         tryCreate()
@@ -25,7 +25,7 @@ sealed class BufferObject : IGLObject, IGLTargetBinding {
 
     open fun allocate(size: Long, data: Ptr, flags: Int): BufferObject {
         // Intel workaround
-        if (GLWrapper.instance.vendor == GpuVendor.INTEL && size != -1L) {
+        if (GpuVendor.get() == GpuVendor.INTEL && size != -1L) {
             destroy()
         }
         tryCreate()
