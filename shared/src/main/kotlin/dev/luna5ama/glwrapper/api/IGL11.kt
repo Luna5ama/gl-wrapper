@@ -164,6 +164,8 @@ interface IGL11 : GLBase {
         internal const val GL_NAND = 0x150E
         internal const val GL_SET = 0x150F
 
+        internal const val GL_TEXTURE = 0x1702
+
         internal const val GL_COLOR = 0x1800
         internal const val GL_DEPTH = 0x1801
         internal const val GL_STENCIL = 0x1802

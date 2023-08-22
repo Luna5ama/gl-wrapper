@@ -3,15 +3,9 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Ptr
 
-sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBinding {
-    final override var id = glCreateTextures(target); private set
+sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObjectType.TEXTURE, target), IGLBinding, IGLTargetBinding {
     var levels = 0; protected set
     var internalformat = 0; protected set
-
-    override fun create() {
-        super.create()
-        id = glCreateTextures(target)
-    }
 
     override fun bind(target: Int) {
         glBindTextureUnit(target, id)
@@ -27,13 +21,6 @@ sealed class TextureObject(val target: Int) : IGLObject, IGLBinding, IGLTargetBi
 
     override fun unbind() {
         unbind(target)
-    }
-
-    override fun destroy() {
-        if (id != 0) {
-            glDeleteTextures(id)
-            id = 0
-        }
     }
 
     fun clear() {

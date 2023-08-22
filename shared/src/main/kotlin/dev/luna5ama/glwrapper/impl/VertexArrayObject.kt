@@ -4,16 +4,11 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 
-class VertexArrayObject : IGLObject, IGLBinding {
-    override var id = glCreateVertexArrays(); private set
+class VertexArrayObject private constructor(private val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding {
+    constructor() : this(IGLObject.Impl(GLObjectType.VERTEX_ARRAY))
 
     private var ebo: BufferObject? = null
     private val vboBindings = Object2ObjectOpenHashMap<BufferObject, VBOBinding>()
-
-    override fun create() {
-        super.create()
-        id = glCreateVertexArrays()
-    }
 
     fun attachEbo(ebo: BufferObject) {
         tryCreate()
@@ -53,29 +48,25 @@ class VertexArrayObject : IGLObject, IGLBinding {
     }
 
     override fun destroy() {
-        if (id == 0) return
+        if (delegate.id0 == 0) return
 
-        glDeleteVertexArrays(id)
         ebo?.destroy()
-        ebo = null
         vboBindings.keys.forEach {
             it.destroy()
         }
-        vboBindings.clear()
-        id = 0
+        destroyVao()
     }
 
     fun destroyVao() {
-        if (id == 0) return
+        if (delegate.id0 == 0) return
 
-        glDeleteVertexArrays(id)
         ebo = null
         vboBindings.clear()
-        id = 0
+        delegate.destroy()
     }
 
     fun clear() {
-        if (id == 0) return
+        if (delegate.id0 == 0) return
 
         if (ebo != null) {
             glVertexArrayElementBuffer(id, 0)

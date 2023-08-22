@@ -3,15 +3,8 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Ptr
 
-sealed class BufferObject : IGLObject, IGLTargetBinding {
-    final override var id = glCreateBuffers(); private set
-
+sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IGLTargetBinding {
     var size = -1L; private set
-
-    override fun create() {
-        super.create()
-        id = glCreateBuffers()
-    }
 
     open fun allocate(size: Long, flags: Int): BufferObject {
         // Intel workaround
@@ -31,14 +24,6 @@ sealed class BufferObject : IGLObject, IGLTargetBinding {
         tryCreate()
         this.size = size
         return this
-    }
-
-    override fun destroy() {
-        if (id != 0) {
-            glDeleteBuffers(id)
-            size = -1L
-            id = 0
-        }
     }
 
     override fun bind(target: Int) {

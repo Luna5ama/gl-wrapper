@@ -10,6 +10,9 @@ open class ShaderProgram(
     vararg shaders: ShaderSource,
 ) : IGLObject, IGLBinding {
     final override val id: Int
+    override val type: GLObjectType
+        get() = GLObjectType.PROGRAM
+
     private var currentBindingIndex = 0
     private val bufferBindings = EnumMap<BindingTarget, Object2ByteMap<String>>(BindingTarget::class.java)
 
@@ -38,6 +41,18 @@ open class ShaderProgram(
             glDetachShader(programID, it)
             glDeleteShader(it)
         }
+    }
+
+    override fun create() {
+        throw UnsupportedOperationException("Shader program cannot be created manually")
+    }
+
+    override fun tryCreate() {
+        throw UnsupportedOperationException("Shader program cannot be created manually")
+    }
+
+    override fun checkCreated() {
+        // do nothing
     }
 
     private fun createShader(source: ShaderSource): Int {

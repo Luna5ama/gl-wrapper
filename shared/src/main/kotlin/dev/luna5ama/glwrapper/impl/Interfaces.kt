@@ -7,21 +7,44 @@ interface IGLBinding {
 
 interface IGLObject {
     val id: Int
+    val type: GLObjectType
 
-    fun create() {
-        check(id == 0) { "Object already created" }
-    }
+    fun create()
     fun destroy()
-}
 
-internal fun IGLObject.tryCreate() {
-    if (id == 0) {
-        create()
+    fun tryCreate()
+    fun checkCreated()
+
+    class Impl(override val type: GLObjectType, private val createArg: Int = -1) : IGLObject {
+        internal var id0 = 0; private set
+        override val id: Int
+            get() {
+                tryCreate()
+                return id0
+            }
+
+        override fun create() {
+            check(id0 == 0) { "Object already created" }
+            id0 = type.create(createArg)
+        }
+
+        override fun destroy() {
+            if (id0 != 0) {
+                type.destroy(id)
+                id0 = 0
+            }
+        }
+
+        override fun tryCreate() {
+            if (id0 == 0) {
+                create()
+            }
+        }
+
+        override fun checkCreated() {
+            check(id0 != 0) { "Object not created" }
+        }
     }
-}
-
-internal fun IGLObject.checkCreated() {
-    check(id != 0) { "Object not created" }
 }
 
 interface IGLTargetBinding {
