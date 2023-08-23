@@ -23,4 +23,28 @@ open class GL33LWJGL3(override val tempArr: Arr) : IGL33 {
     override fun glDeleteSamplers(vararg samplers: Int) {
         GL33C.glDeleteSamplers(samplers)
     }
+
+    override fun glSamplerParameterfv(texture: Int, pname: Int, params: Long) {
+        GL33C.nglSamplerParameterfv(texture, pname, params)
+    }
+
+    override fun glSamplerParameterf(texture: Int, pname: Int, param: Float) {
+        GL33C.glSamplerParameterf(texture, pname, param)
+    }
+
+    override fun glSamplerParameteri(texture: Int, pname: Int, param: Int) {
+        GL33C.glSamplerParameteri(texture, pname, param)
+    }
+
+    override fun glSamplerParameteriv(texture: Int, pname: Int, params: Long) {
+        GL33C.nglSamplerParameteriv(texture, pname, params)
+    }
+
+    override fun glSamplerParameterIiv(texture: Int, pname: Int, params: Long) {
+        GL33C.nglSamplerParameterIiv(texture, pname, params)
+    }
+
+    override fun glSamplerParameterIuiv(texture: Int, pname: Int, params: Long) {
+        GL33C.nglSamplerParameterIuiv(texture, pname, params)
+    }
 }

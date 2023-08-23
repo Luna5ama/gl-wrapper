@@ -1,18 +1,45 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 
-sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObjectType.TEXTURE, target), IGLBinding, IGLTargetBinding {
+sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObjectType.TEXTURE, target), IGLBinding,
+    IGLSampler {
     var levels = 0; protected set
     var internalformat = 0; protected set
 
-    override fun bind(target: Int) {
-        glBindTextureUnit(target, id)
+    override fun parameterf0(pname: Int, param: Float) {
+        checkCreated()
+        glTextureParameterf(id, pname, param)
     }
 
-    override fun unbind(target: Int) {
-        glBindTextureUnit(target, 0)
+    override fun parameteri0(pname: Int, param: Int) {
+        checkCreated()
+        glTextureParameteri(id, pname, param)
+    }
+
+    override fun parameterfv0(pname: Int, v1: Float, v2: Float, v3: Float, v4: Float) {
+        checkCreated()
+        glTextureParameterfv(id, pname, v1, v2, v3, v4)
+    }
+
+    override fun parameteriv0(pname: Int, v1: Int, v2: Int, v3: Int, v4: Int) {
+        checkCreated()
+        glTextureParameteriv(id, pname, v1, v2, v3, v4)
+    }
+
+    fun generateMipmap() {
+        checkCreated()
+        glGenerateTextureMipmap(id)
+    }
+
+    override fun bind(unit: Int) {
+        glBindTextureUnit(unit, id)
+    }
+
+    override fun unbind(unit: Int) {
+        glBindTextureUnit(unit, 0)
     }
 
     override fun bind() {
@@ -207,6 +234,119 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
                 pixels
             )
             return this
+        }
+    }
+    
+    companion object {
+
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject) {
+            MemoryStack {
+                val arr = malloc(2 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                glBindTextures(firstUnit, 2, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject) {
+            MemoryStack {
+                val arr = malloc(3 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                glBindTextures(firstUnit, 3, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject) {
+            MemoryStack {
+                val arr = malloc(4 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                    .setIntInc(t4.id)
+                glBindTextures(firstUnit, 4, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject) {
+            MemoryStack {
+                val arr = malloc(5 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                    .setIntInc(t4.id)
+                    .setIntInc(t5.id)
+                glBindTextures(firstUnit, 5, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject) {
+            MemoryStack {
+                val arr = malloc(6 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                    .setIntInc(t4.id)
+                    .setIntInc(t5.id)
+                    .setIntInc(t6.id)
+                glBindTextures(firstUnit, 6, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject, t7: TextureObject) {
+            MemoryStack {
+                val arr = malloc(7 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                    .setIntInc(t4.id)
+                    .setIntInc(t5.id)
+                    .setIntInc(t6.id)
+                    .setIntInc(t7.id)
+                glBindTextures(firstUnit, 7, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject, t7: TextureObject, t8: TextureObject) {
+            MemoryStack {
+                val arr = malloc(8 * 4L)
+                val ptr = arr.ptr
+                ptr.setIntInc(t1.id)
+                    .setIntInc(t2.id)
+                    .setIntInc(t3.id)
+                    .setIntInc(t4.id)
+                    .setIntInc(t5.id)
+                    .setIntInc(t6.id)
+                    .setIntInc(t7.id)
+                    .setIntInc(t8.id)
+                glBindTextures(firstUnit, 8, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, vararg textures: TextureObject) {
+            MemoryStack {
+                val arr = malloc(textures.size * 4L)
+                var ptr = arr.ptr
+                textures.forEach { ptr = ptr.setIntInc(it.id) }
+                glBindTextures(firstUnit, textures.size, ptr)
+            }
+        }
+
+        fun bindTextures(firstUnit: Int, textures: Collection<TextureObject>) {
+            MemoryStack {
+                val arr = malloc(textures.size * 4L)
+                var ptr = arr.ptr
+                textures.forEach { ptr = ptr.setIntInc(it.id) }
+                glBindTextures(firstUnit, textures.size, ptr)
+            }
         }
     }
 }

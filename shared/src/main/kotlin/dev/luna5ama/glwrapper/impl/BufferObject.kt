@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.Ptr
 
 sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IGLTargetBinding {
@@ -24,6 +25,71 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IG
         tryCreate()
         this.size = size
         return this
+    }
+
+    fun invalidate() {
+        checkAllocated()
+        glInvalidateBufferData(id)
+    }
+
+    fun invalidate(offset: Long, length: Long) {
+        checkAllocated()
+        glInvalidateBufferSubData(id, offset, length)
+    }
+
+    fun upload(data: Ptr) {
+        checkAllocated()
+        glNamedBufferSubData(id, 0L, size, data)
+    }
+
+    fun upload(offset: Long, length: Long, data: Ptr) {
+        checkAllocated()
+        glNamedBufferSubData(id, offset, length, data)
+    }
+
+    fun clear(internalformat: Int, format: Int, type: Int, data: Ptr) {
+        checkAllocated()
+        glClearNamedBufferData(id, internalformat, format, type, data)
+    }
+
+    fun clear(internalformat: Int, offset: Long, length: Long, format: Int, type: Int, data: Ptr) {
+        checkAllocated()
+        glClearNamedBufferSubData(id, internalformat, offset, length, format, type, data)
+    }
+
+    fun map(access: Int): Arr {
+        checkAllocated()
+        return glMapNamedBufferRange(id, 0L, size, access)
+    }
+
+    fun map(offset: Long, length: Long, access: Int): Arr {
+        checkAllocated()
+        return glMapNamedBufferRange(id, offset, length, access)
+    }
+
+    fun flush() {
+        checkAllocated()
+        glFlushMappedNamedBufferRange(id, 0L, size)
+    }
+
+    fun flush(offset: Long, length: Long) {
+        checkAllocated()
+        glFlushMappedNamedBufferRange(id, offset, length)
+    }
+
+    fun unmap(): Boolean {
+        checkAllocated()
+        return glUnmapNamedBuffer(id)
+    }
+
+    fun copyTo(dst: BufferObject, srcOffset: Long, dstOffset: Long, len: Long) {
+        checkAllocated()
+        glCopyNamedBufferSubData(id, dst.id, srcOffset, dstOffset, len)
+    }
+
+    fun checkAllocated() {
+        checkCreated()
+        check(size != -1L) { "Buffer is not allocated" }
     }
 
     override fun bind(target: Int) {

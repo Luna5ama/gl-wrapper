@@ -16,6 +16,8 @@ open class ShaderProgram(
     private var currentBindingIndex = 0
     private val bufferBindings = EnumMap<BindingTarget, Object2ByteMap<String>>(BindingTarget::class.java)
 
+    private var uniformLookUpCacheStr: String? = null
+    private var uniformLookUpCache = -1
     private val uniformLocations = Object2IntOpenHashMap<String>().apply {
         defaultReturnValue(-1)
     }
@@ -81,12 +83,68 @@ open class ShaderProgram(
     }
 
     fun locateUniform(name: String): Int {
+//        if (uniformLookUpCacheStr == name) {
+//            return uniformLookUpCache
+//        }
+
         var loc = uniformLocations.getInt(name)
         if (loc == -1) {
             loc = glGetUniformLocation(id, name)
             uniformLocations.put(name, loc)
         }
+
+        uniformLookUpCacheStr = name
+        uniformLookUpCache = loc
+
         return loc
+    }
+
+    fun uniform1i(name: String, value: Int) {
+        glProgramUniform1i(id, locateUniform(name), value)
+    }
+
+    fun uniform2i(name: String, value1: Int, value2: Int) {
+        glProgramUniform2i(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform3i(name: String, value1: Int, value2: Int, value3: Int) {
+        glProgramUniform3i(id, locateUniform(name), value1, value2, value3)
+    }
+
+    fun uniform4i(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
+        glProgramUniform4i(id, locateUniform(name), value1, value2, value3, value4)
+    }
+
+    fun uniform1f(name: String, value: Float) {
+        glProgramUniform1f(id, locateUniform(name), value)
+    }
+
+    fun uniform2f(name: String, value1: Float, value2: Float) {
+        glProgramUniform2f(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform3f(name: String, value1: Float, value2: Float, value3: Float) {
+        glProgramUniform3f(id, locateUniform(name), value1, value2, value3)
+    }
+
+    fun uniform4f(name: String, value1: Float, value2: Float, value3: Float, value4: Float) {
+        glProgramUniform4f(id, locateUniform(name), value1, value2, value3, value4)
+    }
+
+    fun uniform1ui(name: String, value: Int) {
+        glProgramUniform1ui(id, locateUniform(name), value)
+    }
+
+    fun uniform2ui(name: String, value1: Int, value2: Int) {
+        glProgramUniform2ui(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform3ui(name: String, value1: Int, value2: Int, value3: Int) {
+        glProgramUniform3ui(id, locateUniform(name), value1, value2, value3)
+    }
+
+    fun uniform4ui(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
+        glProgramUniform4ui(id, locateUniform(name), value1, value2, value3, value4)
     }
 
     fun bindBuffer(target: Int, buffer: BufferObject, blockName: String): Boolean {

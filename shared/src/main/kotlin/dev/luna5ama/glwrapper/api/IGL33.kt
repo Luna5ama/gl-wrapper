@@ -91,6 +91,60 @@ interface IGL33 : GLBase {
         memcpy(samplers, offset * 4L, ptr, 0, length * 4L)
         glDeleteSamplers(length, ptr.address)
     }
+
+
+
+    fun glSamplerParameterfv(texture: Int, pname: Int, params: Ptr) {
+        glSamplerParameterfv(texture, pname, params.address)
+    }
+
+    fun glSamplerParameterfv(texture: Int, pname: Int, v0: Float, v1: Float, v2: Float, v3: Float) {
+        val ptr = tempArr.ptr
+        ptr.setFloat(v0)
+        ptr.setFloat(4, v1)
+        ptr.setFloat(8, v2)
+        ptr.setFloat(12, v3)
+        glSamplerParameterfv(texture, pname, ptr)
+    }
+
+
+    fun glSamplerParameterf(texture: Int, pname: Int, param: Float)
+
+    fun glSamplerParameteri(texture: Int, pname: Int, param: Int)
+
+    @Unsafe
+    fun glSamplerParameterfv(texture: Int, pname: Int, params: Long)
+
+    @Unsafe
+    fun glSamplerParameteriv(texture: Int, pname: Int, params: Long)
+
+    @Unsafe
+    fun glSamplerParameterIiv(texture: Int, pname: Int, params: Long)
+
+    @Unsafe
+    fun glSamplerParameterIuiv(texture: Int, pname: Int, params: Long)
+
+
+    fun glSamplerParameteriv(texture: Int, pname: Int, params: Ptr) {
+        glSamplerParameteriv(texture, pname, params.address)
+    }
+
+    fun glSamplerParameteriv(texture: Int, pname: Int, v0: Int, v1: Int, v2: Int, v3: Int) {
+        val ptr = tempArr.ptr
+        ptr.setInt(v0)
+        ptr.setInt(4, v1)
+        ptr.setInt(8, v2)
+        ptr.setInt(12, v3)
+        glSamplerParameteriv(texture, pname, ptr)
+    }
+
+    fun glSamplerParameterIiv(texture: Int, pname: Int, params: Ptr) {
+        glSamplerParameterIiv(texture, pname, params.address)
+    }
+
+    fun glSamplerParameterIuiv(texture: Int, pname: Int, params: Ptr) {
+        glSamplerParameterIuiv(texture, pname, params.address)
+    }
 }
 
 abstract class PatchedGL33(protected val delegate: IGL33) : IGL33 by delegate
