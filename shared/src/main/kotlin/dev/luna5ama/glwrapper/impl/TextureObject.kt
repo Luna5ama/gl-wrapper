@@ -4,8 +4,10 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 
-sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObjectType.TEXTURE, target), IGLBinding,
-    IGLSampler {
+sealed class TextureObject private constructor(private val delegate: IGLObject.Impl, val target: Int) :
+    IGLObject by delegate, IGLBinding, IGLSampler {
+    constructor(target: Int) : this(IGLObject.Impl(GLObjectType.TEXTURE, target), target)
+
     var levels = 0; protected set
     var internalformat = 0; protected set
 
@@ -87,6 +89,12 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
         }
     }
 
+    override fun destroy() {
+        delegate.destroy()
+        levels = 0
+        internalformat = 0
+    }
+
     class Texture1D(target: Int = GL_TEXTURE_1D) : TextureObject(target), IGLSized1D {
         override var sizeX = 0; private set
 
@@ -124,6 +132,11 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             checkCreated()
             glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, pixels)
             return this
+        }
+
+        override fun destroy() {
+            super.destroy()
+            sizeX = 0
         }
     }
 
@@ -170,6 +183,12 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             checkCreated()
             glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, pixels)
             return this
+        }
+
+        override fun destroy() {
+            super.destroy()
+            sizeX = 0
+            sizeY = 0
         }
     }
 
@@ -235,11 +254,16 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             )
             return this
         }
+
+        override fun destroy() {
+            super.destroy()
+            sizeX = 0
+            sizeY = 0
+            sizeZ = 0
+        }
     }
-    
+
     companion object {
-
-
         fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject) {
             MemoryStack {
                 val arr = malloc(2 * 4L)
@@ -273,7 +297,14 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             }
         }
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject) {
+        fun bindTextures(
+            firstUnit: Int,
+            t1: TextureObject,
+            t2: TextureObject,
+            t3: TextureObject,
+            t4: TextureObject,
+            t5: TextureObject
+        ) {
             MemoryStack {
                 val arr = malloc(5 * 4L)
                 val ptr = arr.ptr
@@ -286,7 +317,15 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             }
         }
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject) {
+        fun bindTextures(
+            firstUnit: Int,
+            t1: TextureObject,
+            t2: TextureObject,
+            t3: TextureObject,
+            t4: TextureObject,
+            t5: TextureObject,
+            t6: TextureObject
+        ) {
             MemoryStack {
                 val arr = malloc(6 * 4L)
                 val ptr = arr.ptr
@@ -300,7 +339,16 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             }
         }
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject, t7: TextureObject) {
+        fun bindTextures(
+            firstUnit: Int,
+            t1: TextureObject,
+            t2: TextureObject,
+            t3: TextureObject,
+            t4: TextureObject,
+            t5: TextureObject,
+            t6: TextureObject,
+            t7: TextureObject
+        ) {
             MemoryStack {
                 val arr = malloc(7 * 4L)
                 val ptr = arr.ptr
@@ -315,7 +363,17 @@ sealed class TextureObject(val target: Int) : IGLObject by IGLObject.Impl(GLObje
             }
         }
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject, t5: TextureObject, t6: TextureObject, t7: TextureObject, t8: TextureObject) {
+        fun bindTextures(
+            firstUnit: Int,
+            t1: TextureObject,
+            t2: TextureObject,
+            t3: TextureObject,
+            t4: TextureObject,
+            t5: TextureObject,
+            t6: TextureObject,
+            t7: TextureObject,
+            t8: TextureObject
+        ) {
             MemoryStack {
                 val arr = malloc(8 * 4L)
                 val ptr = arr.ptr
