@@ -1,6 +1,9 @@
 package dev.luna5ama.glwrapper.api
 
 import dev.luna5ama.kmogus.Arr
+import dev.luna5ama.kmogus.Ptr
+import dev.luna5ama.kmogus.asIntBuffer
+import dev.luna5ama.kmogus.nullIntBuffer
 import org.lwjgl.opengl.GL42
 
 open class GL42LWJGL2(override val tempArr: Arr) : IGL42 {
@@ -59,5 +62,20 @@ open class GL42LWJGL2(override val tempArr: Arr) : IGL42 {
 
     override fun glMemoryBarrier(barriers: Int) {
         GL42.glMemoryBarrier(barriers)
+    }
+
+    override fun glGetActiveAtomicCounterBufferi(program: Int, bufferIndex: Int, pname: Int): Int {
+        return GL42.glGetActiveAtomicCounterBuffer(program, bufferIndex, pname)
+    }
+
+    private val glGetActiveAtomicCounterBufferiv = nullIntBuffer()
+
+    override fun glGetActiveAtomicCounterBufferiv(program: Int, bufferIndex: Int, pname: Int, params: Ptr) {
+        GL42.glGetActiveAtomicCounterBuffer(
+            program,
+            bufferIndex,
+            pname,
+            params.asIntBuffer(4, glGetActiveAtomicCounterBufferiv)
+        )
     }
 }

@@ -17,6 +17,8 @@ interface IGLObject {
     fun tryCreate()
     fun checkCreated()
 
+    fun resetID()
+
     class Impl(override val type: GLObjectType, private val createArg: Int = -1) : IGLObject {
         internal var id0 = 0; private set
         override val id: Int
@@ -45,6 +47,10 @@ interface IGLObject {
 
         override fun checkCreated() {
             check(id0 != 0) { "Object not created" }
+        }
+
+        override fun resetID() {
+            id0 = 0
         }
     }
 }

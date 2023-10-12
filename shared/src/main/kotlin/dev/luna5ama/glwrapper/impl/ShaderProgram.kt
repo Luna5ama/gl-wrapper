@@ -57,6 +57,10 @@ open class ShaderProgram(
         // do nothing
     }
 
+    override fun resetID() {
+        throw UnsupportedOperationException("Shader program cannot be reset manually")
+    }
+
     private fun createShader(source: ShaderSource): Int {
         val id = glCreateShader(source.glTypeEnum)
 
@@ -83,9 +87,9 @@ open class ShaderProgram(
     }
 
     fun locateUniform(name: String): Int {
-//        if (uniformLookUpCacheStr == name) {
-//            return uniformLookUpCache
-//        }
+        if (uniformLookUpCacheStr == name) {
+            return uniformLookUpCache
+        }
 
         var loc = uniformLocations.getInt(name)
         if (loc == -1) {
@@ -154,30 +158,26 @@ open class ShaderProgram(
     fun bindBuffer(target: Int, buffer: BufferObject, blockName: String, offset: Long, size: Long): Boolean {
         var bindingIndex: Int
 
-        if (target == GL_ATOMIC_COUNTER_BUFFER || target == GL_TRANSFORM_FEEDBACK_BUFFER) {
-            bindingIndex = locateUniform(blockName)
-        } else {
-            val bindingTarget: BindingTarget = BindingTarget[target]
-            val map = bufferBindings.getOrPut(bindingTarget) {
-                Object2ByteOpenHashMap<String>().apply {
-                    defaultReturnValue(-1)
-                }
+        val bindingTarget: BindingTarget = BindingTarget[target]
+        val map = bufferBindings.getOrPut(bindingTarget) {
+            Object2ByteOpenHashMap<String>().apply {
+                defaultReturnValue(-1)
             }
+        }
 
-            bindingIndex = map.getByte(blockName).toInt()
-            when (bindingIndex) {
-                -1 -> {
-                    if (!bindingTarget.addBinding(id, blockName, currentBindingIndex)) {
-                        map.put(blockName, -2)
-                        return false
-                    }
-
-                    bindingIndex = currentBindingIndex++
-                    map.put(blockName, bindingIndex.toByte())
-                }
-                -2 -> {
+        bindingIndex = map.getByte(blockName).toInt()
+        when (bindingIndex) {
+            -1 -> {
+                if (!bindingTarget.addBinding(id, blockName, currentBindingIndex)) {
+                    map.put(blockName, -2)
                     return false
                 }
+
+                bindingIndex = currentBindingIndex++
+                map.put(blockName, bindingIndex.toByte())
+            }
+            -2 -> {
+                return false
             }
         }
 
@@ -188,6 +188,14 @@ open class ShaderProgram(
         }
 
         return true
+    }
+
+    fun bindAtomicCounterBuffer(buffer: BufferObject, bindingIndex: Int) {
+        glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, bindingIndex, buffer.id)
+    }
+
+    fun bindAtomicCounterBuffer(buffer: BufferObject, bindingIndex: Int, offset: Long, size: Long) {
+        glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, bindingIndex, buffer.id, offset, size)
     }
 
     override fun bind() {

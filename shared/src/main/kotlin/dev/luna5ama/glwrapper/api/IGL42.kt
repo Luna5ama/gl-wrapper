@@ -2,6 +2,8 @@
 
 package dev.luna5ama.glwrapper.api
 
+import dev.luna5ama.kmogus.Ptr
+
 interface IGL42 : GLBase {
     companion object {
         internal const val GL_COPY_READ_BUFFER_BINDING = IGL31.GL_COPY_READ_BUFFER
@@ -161,6 +163,24 @@ interface IGL42 : GLBase {
     fun glBindImageTexture(unit: Int, texture: Int, level: Int, layered: Boolean, layer: Int, access: Int, format: Int)
 
     fun glMemoryBarrier(barriers: Int)
+
+    fun glGetActiveAtomicCounterBufferi(
+        program: Int,
+        bufferIndex: Int,
+        pname: Int
+    ): Int {
+        val ptr = tempArr.ptr
+        glGetActiveAtomicCounterBufferiv(program, bufferIndex, pname, ptr)
+        return ptr.getInt()
+    }
+
+    @Unsafe
+    fun glGetActiveAtomicCounterBufferiv(
+        program: Int,
+        bufferIndex: Int,
+        pname: Int,
+        params: Ptr
+    )
 }
 
 abstract class PatchedGL42(protected val delegate: IGL42) : IGL42 by delegate
