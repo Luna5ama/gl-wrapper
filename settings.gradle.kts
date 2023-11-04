@@ -22,7 +22,7 @@ pluginManagement {
 
 include("shared", "shared:codegen")
 include("lwjgl-2", "lwjgl-3")
-include("forge-1.12.2")
-include("architectury-1.16.5", "architectury-1.16.5:common")
-include("architectury-1.18.2", "architectury-1.18.2:common")
-include("architectury-1.19.4", "architectury-1.19.4:common")
+//include("forge-1.12.2")
+//include("architectury-1.16.5", "architectury-1.16.5:common")
+//include("architectury-1.18.2", "architectury-1.18.2:common")
+//include("architectury-1.19.4", "architectury-1.19.4:common")
