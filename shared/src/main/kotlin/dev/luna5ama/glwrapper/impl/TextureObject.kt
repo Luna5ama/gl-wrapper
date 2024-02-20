@@ -127,9 +127,9 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
     }
 
     fun copyTo(dst: TextureObject, srcLevel: Int, dstLevel: Int, ) {
-        val sizeX = (this as? IGLSized1D)?.sizeX ?: 0
-        val sizeY = (this as? IGLSized2D)?.sizeY ?: 0
-        val sizeZ = (this as? IGLSized3D)?.sizeZ ?: 0
+        val sizeX = (this as? IGLSized1D)?.sizeX ?: 1
+        val sizeY = (this as? IGLSized2D)?.sizeY ?: 1
+        val sizeZ = (this as? IGLSized3D)?.sizeZ ?: 1
         copyTo(
             dst,
             srcLevel, 0, 0, 0, sizeX, sizeY, sizeZ,
