@@ -164,9 +164,9 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             dst: Texture1D,
             srcLevel: Int,
             srcX: Int,
-            srcWidth: Int,
             dstLevel: Int,
-            dstX: Int
+            dstX: Int,
+            srcWidth: Int
         ) {
             require(dst.internalformat == internalformat) { "Internal format must be match" }
             checkCreated()
@@ -181,8 +181,9 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
-                srcLevel, 0, sizeX,
-                dstLevel, 0
+                srcLevel, 0,
+                dstLevel, 0,
+                sizeX
             )
         }
 
@@ -251,18 +252,18 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             srcLevel: Int,
             srcX: Int,
             srcY: Int,
-            srcWidth: Int,
-            srcHeight: Int,
-            srcDepth: Int,
+            dstLevel: Int,
             dstX: Int,
-            dstY: Int
+            dstY: Int,
+            srcWidth: Int,
+            srcHeight: Int
         ) {
             require(dst.internalformat == internalformat) { "Internal format must be match" }
             checkCreated()
             glCopyImageSubData(
                 id, target, srcLevel, srcX, srcY, 0,
-                dst.id, dst.target, 1, dstX, dstY, 0,
-                srcWidth, srcHeight, srcDepth
+                dst.id, dst.target, dstLevel, dstX, dstY, 0,
+                srcWidth, srcHeight, 1
             )
         }
 
@@ -270,8 +271,9 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
-                srcLevel, 0, 0, sizeX, sizeY,
-                dstLevel, 0, 0
+                srcLevel, 0, 0,
+                dstLevel, 0, 0,
+                sizeX, sizeY,
             )
         }
 
@@ -360,13 +362,13 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             srcX: Int,
             srcY: Int,
             srcZ: Int,
-            srcWidth: Int,
-            srcHeight: Int,
-            srcDepth: Int,
             dstLevel: Int,
             dstX: Int,
             dstY: Int,
-            dstZ: Int
+            dstZ: Int,
+            srcWidth: Int,
+            srcHeight: Int,
+            srcDepth: Int
         ) {
             require(dst.internalformat == internalformat) { "Internal format must be match" }
             checkCreated()
@@ -381,8 +383,9 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
-                srcLevel, 0, 0, 0, sizeX, sizeY, sizeZ,
-                dstLevel, 0, 0, 0
+                srcLevel, 0, 0, 0,
+                dstLevel, 0, 0, 0,
+                sizeX, sizeY, sizeZ
             )
         }
 
