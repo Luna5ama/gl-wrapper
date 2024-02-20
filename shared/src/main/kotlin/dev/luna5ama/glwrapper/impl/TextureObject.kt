@@ -103,42 +103,16 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         }
     }
 
-    fun copyTo(
-        dst: TextureObject,
-        srcLevel: Int,
-        srcX: Int,
-        srcY: Int,
-        srcZ: Int,
-        srcWidth: Int,
-        srcHeight: Int,
-        srcDepth: Int,
-        dstLevel: Int,
-        dstX: Int,
-        dstY: Int,
-        dstZ: Int
-    ) {
-        require(dst.internalformat == internalformat) { "Internal format must be match" }
+    fun invalidate(level: Int) {
         checkCreated()
-        glCopyImageSubData(
-            id, target, srcLevel, srcX, srcY, srcZ,
-            dst.id, dst.target, dstLevel, dstX, dstY, dstZ,
-            srcWidth, srcHeight, srcDepth
-        )
+        glInvalidateTexImage(id, level)
     }
 
-    fun copyTo(dst: TextureObject, srcLevel: Int, dstLevel: Int, ) {
-        val sizeX = (this as? IGLSized1D)?.sizeX ?: 1
-        val sizeY = (this as? IGLSized2D)?.sizeY ?: 1
-        val sizeZ = (this as? IGLSized3D)?.sizeZ ?: 1
-        copyTo(
-            dst,
-            srcLevel, 0, 0, 0, sizeX, sizeY, sizeZ,
-            dstLevel, 0, 0, 0
-        )
-    }
-
-    fun copyTo(dst: TextureObject    ) {
-        copyTo(dst, 0, 0)
+    fun invalidate() {
+        checkCreated()
+        repeat(levels) {
+            glInvalidateTexImage(id, it)
+        }
     }
 
     override fun destroy() {
@@ -184,6 +158,41 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             checkCreated()
             glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, pixels)
             return this
+        }
+
+        fun copyTo(
+            dst: Texture1D,
+            srcLevel: Int,
+            srcX: Int,
+            srcWidth: Int,
+            dstLevel: Int,
+            dstX: Int
+        ) {
+            require(dst.internalformat == internalformat) { "Internal format must be match" }
+            checkCreated()
+            glCopyImageSubData(
+                id, target, srcLevel, srcX, 0, 0,
+                dst.id, dst.target, dstLevel, dstX, 0, 0,
+                srcWidth, 1, 1
+            )
+        }
+
+        fun copyTo(dst: Texture1D, srcLevel: Int, dstLevel: Int) {
+            require(dst.sizeBit == sizeBit) { "Size must be match" }
+            copyTo(
+                dst,
+                srcLevel, 0, sizeX,
+                dstLevel, 0
+            )
+        }
+
+        fun copyTo(dst: Texture1D) {
+            copyTo(dst, 0, 0)
+        }
+
+        fun invalidate(level: Int, xoffset: Int, width: Int) {
+            checkCreated()
+            glInvalidateTexSubImage(id, level, xoffset, 0, 0, width, 1, 1)
         }
 
         override fun destroy() {
@@ -235,6 +244,44 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             checkCreated()
             glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, pixels)
             return this
+        }
+
+        fun copyTo(
+            dst: Texture2D,
+            srcLevel: Int,
+            srcX: Int,
+            srcY: Int,
+            srcWidth: Int,
+            srcHeight: Int,
+            srcDepth: Int,
+            dstX: Int,
+            dstY: Int
+        ) {
+            require(dst.internalformat == internalformat) { "Internal format must be match" }
+            checkCreated()
+            glCopyImageSubData(
+                id, target, srcLevel, srcX, srcY, 0,
+                dst.id, dst.target, 1, dstX, dstY, 0,
+                srcWidth, srcHeight, srcDepth
+            )
+        }
+
+        fun copyTo(dst: Texture2D, srcLevel: Int, dstLevel: Int) {
+            require(dst.sizeBit == sizeBit) { "Size must be match" }
+            copyTo(
+                dst,
+                srcLevel, 0, 0, sizeX, sizeY,
+                dstLevel, 0, 0
+            )
+        }
+
+        fun copyTo(dst: Texture2D) {
+            copyTo(dst, 0, 0)
+        }
+
+        fun invalidate(level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int) {
+            checkCreated()
+            glInvalidateTexSubImage(id, level, xoffset, yoffset, 0, width, height, 1)
         }
 
         override fun destroy() {
@@ -305,6 +352,47 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
                 pixels
             )
             return this
+        }
+
+        fun copyTo(
+            dst: Texture3D,
+            srcLevel: Int,
+            srcX: Int,
+            srcY: Int,
+            srcZ: Int,
+            srcWidth: Int,
+            srcHeight: Int,
+            srcDepth: Int,
+            dstLevel: Int,
+            dstX: Int,
+            dstY: Int,
+            dstZ: Int
+        ) {
+            require(dst.internalformat == internalformat) { "Internal format must be match" }
+            checkCreated()
+            glCopyImageSubData(
+                id, target, srcLevel, srcX, srcY, srcZ,
+                dst.id, dst.target, dstLevel, dstX, dstY, dstZ,
+                srcWidth, srcHeight, srcDepth
+            )
+        }
+
+        fun copyTo(dst: Texture3D, srcLevel: Int, dstLevel: Int) {
+            require(dst.sizeBit == sizeBit) { "Size must be match" }
+            copyTo(
+                dst,
+                srcLevel, 0, 0, 0, sizeX, sizeY, sizeZ,
+                dstLevel, 0, 0, 0
+            )
+        }
+
+        fun copyTo(dst: Texture3D) {
+            copyTo(dst, 0, 0)
+        }
+
+        fun invalidate(level: Int, xoffset: Int, yoffset: Int, zoffset: Int, width: Int, height: Int, depth: Int) {
+            checkCreated()
+            glInvalidateTexSubImage(id, level, xoffset, yoffset, zoffset, width, height, depth)
         }
 
         override fun destroy() {
