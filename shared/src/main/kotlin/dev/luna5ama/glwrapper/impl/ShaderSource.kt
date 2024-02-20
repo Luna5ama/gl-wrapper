@@ -217,6 +217,12 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
             }
         }
 
+        fun clearCache() {
+            synchronized(this) {
+                cacheMap.clear()
+            }
+        }
+
         private inner class Cache(val name: String, val lines: List<CharSequence>, val hash: MD5Hash) {
             val str by lazy {
                 buildString {
@@ -312,6 +318,15 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     companion object {
+        fun clearAllCache() {
+            Vert.clearCache()
+            Geom.clearCache()
+            TessCtrl.clearCache()
+            TessEval.clearCache()
+            Frag.clearCache()
+            Comp.clearCache()
+        }
+
         inline operator fun <T : ShaderSource> T.invoke(crossinline block: DefineBuilder.() -> Unit): T {
             return this.withDefines(DefineBuilder().apply(block))
         }

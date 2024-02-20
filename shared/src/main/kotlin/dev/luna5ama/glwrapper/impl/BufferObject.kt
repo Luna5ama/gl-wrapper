@@ -87,6 +87,12 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IG
         glCopyNamedBufferSubData(id, dst.id, srcOffset, dstOffset, len)
     }
 
+    fun copyTo(dst: BufferObject) {
+        require(size == dst.size) { "Buffer sizes must be equal" }
+        checkAllocated()
+        glCopyNamedBufferSubData(id, dst.id, 0, 0, size)
+    }
+
     fun checkAllocated() {
         checkCreated()
         check(size != -1L) { "Buffer is not allocated" }
@@ -127,6 +133,7 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IG
 
     class Mutable : BufferObject() {
         override fun allocate(size: Long, flags: Int): Mutable {
+            require(flags != 0) { "Mutable buffer usage must not be 0" }
             super.allocate(size, flags)
             glNamedBufferData(id, size, Ptr.NULL, flags)
             return this
