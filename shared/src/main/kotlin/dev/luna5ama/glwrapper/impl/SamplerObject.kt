@@ -3,12 +3,12 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.*
 
 class SamplerObject : IGLObject by IGLObject.Impl(GLObjectType.SAMPLER), IGLSampler {
-    override fun bindUnit(unit: Int) {
+    fun bindSamplerUnit(unit: Int) {
         checkCreated()
         glBindSampler(unit, id)
     }
 
-    override fun unbindUnit(unit: Int) {
+    fun unbindSamplerUnit(unit: Int) {
         checkCreated()
         glBindSampler(unit, 0)
     }

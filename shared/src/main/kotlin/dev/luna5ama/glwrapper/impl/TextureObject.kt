@@ -36,22 +36,22 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         glGenerateTextureMipmap(id)
     }
 
-    override fun bindUnit(unit: Int) {
+    fun bindTextureUnit(unit: Int) {
         checkCreated()
         glBindTextureUnit(unit, id)
     }
 
-    override fun unbindUnit(unit: Int) {
+    fun unbindTextureUnit(unit: Int) {
         checkCreated()
         glBindTextureUnit(unit, 0)
     }
 
-    fun bindImage(unit: Int, level: Int, layered: Boolean, layer: Int, access: Int) {
+    fun bindImageUnit(unit: Int, level: Int, layered: Boolean, layer: Int, access: Int) {
         checkCreated()
         glBindImageTexture(unit, id, level, layered, layer, access, this.internalformat)
     }
 
-    fun unbindImage(unit: Int) {
+    fun unbindImageUnit(unit: Int) {
         checkCreated()
         glBindImageTexture(unit, 0, 0, false, 0, GL_READ_WRITE, this.internalformat)
     }
