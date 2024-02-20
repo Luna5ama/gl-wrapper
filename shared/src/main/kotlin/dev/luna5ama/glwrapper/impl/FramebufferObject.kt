@@ -153,11 +153,8 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
 
     fun clearAttachments() {
         colorAttachments.fill(null)
-        colorLayered.fill(false)
         depthAttachment = null
-        depthLayered = false
         stencilAttachment = null
-        stencilLayered = false
         sizeX = -1
         sizeY = -1
     }
