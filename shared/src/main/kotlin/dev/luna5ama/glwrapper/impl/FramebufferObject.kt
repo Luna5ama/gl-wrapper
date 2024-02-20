@@ -159,6 +159,22 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         sizeY = -1
     }
 
+    fun clearColor(attachment: Int, red: Float, green: Float, blue: Float, alpha: Float) {
+        glClearNamedFramebufferf(id, GL_COLOR, attachment, red, green, blue, alpha)
+    }
+
+    fun clearDepth(depth: Float) {
+        glClearNamedFramebufferf(id, GL_DEPTH, 0, depth)
+    }
+
+    fun clearStencil(stencil: Int) {
+        glClearNamedFramebufferi(id, GL_STENCIL, 0, stencil)
+    }
+
+    fun clearDepthStencil(depth: Float, stencil: Int) {
+        glClearNamedFramebufferfi(id, GL_DEPTH_STENCIL, 0, depth, stencil)
+    }
+
     fun blitTo(
         target: FramebufferObject,
         mask: Int, filter: Int
