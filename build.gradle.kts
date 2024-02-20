@@ -6,7 +6,7 @@ allprojects {
 }
 
 plugins {
-    id("dev.fastmc.mod-setup").version("1.3-SNAPSHOT")
+    id("dev.fastmc.mod-setup").version("1.3.1")
     id("dev.fastmc.maven-repo").version("1.0.0")
 }
 
