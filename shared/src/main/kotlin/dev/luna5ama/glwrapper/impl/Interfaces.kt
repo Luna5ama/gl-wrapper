@@ -11,6 +11,8 @@ interface IGLObject {
     val id: Int
     val type: GLObjectType
 
+    fun label0(label: String)
+
     fun create()
     fun destroy()
 
@@ -20,6 +22,8 @@ interface IGLObject {
     fun resetID()
 
     class Impl(override val type: GLObjectType, private val createArg: Int = -1) : IGLObject {
+        private var labelName: String? = null
+
         internal var id0 = 0; private set
         override val id: Int
             get() {
@@ -27,9 +31,19 @@ interface IGLObject {
                 return id0
             }
 
+        override fun label0(label: String) {
+            labelName = label
+            if (id0 != 0) {
+                glObjectLabel(type.identifier, id0, label)
+            }
+        }
+
         override fun create() {
             check(id0 == 0) { "Object already created" }
             id0 = type.create(createArg)
+            if (labelName != null) {
+                glObjectLabel(type.identifier, id0, labelName!!)
+            }
         }
 
         override fun destroy() {
@@ -53,6 +67,11 @@ interface IGLObject {
             id0 = 0
         }
     }
+}
+
+fun <T : IGLObject> T.label(name: String): T {
+    label0(name)
+    return this
 }
 
 interface IGLTargetBinding : IGLObject {

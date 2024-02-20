@@ -4,6 +4,10 @@ import dev.luna5ama.kmogus.Arr
 import org.lwjgl.opengl.GL43C
 
 open class GL43LWJGL3(override val tempArr: Arr) : IGL43 {
+    override fun glObjectLabel(identifier: Int, name: Int, label: String) {
+        GL43C.glObjectLabel(identifier, name, label)
+    }
+
     override fun glDispatchCompute(num_groups_x: Int, num_groups_y: Int, num_groups_z: Int) {
         GL43C.glDispatchCompute(num_groups_x, num_groups_y, num_groups_z)
     }
@@ -48,7 +52,7 @@ open class GL43LWJGL3(override val tempArr: Arr) : IGL43 {
         )
     }
 
-    override fun glInvalidateTextSubImage(
+    override fun glInvalidateTexSubImage(
         texture: Int,
         level: Int,
         xoffset: Int,
