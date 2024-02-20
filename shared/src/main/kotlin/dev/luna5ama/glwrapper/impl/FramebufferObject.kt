@@ -52,6 +52,12 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         return this
     }
 
+    fun attachLayer(texture: TextureObject.Texture2D, attachment: Int, layer: Int, level: Int = 0): FramebufferObject {
+        updateAttachment(attachment, texture)
+        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
+        return this
+    }
+
     fun attachLayer(texture: TextureObject.Texture3D, attachment: Int, layer: Int, level: Int = 0): FramebufferObject {
         updateAttachment(attachment, texture)
         glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
@@ -143,6 +149,43 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     fun check() {
         checkCreated()
         check(glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+    }
+
+    fun clearAttachments() {
+        colorAttachments.fill(null)
+        colorLayered.fill(false)
+        depthAttachment = null
+        depthLayered = false
+        stencilAttachment = null
+        stencilLayered = false
+        sizeX = -1
+        sizeY = -1
+    }
+
+    fun blitTo(
+        target: FramebufferObject,
+        mask: Int, filter: Int
+    ) {
+        glBlitNamedFramebuffer(
+            id, target.id,
+            0, 0, sizeX, sizeY,
+            0, 0, target.sizeX, target.sizeY,
+            mask, filter
+        )
+    }
+
+    fun blitTo(
+        target: FramebufferObject,
+        srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int,
+        dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int,
+        mask: Int, filter: Int
+    ) {
+        glBlitNamedFramebuffer(
+            id, target.id,
+            srcX0, srcY0, srcX1, srcY1,
+            dstX0, dstY0, dstX1, dstY1,
+            mask, filter
+        )
     }
 
     override fun bind() {
