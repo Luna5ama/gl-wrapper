@@ -4,6 +4,10 @@ import dev.luna5ama.kmogus.Arr
 import org.lwjgl.opengl.GL40
 
 open class GL40LWJGL2(override val tempArr: Arr) : IGL40 {
+    override fun glPatchParameteri(pname: Int, value: Int) {
+        GL40.glPatchParameteri(pname, value)
+    }
+
     override fun glBlendEquationi(buf: Int, mode: Int) {
         GL40.glBlendEquationi(buf, mode)
     }

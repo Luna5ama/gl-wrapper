@@ -2,6 +2,8 @@
 
 package dev.luna5ama.glwrapper.api
 
+import dev.luna5ama.kmogus.Ptr
+
 interface IGL40 : GLBase {
     companion object {
         internal const val GL_DRAW_INDIRECT_BUFFER = 0x8F3F
@@ -108,6 +110,8 @@ interface IGL40 : GLBase {
         internal const val GL_MAX_TRANSFORM_FEEDBACK_BUFFERS = 0x8E70
         internal const val GL_MAX_VERTEX_STREAMS = 0x8E71
     }
+
+    fun glPatchParameteri(pname: Int, value: Int)
 
     fun glBlendEquationi(buf: Int, mode: Int)
     fun glBlendEquationSeparatei(buf: Int, modeRGB: Int, modeAlpha: Int)
