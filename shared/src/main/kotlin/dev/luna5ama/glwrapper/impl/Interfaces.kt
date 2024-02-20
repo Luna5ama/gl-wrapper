@@ -32,10 +32,10 @@ interface IGLObject {
             }
 
         override fun label0(label: String) {
-            labelName = label
-            if (id0 != 0) {
+            if (id0 != 0 && label != labelName) {
                 glObjectLabel(type.identifier, id0, label)
             }
+            labelName = label
         }
 
         override fun create() {
