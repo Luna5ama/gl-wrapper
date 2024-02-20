@@ -5,7 +5,7 @@ import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 
 sealed class TextureObject private constructor(private val delegate: IGLObject.Impl, val target: Int) :
-    IGLObject by delegate, IGLBinding, IGLSampler {
+    IGLObject by delegate, IGLSampler {
     constructor(target: Int) : this(IGLObject.Impl(GLObjectType.TEXTURE, target), target)
 
     var levels = 0; protected set
@@ -36,23 +36,27 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         glGenerateTextureMipmap(id)
     }
 
-    override fun bind(unit: Int) {
+    override fun bindUnit(unit: Int) {
+        checkCreated()
         glBindTextureUnit(unit, id)
     }
 
-    override fun unbind(unit: Int) {
+    override fun unbindUnit(unit: Int) {
+        checkCreated()
         glBindTextureUnit(unit, 0)
     }
 
-    override fun bind() {
-        bind(target)
+    fun bindImage(unit: Int, level: Int, layered: Boolean, layer: Int, access: Int) {
+        checkCreated()
+        glBindImageTexture(unit, id, level, layered, layer, access, this.internalformat)
     }
 
-    override fun unbind() {
-        unbind(target)
+    fun unbindImage(unit: Int) {
+        checkCreated()
+        glBindImageTexture(unit, 0, 0, false, 0, GL_READ_WRITE, this.internalformat)
     }
 
-    fun clear() {
+    fun clearImage() {
         checkCreated()
         val clearFormat = when (internalformat) {
             GL_DEPTH_COMPONENT,
@@ -84,9 +88,57 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             GL_RGBA32F -> GL_FLOAT
             else -> GL_UNSIGNED_BYTE
         }
+        clearImage(clearFormat, clearType, Ptr.NULL)
+    }
+
+    fun clearImage(level: Int, format: Int, type: Int, data: Ptr) {
+        checkCreated()
+        glClearTexImage(id, level, format, type, data)
+    }
+
+    fun clearImage(format: Int, type: Int, data: Ptr) {
+        checkCreated()
         repeat(levels) {
-            glClearTexImage(id, it, clearFormat, clearType, Ptr.NULL)
+            clearImage(it, format, type, data)
         }
+    }
+
+    fun copyTo(
+        dst: TextureObject,
+        srcLevel: Int,
+        srcX: Int,
+        srcY: Int,
+        srcZ: Int,
+        srcWidth: Int,
+        srcHeight: Int,
+        srcDepth: Int,
+        dstLevel: Int,
+        dstX: Int,
+        dstY: Int,
+        dstZ: Int
+    ) {
+        require(dst.internalformat == internalformat) { "Internal format must be match" }
+        checkCreated()
+        glCopyImageSubData(
+            id, target, srcLevel, srcX, srcY, srcZ,
+            dst.id, dst.target, dstLevel, dstX, dstY, dstZ,
+            srcWidth, srcHeight, srcDepth
+        )
+    }
+
+    fun copyTo(dst: TextureObject, srcLevel: Int, dstLevel: Int, ) {
+        val sizeX = (this as? IGLSized1D)?.sizeX ?: 0
+        val sizeY = (this as? IGLSized2D)?.sizeY ?: 0
+        val sizeZ = (this as? IGLSized3D)?.sizeZ ?: 0
+        copyTo(
+            dst,
+            srcLevel, 0, 0, 0, sizeX, sizeY, sizeZ,
+            dstLevel, 0, 0, 0
+        )
+    }
+
+    fun copyTo(dst: TextureObject    ) {
+        copyTo(dst, 0, 0)
     }
 
     override fun destroy() {
@@ -104,7 +156,7 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             this.internalformat = internalformat
             sizeX = width
             glTextureStorage1D(id, levels, internalformat, width)
-            clear()
+            clearImage()
             return this
         }
 
@@ -151,7 +203,7 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             sizeX = width
             sizeY = height
             glTextureStorage2D(id, levels, internalformat, width, height)
-            clear()
+            clearImage()
             return this
         }
 
@@ -205,7 +257,7 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             sizeY = height
             sizeZ = depth
             glTextureStorage3D(id, levels, internalformat, width, height, depth)
-            clear()
+            clearImage()
             return this
         }
 

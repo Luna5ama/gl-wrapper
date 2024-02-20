@@ -61,9 +61,9 @@ interface IGLTargetBinding : IGLObject {
 }
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-interface IGLSampler : IGLObject, IGLTargetBinding {
-    override fun bind(unit: Int)
-    override fun unbind(unit: Int)
+interface IGLSampler : IGLObject {
+    fun bindUnit(unit: Int)
+    fun unbindUnit(unit: Int)
 
     fun parameteri0(pname: Int, param: Int)
     fun parameteriv0(pname: Int, v1: Int, v2: Int, v3: Int, v4: Int)

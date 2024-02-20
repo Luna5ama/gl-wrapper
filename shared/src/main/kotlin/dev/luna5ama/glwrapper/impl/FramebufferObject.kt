@@ -173,9 +173,9 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
 
     fun blitTo(
         target: FramebufferObject,
+        mask: Int, filter: Int,
         srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int,
-        dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int,
-        mask: Int, filter: Int
+        dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int
     ) {
         glBlitNamedFramebuffer(
             id, target.id,
