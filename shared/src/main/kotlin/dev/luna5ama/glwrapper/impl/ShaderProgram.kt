@@ -22,6 +22,8 @@ open class ShaderProgram(
         defaultReturnValue(-1)
     }
 
+    private var labelName: String? = null
+
     init {
         val programID = glCreateProgram()
         val shaderIDs = IntArray(shaders.size) { i ->
@@ -43,6 +45,13 @@ open class ShaderProgram(
             glDetachShader(programID, it)
             glDeleteShader(it)
         }
+    }
+
+    override fun label0(label: String) {
+        if (label != labelName) {
+            glObjectLabel(type.identifier, id, label)
+        }
+        labelName = label
     }
 
     override fun create() {
