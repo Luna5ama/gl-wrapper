@@ -4,6 +4,14 @@ import dev.luna5ama.kmogus.Arr
 import org.lwjgl.opengl.GL43
 
 open class GL43LWJGL2(override val tempArr: Arr) : IGL43 {
+    override fun glPushDebugGroup(source: Int, id: Int, message: String) {
+        GL43.glPushDebugGroup(source, id, message)
+    }
+
+    override fun glPopDebugGroup() {
+        GL43.glPopDebugGroup()
+    }
+
     override fun glObjectLabel(identifier: Int, name: Int, label: String) {
         GL43.glObjectLabel(identifier, name, label)
     }

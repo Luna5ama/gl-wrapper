@@ -308,6 +308,9 @@ interface IGL43 : GLBase {
         internal const val GL_MAX_VERTEX_ATTRIB_BINDINGS = 0x82DA
     }
 
+    fun glPushDebugGroup(source: Int, id: Int, message: String)
+    fun glPopDebugGroup()
+
     fun glObjectLabel(identifier: Int, name: Int, label: String)
 
     fun glDispatchCompute(num_groups_x: Int, num_groups_y: Int, num_groups_z: Int)
