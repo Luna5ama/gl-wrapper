@@ -1,6 +1,9 @@
 package dev.luna5ama.glwrapper.impl
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.api.glBindVertexArray
+import dev.luna5ama.glwrapper.api.glVertexArrayElementBuffer
+import dev.luna5ama.glwrapper.api.glVertexArrayVertexBuffer
+import dev.luna5ama.glwrapper.api.glVertexArrayVertexBuffers
 import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 

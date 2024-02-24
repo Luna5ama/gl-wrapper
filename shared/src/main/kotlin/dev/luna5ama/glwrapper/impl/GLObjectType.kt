@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.api.IGL11.Companion.GL_TEXTURE
 import dev.luna5ama.kmogus.Ptr
 
 enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {

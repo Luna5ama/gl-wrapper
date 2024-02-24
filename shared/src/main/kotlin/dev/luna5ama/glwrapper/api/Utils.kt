@@ -1,7 +1,19 @@
 package dev.luna5ama.glwrapper.api
 
-@Retention(AnnotationRetention.SOURCE)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class Unsafe
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class PtrReturn
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class PtrParameter(val ptrParamIdx: IntArray)
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class NullableReturn
 
 enum class GpuVendor {
     NVIDIA,
@@ -14,8 +26,11 @@ enum class GpuVendor {
         val isNvidia get() = get() == NVIDIA
         val isAmd get() = get() == AMD
 
-        fun get(): GpuVendor {
-            return GLWrapper.instance.vendor
+        fun get(glWrapper: GLWrapper = GLWrapper.instance): GpuVendor {
+            val vendorStr = glWrapper.GL11.glGetString(GL_VENDOR) ?: ""
+            return GpuVendor.entries.find {
+                vendorStr.contains(it.name, true)
+            } ?: GpuVendor.UNKNOWN
         }
     }
 }

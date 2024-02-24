@@ -92,7 +92,14 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
             val index = it - GL_COLOR_ATTACHMENT0
             require(colorAttachments[index] != null) { "Attachment not set: $index" }
         }
-        glNamedFramebufferDrawBuffers(id, *attachments)
+        MemoryStack {
+            val arr = malloc(attachments.size * 4L)
+            val ptr = arr.ptr
+            for (i in attachments.indices) {
+                ptr.setInt(i * 4L, attachments[i])
+            }
+            glNamedFramebufferDrawBuffers(id, attachments.size, ptr)
+        }
         return this
     }
 

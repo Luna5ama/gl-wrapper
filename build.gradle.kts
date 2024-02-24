@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 allprojects {
     group = "dev.luna5ama"
-    version = "1.0.2"
+    version = "1.1.0"
 }
 
 plugins {
@@ -16,9 +16,9 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven("https://maven.luna5ama.dev")
-        maven("https://maven.fastmc.dev/")
         maven("https://libraries.minecraft.net/")
     }
 
@@ -30,6 +30,7 @@ subprojects {
                     "-opt-in=kotlin.contracts.ExperimentalContracts",
                     "-Xbackend-threads=0"
                 )
+                javaParameters = true
             }
         }
     }
