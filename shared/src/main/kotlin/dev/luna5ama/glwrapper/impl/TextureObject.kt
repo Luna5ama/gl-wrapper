@@ -12,22 +12,22 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
     var internalformat = 0; protected set
 
     override fun parameterf0(pname: Int, param: Float) {
-        checkCreated()
+        tryCreate()
         glTextureParameterf(id, pname, param)
     }
 
     override fun parameteri0(pname: Int, param: Int) {
-        checkCreated()
+        tryCreate()
         glTextureParameteri(id, pname, param)
     }
 
     override fun parameterfv0(pname: Int, v1: Float, v2: Float, v3: Float, v4: Float) {
-        checkCreated()
+        tryCreate()
         glTextureParameterfv(id, pname, v1, v2, v3, v4)
     }
 
     override fun parameteriv0(pname: Int, v1: Int, v2: Int, v3: Int, v4: Int) {
-        checkCreated()
+        tryCreate()
         glTextureParameteriv(id, pname, v1, v2, v3, v4)
     }
 
