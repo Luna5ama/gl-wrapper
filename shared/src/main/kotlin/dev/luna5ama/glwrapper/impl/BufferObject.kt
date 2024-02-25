@@ -59,12 +59,12 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IG
 
     fun map(access: Int): Arr {
         checkAllocated()
-        return Arr.wrap(glMapNamedBufferRange(id, 0L, size, access).address, size)
+        return glMapNamedBufferRange(id, 0L, size, access)
     }
 
     fun map(offset: Long, length: Long, access: Int): Arr {
         checkAllocated()
-        return Arr.wrap(glMapNamedBufferRange(id, offset, length, access).address, length)
+        return glMapNamedBufferRange(id, offset, length, access)
     }
 
     fun flush() {

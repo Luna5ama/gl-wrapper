@@ -15,6 +15,10 @@ annotation class PtrParameter(val ptrParamIdx: IntArray)
 @Target(AnnotationTarget.FUNCTION)
 annotation class NullableReturn
 
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class CoreOverload
+
 enum class GpuVendor {
     NVIDIA,
     AMD,

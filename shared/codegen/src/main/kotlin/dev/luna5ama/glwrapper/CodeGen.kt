@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.sun.source.tree.*
 import com.sun.source.util.JavacTask
 import com.sun.source.util.SimpleTreeVisitor
@@ -25,6 +26,8 @@ class CodeGen : KtgenProcessor {
         AnnotationSpec.builder(ClassName("dev.luna5ama.glwrapper.api", "PtrReturn")).build()
     private val nullableReturnAnnotationSpec =
         AnnotationSpec.builder(ClassName("dev.luna5ama.glwrapper.api", "NullableReturn")).build()
+    private val coreOverloadAnnotationSpec =
+        AnnotationSpec.builder(ClassName("dev.luna5ama.glwrapper.api", "CoreOverload")).build()
     private val core = """GL_ARB_gl_spirv
 GL_ARB_indirect_parameters
 GL_ARB_pipeline_statistics_query
@@ -710,6 +713,15 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     addModifiers(KModifier.ABSTRACT)
                 }
             }
+            "GL32" -> {
+                visitor.addFuncWithTopLevel("glGetSynci", listOf(LONG to "sync", INT to "pname"), INT) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("val ptr = %N.%N", "tempArr", "ptr")
+                    addStatement("%N.%N(%L)", "ptr", "setInt", 1)
+                    addStatement("%N(%N, %N, 1, %N, %N + %L)", "glGetSynciv", "sync", "pname", "ptr", "ptr", 4)
+                    addStatement("return %N.%N()", "ptr", "getInt")
+                }
+            }
             "GL33" -> {
                 setScalar(
                     "glSamplerParameterfv",
@@ -737,6 +749,18 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             "GL41" -> {
                 visitor.addFuncWithTopLevel("glDeleteProgramPipelines", listOf(INT to "pipeline"), UNIT) {
                     addModifiers(KModifier.ABSTRACT)
+                }
+            }
+            "GL42" -> {
+                visitor.addFuncWithTopLevel("glGetInternalformati", listOf(INT to "target", INT to "internalformat", INT to "pname"), INT) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N(%N, %N, %N, %L, %N.%N)", "glGetInternalformativ", "target", "internalformat", "pname", 1, "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
+                }
+                visitor.addFuncWithTopLevel("glGetInternalformati64", listOf(INT to "target", INT to "internalformat", INT to "pname"), LONG) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N(%N, %N, %N, %L, %N.%N)", "glGetInternalformati64v", "target", "internalformat", "pname", 1, "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
                 }
             }
             "GL43" -> {
@@ -838,6 +862,38 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf(INT to "framebuffer", INT to "buffer", INT to "drawbuffer"),
                     listOf("depth")
                 )
+
+                visitor.functions.removeIf {it.name == "glMapNamedBufferRange"}
+                visitor.typeBuilder!!.funSpecs.removeIf {it.name == "glMapNamedBufferRange"}
+
+                visitor.addFuncWithTopLevel(
+                    "nglMapNamedBufferRange",
+                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access"),
+                    kmogusPtrClassName
+                ) {
+                    addAnnotation(ptrReturnAnnotationSpec)
+                    addModifiers(KModifier.ABSTRACT)
+                }
+
+                visitor.addFuncWithTopLevel(
+                    "glMapNamedBufferRange",
+                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access"),
+                    kmogusArrClassName
+                ) {
+                    addAnnotation(coreOverloadAnnotationSpec)
+                    addStatement(
+                        "return %T.%N(%N(%N, %N, %N, %N).%N, %N)",
+                        kmogusArrClassName,
+                        "wrap",
+                        "nglMapNamedBufferRange",
+                        "buffer",
+                        "offset",
+                        "length",
+                        "access",
+                        "address",
+                        "length"
+                    )
+                }
             }
         }
     }

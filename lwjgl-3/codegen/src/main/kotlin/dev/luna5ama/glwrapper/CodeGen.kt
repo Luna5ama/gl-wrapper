@@ -1,10 +1,7 @@
 package dev.luna5ama.glwrapper
 
 import com.squareup.kotlinpoet.*
-import dev.luna5ama.glwrapper.api.GLBase
-import dev.luna5ama.glwrapper.api.NullableReturn
-import dev.luna5ama.glwrapper.api.PtrParameter
-import dev.luna5ama.glwrapper.api.PtrReturn
+import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.ktgen.KtgenProcessor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
@@ -25,6 +22,7 @@ class CodeGen : KtgenProcessor {
         val ptrReturnClass = PtrReturn::class
         val ptrParameterClass = PtrParameter::class
         val nullableReturnClass = NullableReturn::class
+        val coreOverloadClass = CoreOverload::class
 
         val ptrReturnAnnotationSpec = AnnotationSpec.builder(ptrReturnClass).build()
         val nullableReturnAnnotationSpec = AnnotationSpec.builder(nullableReturnClass).build()
@@ -65,7 +63,8 @@ class CodeGen : KtgenProcessor {
                     .toList()
 
                 interfaceClass.methods.asSequence()
-                    .filter { it.name.startsWith("gl") }
+                    .filter { it.name.startsWith("gl") || it.name.startsWith("ngl") }
+                    .filter { method -> method.annotations.none { it.annotationClass == coreOverloadClass }}
                     .forEach { method ->
                         val methodName = method.name.substringBefore('-')
                         val returnType = method.returnType
