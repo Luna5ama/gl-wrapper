@@ -718,8 +718,8 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
                     addStatement("val ptr = %N.%N", "tempArr", "ptr")
                     addStatement("%N.%N(%L)", "ptr", "setInt", 1)
-                    addStatement("%N(%N, %N, 1, %N, %N + %L)", "glGetSynciv", "sync", "pname", "ptr", "ptr", 4)
-                    addStatement("return %N.%N()", "ptr", "getInt")
+                    addStatement("%N(%N, %N, 1, %N, %N + %L)", "glGetSynciv", "sync", "pname", "ptr", "ptr", 4L)
+                    addStatement("return (%N + %L).%N()", "ptr", 4L, "getInt")
                 }
             }
             "GL33" -> {
