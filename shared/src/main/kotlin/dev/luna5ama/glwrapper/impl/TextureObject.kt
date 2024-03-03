@@ -147,6 +147,22 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             return this
         }
 
+        fun upload(
+            level: Int,
+            xoffset: Int,
+            width: Int,
+            format: Int,
+            type: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture1D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glTextureSubImage1D(id, level, xoffset, width, format, type, offset)
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
+            return this
+        }
+
         fun uploadCompressed(
             level: Int,
             xoffset: Int,
@@ -157,6 +173,22 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         ): Texture1D {
             checkCreated()
             glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, pixels)
+            return this
+        }
+
+        fun uploadCompressed(
+            level: Int,
+            xoffset: Int,
+            width: Int,
+            format: Int,
+            imageSize: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture1D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, offset)
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
             return this
         }
 
@@ -232,6 +264,24 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             return this
         }
 
+        fun upload(
+            level: Int,
+            xoffset: Int,
+            yoffset: Int,
+            width: Int,
+            height: Int,
+            format: Int,
+            type: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture2D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, type, offset)
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
+            return this
+        }
+
         fun uploadCompressed(
             level: Int,
             xoffset: Int,
@@ -244,6 +294,24 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         ): Texture2D {
             checkCreated()
             glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, pixels)
+            return this
+        }
+
+        fun uploadCompressed(
+            level: Int,
+            xoffset: Int,
+            yoffset: Int,
+            width: Int,
+            height: Int,
+            format: Int,
+            imageSize: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture2D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, offset)
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
             return this
         }
 
@@ -327,6 +395,26 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
             return this
         }
 
+        fun upload(
+            level: Int,
+            xoffset: Int,
+            yoffset: Int,
+            zoffset: Int,
+            width: Int,
+            height: Int,
+            depth: Int,
+            format: Int,
+            type: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture3D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glTextureSubImage3D(id, level, xoffset, yoffset, zoffset, width, height, depth, format, type, offset)
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
+            return this
+        }
+
         fun uploadCompressed(
             level: Int,
             xoffset: Int,
@@ -353,6 +441,38 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
                 imageSize,
                 pixels
             )
+            return this
+        }
+
+        fun uploadCompressed(
+            level: Int,
+            xoffset: Int,
+            yoffset: Int,
+            zoffset: Int,
+            width: Int,
+            height: Int,
+            depth: Int,
+            format: Int,
+            imageSize: Int,
+            buffer: BufferObject,
+            offset: Long
+        ): Texture3D {
+            checkCreated()
+            buffer.bind(GL_PIXEL_UNPACK_BUFFER)
+            glCompressedTextureSubImage3D(
+                id,
+                level,
+                xoffset,
+                yoffset,
+                zoffset,
+                width,
+                height,
+                depth,
+                format,
+                imageSize,
+                offset
+            )
+            buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
             return this
         }
 
