@@ -658,6 +658,10 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     addModifiers(KModifier.ABSTRACT)
                 }
 
+                visitor.addFuncWithTopLevel("glGenTextures", emptyList(), INT) {
+                    addModifiers(KModifier.ABSTRACT)
+                }
+
                 visitor.addFuncWithTopLevel("glDeleteTextures", listOf(INT to "texture"), UNIT) {
                     addModifiers(KModifier.ABSTRACT)
                 }

@@ -5,7 +5,7 @@ import dev.luna5ama.kmogus.MemoryStack
 
 class FramebufferObject private constructor(private val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding,
     IGLTargetBinding, IGLSized2D {
-    constructor() : this(IGLObject.Impl(GLObjectType.FRAMEBUFFER))
+    constructor() : this(IGLObject.Impl(GLObjectType.Framebuffer))
 
     val colorAttachments = arrayOfNulls<Attachment>(32)
     var depthAttachment: Attachment? = null; private set

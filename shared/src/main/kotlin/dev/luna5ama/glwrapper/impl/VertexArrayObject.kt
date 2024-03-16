@@ -8,7 +8,7 @@ import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 
 class VertexArrayObject private constructor(private val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding {
-    constructor() : this(IGLObject.Impl(GLObjectType.VERTEX_ARRAY))
+    constructor() : this(IGLObject.Impl(GLObjectType.VertexArray))
 
     private var ebo: BufferObject? = null
     private val vboBindings = Object2ObjectOpenHashMap<BufferObject, VBOBinding>()

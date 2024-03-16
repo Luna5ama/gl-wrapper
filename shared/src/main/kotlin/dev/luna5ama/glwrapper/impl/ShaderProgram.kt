@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ByteMap
 import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
@@ -11,7 +12,7 @@ open class ShaderProgram(
 ) : IGLObject, IGLBinding {
     final override val id: Int
     override val type: GLObjectType
-        get() = GLObjectType.PROGRAM
+        get() = GLObjectType.Program
 
     private var currentBindingIndex = 0
     private val bufferBindings = EnumMap<BindingTarget, Object2ByteMap<String>>(BindingTarget::class.java)
@@ -116,48 +117,104 @@ open class ShaderProgram(
         glProgramUniform1i(id, locateUniform(name), value)
     }
 
+    fun uniform1iv(name: String, count: Int, value: Ptr) {
+        glProgramUniform1iv(id, locateUniform(name), count, value)
+    }
+
     fun uniform2i(name: String, value1: Int, value2: Int) {
         glProgramUniform2i(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform2iv(name: String, count: Int, value: Ptr) {
+        glProgramUniform2iv(id, locateUniform(name), count, value)
     }
 
     fun uniform3i(name: String, value1: Int, value2: Int, value3: Int) {
         glProgramUniform3i(id, locateUniform(name), value1, value2, value3)
     }
 
+    fun uniform3iv(name: String, count: Int, value: Ptr) {
+        glProgramUniform3iv(id, locateUniform(name), count, value)
+    }
+
     fun uniform4i(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
         glProgramUniform4i(id, locateUniform(name), value1, value2, value3, value4)
     }
 
-    fun uniform1f(name: String, value: Float) {
-        glProgramUniform1f(id, locateUniform(name), value)
-    }
-
-    fun uniform2f(name: String, value1: Float, value2: Float) {
-        glProgramUniform2f(id, locateUniform(name), value1, value2)
-    }
-
-    fun uniform3f(name: String, value1: Float, value2: Float, value3: Float) {
-        glProgramUniform3f(id, locateUniform(name), value1, value2, value3)
-    }
-
-    fun uniform4f(name: String, value1: Float, value2: Float, value3: Float, value4: Float) {
-        glProgramUniform4f(id, locateUniform(name), value1, value2, value3, value4)
+    fun uniform4iv(name: String, count: Int, value: Ptr) {
+        glProgramUniform4iv(id, locateUniform(name), count, value)
     }
 
     fun uniform1ui(name: String, value: Int) {
         glProgramUniform1ui(id, locateUniform(name), value)
     }
 
+    fun uniform1uiv(name: String, count: Int, value: Ptr) {
+        glProgramUniform1uiv(id, locateUniform(name), count, value)
+    }
+
     fun uniform2ui(name: String, value1: Int, value2: Int) {
         glProgramUniform2ui(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform2uiv(name: String, count: Int, value: Ptr) {
+        glProgramUniform2uiv(id, locateUniform(name), count, value)
     }
 
     fun uniform3ui(name: String, value1: Int, value2: Int, value3: Int) {
         glProgramUniform3ui(id, locateUniform(name), value1, value2, value3)
     }
 
+    fun uniform3uiv(name: String, count: Int, value: Ptr) {
+        glProgramUniform3uiv(id, locateUniform(name), count, value)
+    }
+
     fun uniform4ui(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
         glProgramUniform4ui(id, locateUniform(name), value1, value2, value3, value4)
+    }
+
+    fun uniform4uiv(name: String, count: Int, value: Ptr) {
+        glProgramUniform4uiv(id, locateUniform(name), count, value)
+    }
+
+    fun uniformHandleui64(name: String, value: Long) {
+        glProgramUniformHandleui64ARB(id, locateUniform(name), value)
+    }
+
+    fun uniformHandleui64v(name: String, count: Int, value: Ptr) {
+        glProgramUniformHandleui64vARB(id, locateUniform(name), count, value)
+    }
+
+    fun uniform1f(name: String, value: Float) {
+        glProgramUniform1f(id, locateUniform(name), value)
+    }
+
+    fun uniform1fv(name: String, count: Int, value: Ptr) {
+        glProgramUniform1fv(id, locateUniform(name), count, value)
+    }
+
+    fun uniform2f(name: String, value1: Float, value2: Float) {
+        glProgramUniform2f(id, locateUniform(name), value1, value2)
+    }
+
+    fun uniform2fv(name: String, count: Int, value: Ptr) {
+        glProgramUniform2fv(id, locateUniform(name), count, value)
+    }
+
+    fun uniform3f(name: String, value1: Float, value2: Float, value3: Float) {
+        glProgramUniform3f(id, locateUniform(name), value1, value2, value3)
+    }
+
+    fun uniform3fv(name: String, count: Int, value: Ptr) {
+        glProgramUniform3fv(id, locateUniform(name), count, value)
+    }
+
+    fun uniform4f(name: String, value1: Float, value2: Float, value3: Float, value4: Float) {
+        glProgramUniform4f(id, locateUniform(name), value1, value2, value3, value4)
+    }
+
+    fun uniform4fv(name: String, count: Int, value: Ptr) {
+        glProgramUniform4fv(id, locateUniform(name), count, value)
     }
 
     fun bindBuffer(target: Int, buffer: BufferObject, blockName: String): Boolean {

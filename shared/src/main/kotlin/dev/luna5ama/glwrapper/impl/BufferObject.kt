@@ -4,7 +4,7 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.Ptr
 
-sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.BUFFER), IGLTargetBinding {
+sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IGLTargetBinding {
     var size = -1L; private set
 
     open fun allocate(size: Long, flags: Int): BufferObject {

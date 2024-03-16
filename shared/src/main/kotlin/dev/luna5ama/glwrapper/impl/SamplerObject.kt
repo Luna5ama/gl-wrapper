@@ -2,7 +2,7 @@ package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
 
-class SamplerObject : IGLObject by IGLObject.Impl(GLObjectType.SAMPLER), IGLSampler {
+class SamplerObject : IGLObject by IGLObject.Impl(GLObjectType.Sampler), IGLSampler {
     fun bindSamplerUnit(unit: Int) {
         checkCreated()
         glBindSampler(unit, id)

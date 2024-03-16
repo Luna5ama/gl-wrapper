@@ -4,9 +4,9 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 
-sealed class TextureObject private constructor(private val delegate: IGLObject.Impl, val target: Int) :
+sealed class TextureObject private constructor(val target: Int, private val delegate: IGLObject.Impl) :
     IGLObject by delegate, IGLSampler {
-    constructor(target: Int) : this(IGLObject.Impl(GLObjectType.TEXTURE, target), target)
+    constructor(target: Int, type: GLObjectType.Texture) : this(target, IGLObject.Impl(type, target))
 
     var levels = 0; protected set
     var internalformat = 0; protected set
@@ -121,10 +121,11 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         internalformat = 0
     }
 
-    class Texture1D(target: Int = GL_TEXTURE_1D) : TextureObject(target), IGLSized1D {
+    class Texture1D(target: Int = GL_TEXTURE_1D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized1D {
         override var sizeX = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int): Texture1D {
+            check(sizeX == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
             this.internalformat = internalformat
@@ -234,11 +235,12 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         }
     }
 
-    class Texture2D(target: Int = GL_TEXTURE_2D) : TextureObject(target), IGLSized2D, FramebufferObject.Attachment {
+    class Texture2D(target: Int = GL_TEXTURE_2D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized2D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int, height: Int): Texture2D {
+            check(sizeX == 0 && sizeY == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
             this.internalformat = internalformat
@@ -361,12 +363,13 @@ sealed class TextureObject private constructor(private val delegate: IGLObject.I
         }
     }
 
-    class Texture3D(target: Int = GL_TEXTURE_3D) : TextureObject(target), IGLSized3D, FramebufferObject.Attachment {
+    class Texture3D(target: Int = GL_TEXTURE_3D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized3D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
         override var sizeZ = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int, height: Int, depth: Int): Texture3D {
+            check(sizeX == 0 && sizeY == 0 && sizeZ == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
             this.internalformat = internalformat

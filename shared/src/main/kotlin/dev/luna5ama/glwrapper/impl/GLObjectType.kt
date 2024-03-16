@@ -3,8 +3,8 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Ptr
 
-enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
-    BUFFER(GL_BUFFER, false) {
+sealed class GLObjectType(val identifier: Int, val isContainer: Boolean) {
+    data object Buffer : GLObjectType(GL_BUFFER, false) {
         override fun create(arg: Int): Int {
             return glCreateBuffers()
         }
@@ -28,8 +28,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             glDeleteBuffers(n, ptr)
         }
-    },
-    SHADER(GL_SHADER, false) {
+    }
+
+    data object Shader : GLObjectType(GL_SHADER, false) {
         override fun create(arg: Int): Int {
             return glCreateShader(arg)
         }
@@ -50,8 +51,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
                 destroy(ptr.getInt(it * 4L))
             }
         }
-    },
-    PROGRAM(GL_PROGRAM, false) {
+    }
+
+    data object Program : GLObjectType(GL_PROGRAM, false) {
         override fun create(arg: Int): Int {
             return glCreateProgram()
         }
@@ -80,8 +82,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
                 destroy(ptr.getInt(it * 4L))
             }
         }
-    },
-    QUERY(GL_QUERY, false) {
+    }
+
+    data object Query : GLObjectType(GL_QUERY, false) {
         override fun create(arg: Int): Int {
             throw UnsupportedOperationException()
         }
@@ -105,8 +108,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             throw UnsupportedOperationException()
         }
-    },
-    RENDERBUFFER(GL_RENDERBUFFER, false) {
+    }
+
+    data object Renderbuffer : GLObjectType(GL_RENDERBUFFER, false) {
         override fun create(arg: Int): Int {
             return glCreateRenderbuffers()
         }
@@ -130,8 +134,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             glDeleteRenderbuffers(n, ptr)
         }
-    },
-    SAMPLER(GL_SAMPLER, false) {
+    }
+
+    data object Sampler : GLObjectType(GL_SAMPLER, false) {
         override fun create(arg: Int): Int {
             return glCreateSamplers()
         }
@@ -155,25 +160,39 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             glDeleteSamplers(n, ptr)
         }
-    },
-    TEXTURE(GL_TEXTURE, false) {
-        override fun create(arg: Int): Int {
-            return glCreateTextures(arg)
-        }
+    }
 
-        override fun create(arg: Int, n: Int, ptr: Ptr) {
-            glCreateTextures(arg, n, ptr)
-        }
-
-        override fun destroy(id: Int) {
+    sealed class Texture : GLObjectType(GL_TEXTURE, false) {
+        final override fun destroy(id: Int) {
             glDeleteTextures(id)
         }
 
-        override fun destroy(n: Int, ptr: Ptr) {
+        final override fun destroy(n: Int, ptr: Ptr) {
             glDeleteTextures(n, ptr)
         }
-    },
-    FRAMEBUFFER(GL_FRAMEBUFFER, true) {
+
+        data object Storage : Texture() {
+            override fun create(arg: Int): Int {
+                return glCreateTextures(arg)
+            }
+
+            override fun create(arg: Int, n: Int, ptr: Ptr) {
+                glCreateTextures(arg, n, ptr)
+            }
+        }
+
+        data object View : Texture() {
+            override fun create(arg: Int): Int {
+                return glGenTextures()
+            }
+
+            override fun create(arg: Int, n: Int, ptr: Ptr) {
+                glGenTextures(n, ptr)
+            }
+        }
+    }
+
+    data object Framebuffer : GLObjectType(GL_FRAMEBUFFER, true) {
         override fun create(arg: Int): Int {
             return glCreateFramebuffers()
         }
@@ -197,8 +216,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             glDeleteFramebuffers(n, ptr)
         }
-    },
-    PROGRAM_PIPELINE(GL_PROGRAM_PIPELINE, true) {
+    }
+
+    data object ProgramPipeline : GLObjectType(GL_PROGRAM_PIPELINE, true) {
         override fun create(arg: Int): Int {
             throw UnsupportedOperationException()
         }
@@ -222,8 +242,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             throw UnsupportedOperationException()
         }
-    },
-    TRANSFORM_FEEDBACK(GL_TRANSFORM_FEEDBACK, true) {
+    }
+
+    data object TransformFeedback : GLObjectType(GL_TRANSFORM_FEEDBACK, true) {
         override fun create(arg: Int): Int {
             throw UnsupportedOperationException()
         }
@@ -247,8 +268,9 @@ enum class GLObjectType(val identifier: Int, val isContainer: Boolean) {
         override fun destroy(n: Int, ptr: Ptr) {
             throw UnsupportedOperationException()
         }
-    },
-    VERTEX_ARRAY(GL_VERTEX_ARRAY, true) {
+    }
+
+    data object VertexArray : GLObjectType(GL_VERTEX_ARRAY, true) {
         override fun create(arg: Int): Int {
             return glCreateVertexArrays()
         }
