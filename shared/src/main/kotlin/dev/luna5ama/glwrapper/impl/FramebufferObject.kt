@@ -46,47 +46,41 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         delegate.destroy()
     }
 
-    fun attach(texture: TextureObject.Texture2D, attachment: Int, level: Int = 0): FramebufferObject {
-        updateAttachment(attachment, texture)
-        glNamedFramebufferTexture(id, attachment, texture.id, level)
-        return this
-    }
-
-    fun attachLayer(texture: TextureObject.Texture2D, attachment: Int, layer: Int, level: Int = 0): FramebufferObject {
-        updateAttachment(attachment, texture)
-        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
-        return this
-    }
-
-    fun attachLayer(texture: TextureObject.Texture3D, attachment: Int, layer: Int, level: Int = 0): FramebufferObject {
-        updateAttachment(attachment, texture)
-        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
-        return this
-    }
-
-    fun attach(renderbuffer: RenderbufferObject, attachment: Int): FramebufferObject {
+    fun attachRenderbuffer(renderbuffer: RenderbufferObject, attachment: Int) {
         updateAttachment(attachment, renderbuffer)
         glNamedFramebufferRenderbuffer(id, attachment, GL_RENDERBUFFER, renderbuffer.id)
-        return this
     }
 
-    fun setReadBuffer(attachment: Int): FramebufferObject {
+    fun attachLayerAll(texture: LayeredAttachment, attachment: Int, level: Int = 0) {
+        updateAttachment(attachment, texture)
+        glNamedFramebufferTexture(id, attachment, texture.id, level)
+    }
+
+    fun attachLayerSingle(texture: LayeredAttachment, attachment: Int, face: Int, level: Int = 0) {
+        updateAttachment(attachment, texture)
+        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, face)
+    }
+
+    fun attachNonLayered(texture: NonLayeredAttachment, attachment: Int, level: Int = 0) {
+        updateAttachment(attachment, texture)
+        glNamedFramebufferTexture(id, attachment, texture.id, level)
+    }
+
+    fun setReadBuffer(attachment: Int) {
         require(attachment in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31) { "Invalid attachment: $attachment" }
         val index = attachment - GL_COLOR_ATTACHMENT0
         require(colorAttachments[index] != null) { "Attachment not set: $index" }
         glNamedFramebufferReadBuffer(id, attachment)
-        return this
     }
 
-    fun setDrawBuffer(attachment: Int): FramebufferObject {
+    fun setDrawBuffer(attachment: Int) {
         require(attachment in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31) { "Invalid attachment: $attachment" }
         val index = attachment - GL_COLOR_ATTACHMENT0
         require(colorAttachments[index] != null) { "Attachment not set: $index" }
         glNamedFramebufferDrawBuffer(id, attachment)
-        return this
     }
 
-    fun setDrawBuffer(vararg attachments: Int): FramebufferObject {
+    fun setDrawBuffer(vararg attachments: Int) {
         attachments.forEach {
             require(it in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31) { "Invalid attachment: $it" }
             val index = it - GL_COLOR_ATTACHMENT0
@@ -100,10 +94,9 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
             }
             glNamedFramebufferDrawBuffers(id, attachments.size, ptr)
         }
-        return this
     }
 
-    fun setDrawBufferAll(): FramebufferObject {
+    fun setDrawBufferAll() {
         MemoryStack {
             val arr = malloc(colorAttachments.size * 4L)
             var ptr = arr.ptr
@@ -115,7 +108,6 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
             }
             glNamedFramebufferDrawBuffers(id, n, arr.ptr)
         }
-        return this
     }
 
     private fun updateAttachment(attachment: Int, obj: Attachment) {
@@ -142,15 +134,17 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     }
 
     private fun checkAndUpdateSize(attachment: Attachment) {
+        val aSizeX = attachment.sizeX
+        val aSizeY = (attachment as? IGLSized2D)?.sizeY ?: 1
         if (sizeX != -1 && sizeY != -1) {
-            require(sizeX == attachment.sizeX && sizeY == attachment.sizeY) {
-                "Framebuffer attachments size mismatch: $sizeX x $sizeY != ${attachment.sizeX} x ${attachment.sizeY}"
+            require(sizeX == aSizeX && sizeY == aSizeY) {
+                "Framebuffer attachments size mismatch: $sizeX x $sizeY != $aSizeX x $aSizeY"
             }
             return
         }
 
-        sizeX = attachment.sizeX
-        sizeY = attachment.sizeY
+        sizeX = aSizeX
+        sizeY = aSizeY
     }
 
     fun check() {
@@ -224,5 +218,7 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         glBindFramebuffer(target, 0)
     }
 
-    interface Attachment : IGLSized2D
+    sealed interface Attachment : IGLObject, IGLSized1D
+    sealed interface LayeredAttachment : Attachment
+    sealed interface NonLayeredAttachment : Attachment
 }

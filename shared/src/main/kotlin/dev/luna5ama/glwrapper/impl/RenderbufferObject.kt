@@ -3,7 +3,10 @@ package dev.luna5ama.glwrapper.impl
 import dev.luna5ama.glwrapper.api.glNamedRenderbufferStorage
 import dev.luna5ama.glwrapper.api.glNamedRenderbufferStorageMultisample
 
-class RenderbufferObject : IGLObject by IGLObject.Impl(GLObjectType.Renderbuffer), FramebufferObject.Attachment {
+class RenderbufferObject :
+    IGLObject by IGLObject.Impl(GLObjectType.Renderbuffer),
+    FramebufferObject.Attachment,
+    IGLSized2D {
     override var sizeX = 0; private set
     override var sizeY = 0; private set
 

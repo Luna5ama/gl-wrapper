@@ -7,24 +7,22 @@ import dev.luna5ama.kmogus.Ptr
 sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IGLTargetBinding {
     var size = -1L; private set
 
-    open fun allocate(size: Long, flags: Int): BufferObject {
+    open fun allocate(size: Long, flags: Int) {
         // Intel workaround
         if (GpuVendor.get() == GpuVendor.INTEL && size != -1L) {
             destroy()
         }
         tryCreate()
         this.size = size
-        return this
     }
 
-    open fun allocate(size: Long, data: Ptr, flags: Int): BufferObject {
+    open fun allocate(size: Long, data: Ptr, flags: Int) {
         // Intel workaround
         if (GpuVendor.get() == GpuVendor.INTEL && size != -1L) {
             destroy()
         }
         tryCreate()
         this.size = size
-        return this
     }
 
     fun invalidate() {
@@ -118,31 +116,27 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IG
     }
 
     class Immutable : BufferObject() {
-        override fun allocate(size: Long, flags: Int): Immutable {
+        override fun allocate(size: Long, flags: Int) {
             super.allocate(size, flags)
             glNamedBufferStorage(id, size, Ptr.NULL, flags)
-            return this
         }
 
-        override fun allocate(size: Long, data: Ptr, flags: Int): Immutable {
+        override fun allocate(size: Long, data: Ptr, flags: Int) {
             super.allocate(size, data, flags)
             glNamedBufferStorage(id, size, data, flags)
-            return this
         }
     }
 
     class Mutable : BufferObject() {
-        override fun allocate(size: Long, flags: Int): Mutable {
+        override fun allocate(size: Long, flags: Int) {
             require(flags != 0) { "Mutable buffer usage must not be 0" }
             super.allocate(size, flags)
             glNamedBufferData(id, size, Ptr.NULL, flags)
-            return this
         }
 
-        override fun allocate(size: Long, data: Ptr, flags: Int): Mutable {
+        override fun allocate(size: Long, data: Ptr, flags: Int) {
             super.allocate(size, data, flags)
             glNamedBufferData(id, size, data, flags)
-            return this
         }
     }
 }

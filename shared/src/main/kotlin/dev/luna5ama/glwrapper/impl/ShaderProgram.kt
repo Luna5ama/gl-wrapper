@@ -48,7 +48,7 @@ open class ShaderProgram(
         }
     }
 
-    override fun label0(label: String) {
+    override fun label(label: String) {
         if (label != labelName) {
             glObjectLabel(type.identifier, id, label)
         }

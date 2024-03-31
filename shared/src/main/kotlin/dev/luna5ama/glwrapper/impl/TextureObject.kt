@@ -4,12 +4,26 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 
+@Suppress("FunctionName")
 sealed class TextureObject private constructor(val target: Int, private val delegate: IGLObject.Impl) :
-    IGLObject by delegate, IGLSampler {
-    constructor(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int) : this(target, IGLObject.Impl(type, target))
+    IGLObject by delegate, IGLSampler, FramebufferObject.Attachment {
+    constructor(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int) : this(
+        target,
+        IGLObject.Impl(type, target)
+    )
 
     var levels = -1; protected set
     var internalformat = -1; protected set
+    
+    protected open fun reset() {
+        levels = 0
+        internalformat = 0
+    }
+
+    final override fun destroy() {
+        delegate.destroy()
+        reset()
+    }
 
     fun textureView(
         origtexture: TextureObject,
@@ -18,31 +32,30 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         numlevels: Int,
         minlayer: Int,
         numlayers: Int
-    ) : TextureObject {
+    ) {
         tryCreate()
         require(origtexture.levels != -1) { "Original texture must be allocated" }
         glTextureView(id, target, origtexture.id, internalformat, minlevel, numlevels, minlayer, numlayers)
         levels = numlevels
         this.internalformat = internalformat
-        return this
     }
 
-    override fun parameterf0(pname: Int, param: Float) {
+    override fun parameterf(pname: Int, param: Float) {
         tryCreate()
         glTextureParameterf(id, pname, param)
     }
 
-    override fun parameteri0(pname: Int, param: Int) {
+    override fun parameteri(pname: Int, param: Int) {
         tryCreate()
         glTextureParameteri(id, pname, param)
     }
 
-    override fun parameterfv0(pname: Int, v1: Float, v2: Float, v3: Float, v4: Float) {
+    override fun parameterfv(pname: Int, v1: Float, v2: Float, v3: Float, v4: Float) {
         tryCreate()
         glTextureParameterfv(id, pname, v1, v2, v3, v4)
     }
 
-    override fun parameteriv0(pname: Int, v1: Int, v2: Int, v3: Int, v4: Int) {
+    override fun parameteriv(pname: Int, v1: Int, v2: Int, v3: Int, v4: Int) {
         tryCreate()
         glTextureParameteriv(id, pname, v1, v2, v3, v4)
     }
@@ -131,16 +144,24 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
     }
 
-    override fun destroy() {
-        delegate.destroy()
-        levels = 0
-        internalformat = 0
+    sealed interface ArrayTexture : FramebufferObject.LayeredAttachment {
+        val layers: Int
     }
 
-    class Texture1D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_1D) : TextureObject(type, target), IGLSized1D {
-        override var sizeX = 0; private set
+    sealed interface CubemapTexture : FramebufferObject.LayeredAttachment
 
-        fun allocate(levels: Int, internalformat: Int, width: Int): Texture1D {
+    sealed interface RegularTexture : FramebufferObject.Attachment
+
+    sealed class Tex1D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
+        IGLSized1D {
+        final override var sizeX = 0; private set
+
+        override fun reset() {
+            super.reset()
+            sizeX = 0
+        }
+
+        fun allocate(levels: Int, internalformat: Int, width: Int) {
             check(sizeX == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
@@ -148,7 +169,6 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeX = width
             glTextureStorage1D(id, levels, internalformat, width)
             clearImage()
-            return this
         }
 
         fun upload(
@@ -158,10 +178,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             type: Int,
             pixels: Ptr
-        ): Texture1D {
+        ) {
             checkCreated()
             glTextureSubImage1D(id, level, xoffset, width, format, type, pixels)
-            return this
         }
 
         fun upload(
@@ -172,12 +191,11 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             type: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture1D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glTextureSubImage1D(id, level, xoffset, width, format, type, offset)
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun uploadCompressed(
@@ -187,10 +205,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             imageSize: Int,
             pixels: Ptr
-        ): Texture1D {
+        ) {
             checkCreated()
             glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, pixels)
-            return this
         }
 
         fun uploadCompressed(
@@ -201,16 +218,15 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             imageSize: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture1D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glCompressedTextureSubImage1D(id, level, xoffset, width, format, imageSize, offset)
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun copyTo(
-            dst: Texture1D,
+            dst: Tex1D,
             srcLevel: Int,
             srcX: Int,
             dstLevel: Int,
@@ -226,7 +242,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture1D, srcLevel: Int, dstLevel: Int) {
+        fun copyTo(dst: Tex1D, srcLevel: Int, dstLevel: Int) {
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
@@ -236,7 +252,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture1D) {
+        fun copyTo(dst: Tex1D) {
             copyTo(dst, 0, 0)
         }
 
@@ -245,17 +261,22 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             glInvalidateTexSubImage(id, level, xoffset, 0, 0, width, 1, 1)
         }
 
-        override fun destroy() {
-            super.destroy()
-            sizeX = 0
-        }
+        class Texture1D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex1D(type, GL_TEXTURE_1D),
+            RegularTexture, FramebufferObject.NonLayeredAttachment
     }
 
-    class Texture2D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_2D) : TextureObject(type, target), IGLSized2D, FramebufferObject.Attachment {
-        override var sizeX = 0; private set
-        override var sizeY = 0; private set
+    sealed class Tex2D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
+        IGLSized2D {
+        final override var sizeX = 0; private set
+        final override var sizeY = 0; private set
 
-        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int): Texture2D {
+        override fun reset() {
+            super.reset()
+            sizeX = 0
+            sizeY = 0
+        }
+
+        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int) {
             check(sizeX == 0 && sizeY == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
@@ -264,7 +285,6 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeY = height
             glTextureStorage2D(id, levels, internalformat, width, height)
             clearImage()
-            return this
         }
 
         fun upload(
@@ -276,10 +296,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             type: Int,
             pixels: Ptr
-        ): Texture2D {
+        ) {
             checkCreated()
             glTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, type, pixels)
-            return this
         }
 
         fun upload(
@@ -292,12 +311,11 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             type: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture2D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, type, offset)
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun uploadCompressed(
@@ -309,10 +327,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             imageSize: Int,
             pixels: Ptr
-        ): Texture2D {
+        ) {
             checkCreated()
             glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, pixels)
-            return this
         }
 
         fun uploadCompressed(
@@ -325,16 +342,15 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             imageSize: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture2D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glCompressedTextureSubImage2D(id, level, xoffset, yoffset, width, height, format, imageSize, offset)
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun copyTo(
-            dst: Texture2D,
+            dst: Tex2D,
             srcLevel: Int,
             srcX: Int,
             srcY: Int,
@@ -353,7 +369,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture2D, srcLevel: Int, dstLevel: Int) {
+        fun copyTo(dst: Tex2D, srcLevel: Int, dstLevel: Int) {
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
@@ -363,7 +379,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture2D) {
+        fun copyTo(dst: Tex2D) {
             copyTo(dst, 0, 0)
         }
 
@@ -372,19 +388,33 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             glInvalidateTexSubImage(id, level, xoffset, yoffset, 0, width, height, 1)
         }
 
-        override fun destroy() {
-            super.destroy()
-            sizeX = 0
-            sizeY = 0
+        class Texture2D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex2D(type, GL_TEXTURE_2D),
+            RegularTexture, FramebufferObject.NonLayeredAttachment
+
+        class Texture1DArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
+            Tex2D(type, GL_TEXTURE_1D_ARRAY), ArrayTexture {
+            override val layers: Int
+                get() = sizeY
         }
+
+        class TextureCubemap(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
+            Tex2D(type, GL_TEXTURE_CUBE_MAP), CubemapTexture
     }
 
-    class Texture3D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_3D) : TextureObject(type, target), IGLSized3D, FramebufferObject.Attachment {
-        override var sizeX = 0; private set
-        override var sizeY = 0; private set
-        override var sizeZ = 0; private set
+    sealed class Tex3D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
+        IGLSized3D {
+        final override var sizeX = 0; private set
+        final override var sizeY = 0; private set
+        final override var sizeZ = 0; private set
 
-        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int, depth: Int): Texture3D {
+        override fun reset() {
+            super.reset()
+            sizeX = 0
+            sizeY = 0
+            sizeZ = 0
+        }
+
+        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int, depth: Int) {
             check(sizeX == 0 && sizeY == 0 && sizeZ == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
@@ -394,7 +424,6 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeZ = depth
             glTextureStorage3D(id, levels, internalformat, width, height, depth)
             clearImage()
-            return this
         }
 
         fun upload(
@@ -408,10 +437,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             type: Int,
             pixels: Ptr
-        ): Texture3D {
+        ) {
             checkCreated()
             glTextureSubImage3D(id, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels)
-            return this
         }
 
         fun upload(
@@ -426,12 +454,11 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             type: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture3D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glTextureSubImage3D(id, level, xoffset, yoffset, zoffset, width, height, depth, format, type, offset)
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun uploadCompressed(
@@ -445,7 +472,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             format: Int,
             imageSize: Int,
             pixels: Ptr
-        ): Texture3D {
+        ) {
             checkCreated()
             glCompressedTextureSubImage3D(
                 id,
@@ -460,7 +487,6 @@ sealed class TextureObject private constructor(val target: Int, private val dele
                 imageSize,
                 pixels
             )
-            return this
         }
 
         fun uploadCompressed(
@@ -475,7 +501,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             imageSize: Int,
             buffer: BufferObject,
             offset: Long
-        ): Texture3D {
+        ) {
             checkCreated()
             buffer.bind(GL_PIXEL_UNPACK_BUFFER)
             glCompressedTextureSubImage3D(
@@ -492,11 +518,10 @@ sealed class TextureObject private constructor(val target: Int, private val dele
                 offset
             )
             buffer.unbind(GL_PIXEL_UNPACK_BUFFER)
-            return this
         }
 
         fun copyTo(
-            dst: Texture3D,
+            dst: Tex3D,
             srcLevel: Int,
             srcX: Int,
             srcY: Int,
@@ -518,7 +543,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture3D, srcLevel: Int, dstLevel: Int) {
+        fun copyTo(dst: Tex3D, srcLevel: Int, dstLevel: Int) {
             require(dst.sizeBit == sizeBit) { "Size must be match" }
             copyTo(
                 dst,
@@ -528,7 +553,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             )
         }
 
-        fun copyTo(dst: Texture3D) {
+        fun copyTo(dst: Tex3D) {
             copyTo(dst, 0, 0)
         }
 
@@ -537,156 +562,163 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             glInvalidateTexSubImage(id, level, xoffset, yoffset, zoffset, width, height, depth)
         }
 
-        override fun destroy() {
-            super.destroy()
-            sizeX = 0
-            sizeY = 0
-            sizeZ = 0
+        class Texture3D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex3D(type, GL_TEXTURE_3D),
+            RegularTexture, FramebufferObject.LayeredAttachment
+
+        class Texture2DArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
+            Tex3D(type, GL_TEXTURE_2D_ARRAY), ArrayTexture {
+            override val layers: Int
+                get() = sizeZ
+        }
+
+        class TextureCubemapArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
+            Tex3D(type, GL_TEXTURE_CUBE_MAP_ARRAY), CubemapTexture, ArrayTexture {
+            override val layers: Int
+                get() = sizeZ
         }
     }
+}
 
-    companion object {
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject) {
-            MemoryStack {
-                val arr = malloc(2 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                glBindTextures(firstUnit, 2, ptr)
-            }
-        }
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject) {
-            MemoryStack {
-                val arr = malloc(3 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                glBindTextures(firstUnit, 3, ptr)
-            }
-        }
+fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject) {
+    MemoryStack {
+        val arr = malloc(2 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+        glBindTextures(firstUnit, 2, ptr)
+    }
+}
 
-        fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject) {
-            MemoryStack {
-                val arr = malloc(4 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                    .setIntInc(t4.id)
-                glBindTextures(firstUnit, 4, ptr)
-            }
-        }
+fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject) {
+    MemoryStack {
+        val arr = malloc(3 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+        glBindTextures(firstUnit, 3, ptr)
+    }
+}
 
-        fun bindTextures(
-            firstUnit: Int,
-            t1: TextureObject,
-            t2: TextureObject,
-            t3: TextureObject,
-            t4: TextureObject,
-            t5: TextureObject
-        ) {
-            MemoryStack {
-                val arr = malloc(5 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                    .setIntInc(t4.id)
-                    .setIntInc(t5.id)
-                glBindTextures(firstUnit, 5, ptr)
-            }
-        }
+fun bindTextures(firstUnit: Int, t1: TextureObject, t2: TextureObject, t3: TextureObject, t4: TextureObject) {
+    MemoryStack {
+        val arr = malloc(4 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+            .setIntInc(t4.id)
+        glBindTextures(firstUnit, 4, ptr)
+    }
+}
 
-        fun bindTextures(
-            firstUnit: Int,
-            t1: TextureObject,
-            t2: TextureObject,
-            t3: TextureObject,
-            t4: TextureObject,
-            t5: TextureObject,
-            t6: TextureObject
-        ) {
-            MemoryStack {
-                val arr = malloc(6 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                    .setIntInc(t4.id)
-                    .setIntInc(t5.id)
-                    .setIntInc(t6.id)
-                glBindTextures(firstUnit, 6, ptr)
-            }
-        }
+fun bindTextures(
+    firstUnit: Int,
+    t1: TextureObject,
+    t2: TextureObject,
+    t3: TextureObject,
+    t4: TextureObject,
+    t5: TextureObject
+) {
+    MemoryStack {
+        val arr = malloc(5 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+            .setIntInc(t4.id)
+            .setIntInc(t5.id)
+        glBindTextures(firstUnit, 5, ptr)
+    }
+}
 
-        fun bindTextures(
-            firstUnit: Int,
-            t1: TextureObject,
-            t2: TextureObject,
-            t3: TextureObject,
-            t4: TextureObject,
-            t5: TextureObject,
-            t6: TextureObject,
-            t7: TextureObject
-        ) {
-            MemoryStack {
-                val arr = malloc(7 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                    .setIntInc(t4.id)
-                    .setIntInc(t5.id)
-                    .setIntInc(t6.id)
-                    .setIntInc(t7.id)
-                glBindTextures(firstUnit, 7, ptr)
-            }
-        }
+fun bindTextures(
+    firstUnit: Int,
+    t1: TextureObject,
+    t2: TextureObject,
+    t3: TextureObject,
+    t4: TextureObject,
+    t5: TextureObject,
+    t6: TextureObject
+) {
+    MemoryStack {
+        val arr = malloc(6 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+            .setIntInc(t4.id)
+            .setIntInc(t5.id)
+            .setIntInc(t6.id)
+        glBindTextures(firstUnit, 6, ptr)
+    }
+}
 
-        fun bindTextures(
-            firstUnit: Int,
-            t1: TextureObject,
-            t2: TextureObject,
-            t3: TextureObject,
-            t4: TextureObject,
-            t5: TextureObject,
-            t6: TextureObject,
-            t7: TextureObject,
-            t8: TextureObject
-        ) {
-            MemoryStack {
-                val arr = malloc(8 * 4L)
-                val ptr = arr.ptr
-                ptr.setIntInc(t1.id)
-                    .setIntInc(t2.id)
-                    .setIntInc(t3.id)
-                    .setIntInc(t4.id)
-                    .setIntInc(t5.id)
-                    .setIntInc(t6.id)
-                    .setIntInc(t7.id)
-                    .setIntInc(t8.id)
-                glBindTextures(firstUnit, 8, ptr)
-            }
-        }
+fun bindTextures(
+    firstUnit: Int,
+    t1: TextureObject,
+    t2: TextureObject,
+    t3: TextureObject,
+    t4: TextureObject,
+    t5: TextureObject,
+    t6: TextureObject,
+    t7: TextureObject
+) {
+    MemoryStack {
+        val arr = malloc(7 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+            .setIntInc(t4.id)
+            .setIntInc(t5.id)
+            .setIntInc(t6.id)
+            .setIntInc(t7.id)
+        glBindTextures(firstUnit, 7, ptr)
+    }
+}
 
-        fun bindTextures(firstUnit: Int, vararg textures: TextureObject) {
-            MemoryStack {
-                val arr = malloc(textures.size * 4L)
-                var ptr = arr.ptr
-                textures.forEach { ptr = ptr.setIntInc(it.id) }
-                glBindTextures(firstUnit, textures.size, ptr)
-            }
-        }
+fun bindTextures(
+    firstUnit: Int,
+    t1: TextureObject,
+    t2: TextureObject,
+    t3: TextureObject,
+    t4: TextureObject,
+    t5: TextureObject,
+    t6: TextureObject,
+    t7: TextureObject,
+    t8: TextureObject
+) {
+    MemoryStack {
+        val arr = malloc(8 * 4L)
+        val ptr = arr.ptr
+        ptr.setIntInc(t1.id)
+            .setIntInc(t2.id)
+            .setIntInc(t3.id)
+            .setIntInc(t4.id)
+            .setIntInc(t5.id)
+            .setIntInc(t6.id)
+            .setIntInc(t7.id)
+            .setIntInc(t8.id)
+        glBindTextures(firstUnit, 8, ptr)
+    }
+}
 
-        fun bindTextures(firstUnit: Int, textures: Collection<TextureObject>) {
-            MemoryStack {
-                val arr = malloc(textures.size * 4L)
-                var ptr = arr.ptr
-                textures.forEach { ptr = ptr.setIntInc(it.id) }
-                glBindTextures(firstUnit, textures.size, ptr)
-            }
-        }
+fun bindTextures(firstUnit: Int, vararg textures: TextureObject) {
+    MemoryStack {
+        val arr = malloc(textures.size * 4L)
+        var ptr = arr.ptr
+        textures.forEach { ptr = ptr.setIntInc(it.id) }
+        glBindTextures(firstUnit, textures.size, ptr)
+    }
+}
+
+fun bindTextures(firstUnit: Int, textures: Collection<TextureObject>) {
+    MemoryStack {
+        val arr = malloc(textures.size * 4L)
+        var ptr = arr.ptr
+        textures.forEach { ptr = ptr.setIntInc(it.id) }
+        glBindTextures(firstUnit, textures.size, ptr)
     }
 }
