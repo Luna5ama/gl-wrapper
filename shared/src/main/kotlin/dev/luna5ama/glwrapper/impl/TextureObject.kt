@@ -6,10 +6,26 @@ import dev.luna5ama.kmogus.Ptr
 
 sealed class TextureObject private constructor(val target: Int, private val delegate: IGLObject.Impl) :
     IGLObject by delegate, IGLSampler {
-    constructor(target: Int, type: GLObjectType.Texture) : this(target, IGLObject.Impl(type, target))
+    constructor(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int) : this(target, IGLObject.Impl(type, target))
 
-    var levels = 0; protected set
-    var internalformat = 0; protected set
+    var levels = -1; protected set
+    var internalformat = -1; protected set
+
+    fun textureView(
+        origtexture: TextureObject,
+        internalformat: Int,
+        minlevel: Int,
+        numlevels: Int,
+        minlayer: Int,
+        numlayers: Int
+    ) : TextureObject {
+        tryCreate()
+        require(origtexture.levels != -1) { "Original texture must be allocated" }
+        glTextureView(id, target, origtexture.id, internalformat, minlevel, numlevels, minlayer, numlayers)
+        levels = numlevels
+        this.internalformat = internalformat
+        return this
+    }
 
     override fun parameterf0(pname: Int, param: Float) {
         tryCreate()
@@ -121,7 +137,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         internalformat = 0
     }
 
-    class Texture1D(target: Int = GL_TEXTURE_1D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized1D {
+    class Texture1D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_1D) : TextureObject(type, target), IGLSized1D {
         override var sizeX = 0; private set
 
         fun allocate(levels: Int, internalformat: Int, width: Int): Texture1D {
@@ -235,7 +251,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
     }
 
-    class Texture2D(target: Int = GL_TEXTURE_2D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized2D, FramebufferObject.Attachment {
+    class Texture2D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_2D) : TextureObject(type, target), IGLSized2D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
 
@@ -363,7 +379,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
     }
 
-    class Texture3D(target: Int = GL_TEXTURE_3D, type: GLObjectType.Texture = GLObjectType.Texture.Storage) : TextureObject(target, type), IGLSized3D, FramebufferObject.Attachment {
+    class Texture3D(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int = GL_TEXTURE_3D) : TextureObject(type, target), IGLSized3D, FramebufferObject.Attachment {
         override var sizeX = 0; private set
         override var sizeY = 0; private set
         override var sizeZ = 0; private set
