@@ -13,11 +13,11 @@ sealed class TextureObject private constructor(val target: Int, private val dele
     )
 
     var levels = -1; protected set
-    var internalformat = -1; protected set
-    
+    var internalformat: ImageFormat? = null; protected set
+
     protected open fun reset() {
-        levels = 0
-        internalformat = 0
+        levels = -1
+        internalformat = null
     }
 
     final override fun destroy() {
@@ -25,19 +25,18 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         reset()
     }
 
-    fun textureView(
-        origtexture: TextureObject,
-        internalformat: Int,
+    internal fun _createView(
+        view: TextureObject,
+        internalformat: ImageFormat.Sized,
         minlevel: Int,
         numlevels: Int,
         minlayer: Int,
         numlayers: Int
     ) {
-        tryCreate()
-        require(origtexture.levels != -1) { "Original texture must be allocated" }
-        glTextureView(id, target, origtexture.id, internalformat, minlevel, numlevels, minlayer, numlayers)
-        levels = numlevels
-        this.internalformat = internalformat
+        view.tryCreate()
+        glTextureView(view.id, target, this.id, internalformat.value, minlevel, numlevels, minlayer, numlayers)
+        view.internalformat = internalformat
+        view.levels = numlevels
     }
 
     override fun parameterf(pname: Int, param: Float) {
@@ -77,47 +76,52 @@ sealed class TextureObject private constructor(val target: Int, private val dele
 
     fun bindImageUnit(unit: Int, level: Int, layered: Boolean, layer: Int, access: Int) {
         checkCreated()
-        glBindImageTexture(unit, id, level, layered, layer, access, this.internalformat)
+        val format = this.internalformat
+        check(format != null) { "Internal format must be set" }
+        glBindImageTexture(unit, id, level, layered, layer, access, format.value)
     }
 
     fun unbindImageUnit(unit: Int) {
         checkCreated()
-        glBindImageTexture(unit, 0, 0, false, 0, GL_READ_WRITE, this.internalformat)
+        val format = this.internalformat
+        check(format != null) { "Internal format must be set" }
+        glBindImageTexture(unit, 0, 0, false, 0, GL_READ_WRITE, format.value)
     }
 
     fun clearImage() {
         checkCreated()
         val clearFormat = when (internalformat) {
-            GL_DEPTH_COMPONENT,
-            GL_DEPTH_COMPONENT16,
-            GL_DEPTH_COMPONENT24,
-            GL_DEPTH_COMPONENT32,
-            GL_DEPTH_COMPONENT32F -> GL_DEPTH_COMPONENT
-            GL_DEPTH_STENCIL,
-            GL_DEPTH24_STENCIL8,
-            GL_DEPTH32F_STENCIL8 -> GL_DEPTH_STENCIL
+            is ImageFormat.DepthStencil -> GL_DEPTH_STENCIL
+            is ImageFormat.Depth -> GL_DEPTH_COMPONENT
+            is ImageFormat.Stencil -> GL_STENCIL_INDEX
             else -> GL_RGBA
         }
         val clearType = when (internalformat) {
-            GL_DEPTH_COMPONENT,
-            GL_DEPTH_COMPONENT16,
-            GL_DEPTH_COMPONENT24,
-            GL_DEPTH_COMPONENT32,
-            GL_DEPTH_COMPONENT32F -> GL_FLOAT
-            GL_DEPTH_STENCIL,
-            GL_DEPTH24_STENCIL8 -> GL_UNSIGNED_INT_24_8
-            GL_DEPTH32F_STENCIL8 -> GL_FLOAT_32_UNSIGNED_INT_24_8_REV
-            GL_R16F,
-            GL_RG16F,
-            GL_RGB16F,
-            GL_RGBA16F,
-            GL_R32F,
-            GL_RG32F,
-            GL_RGB32F,
-            GL_RGBA32F -> GL_FLOAT
+            ImageFormat.Depth32FStencil8 -> GL_DEPTH32F_STENCIL8
+            ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
+            ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE
+            is ImageFormat.Depth, is ImageFormat.Float -> GL_FLOAT
             else -> GL_UNSIGNED_BYTE
         }
         clearImage(clearFormat, clearType, Ptr.NULL)
+    }
+
+    fun clearImage(level: Int) {
+        checkCreated()
+        val clearFormat = when (internalformat) {
+            is ImageFormat.DepthStencil -> GL_DEPTH_STENCIL
+            is ImageFormat.Depth -> GL_DEPTH_COMPONENT
+            is ImageFormat.Stencil -> GL_STENCIL_INDEX
+            else -> GL_RGBA
+        }
+        val clearType = when (internalformat) {
+            ImageFormat.Depth32FStencil8 -> GL_DEPTH32F_STENCIL8
+            ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
+            ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE
+            is ImageFormat.Depth, is ImageFormat.Float -> GL_FLOAT
+            else -> GL_UNSIGNED_BYTE
+        }
+        clearImage(level, clearFormat, clearType, Ptr.NULL)
     }
 
     fun clearImage(level: Int, format: Int, type: Int, data: Ptr) {
@@ -144,11 +148,16 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
     }
 
-    sealed interface ArrayTexture : FramebufferObject.LayeredAttachment {
-        val layers: Int
+    sealed interface LayeredTexture : FramebufferObject.LayeredAttachment {
+        override val layers: Int
     }
 
-    sealed interface CubemapTexture : FramebufferObject.LayeredAttachment
+    sealed interface ArrayTexture : LayeredTexture
+
+    sealed interface CubemapTexture : LayeredTexture {
+        override val layers: Int
+            get() = 6
+    }
 
     sealed interface RegularTexture : FramebufferObject.Attachment
 
@@ -161,13 +170,13 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeX = 0
         }
 
-        fun allocate(levels: Int, internalformat: Int, width: Int) {
+        fun allocate(levels: Int, internalformat: ImageFormat.Sized, width: Int) {
             check(sizeX == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
             this.internalformat = internalformat
             sizeX = width
-            glTextureStorage1D(id, levels, internalformat, width)
+            glTextureStorage1D(id, levels, internalformat.value, width)
             clearImage()
         }
 
@@ -276,14 +285,14 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeY = 0
         }
 
-        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int) {
+        fun allocate(levels: Int, internalformat: ImageFormat.Sized, width: Int, height: Int) {
             check(sizeX == 0 && sizeY == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
             this.internalformat = internalformat
             sizeX = width
             sizeY = height
-            glTextureStorage2D(id, levels, internalformat, width, height)
+            glTextureStorage2D(id, levels, internalformat.value, width, height)
             clearImage()
         }
 
@@ -414,7 +423,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeZ = 0
         }
 
-        fun allocate(levels: Int, internalformat: Int, width: Int, height: Int, depth: Int) {
+        fun allocate(levels: Int, internalformat: ImageFormat.Sized, width: Int, height: Int, depth: Int) {
             check(sizeX == 0 && sizeY == 0 && sizeZ == 0) { "Texture already allocated" }
             tryCreate()
             this.levels = levels
@@ -422,7 +431,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             sizeX = width
             sizeY = height
             sizeZ = depth
-            glTextureStorage3D(id, levels, internalformat, width, height, depth)
+            glTextureStorage3D(id, levels, internalformat.value, width, height, depth)
             clearImage()
         }
 
@@ -563,7 +572,10 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
 
         class Texture3D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex3D(type, GL_TEXTURE_3D),
-            RegularTexture, FramebufferObject.LayeredAttachment
+            RegularTexture, FramebufferObject.LayeredAttachment {
+            override val layers: Int
+                get() = sizeZ
+        }
 
         class Texture2DArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
             Tex3D(type, GL_TEXTURE_2D_ARRAY), ArrayTexture {
@@ -721,4 +733,32 @@ fun bindTextures(firstUnit: Int, textures: Collection<TextureObject>) {
         textures.forEach { ptr = ptr.setIntInc(it.id) }
         glBindTextures(firstUnit, textures.size, ptr)
     }
+}
+
+fun <T : TextureObject> T.createView(
+    internalformat: ImageFormat.Sized,
+    minlevel: Int,
+    numlevels: Int,
+    minlayer: Int,
+    numlayers: Int
+): T {
+    require(this.levels != -1) { "Original texture must be allocated" }
+    require(minlevel >= 0 && numlevels >= 1) { "Invalid level range" }
+    require(minlevel + numlevels <= this.levels) { "Invalid level range" }
+    require(minlayer >= 0 && numlayers >= 1) { "Invalid layer range" }
+    if (this is TextureObject.LayeredTexture) {
+        require(minlayer + numlayers <= this.layers) { "Invalid layer range" }
+    } else {
+        require(minlayer == 0 && numlayers == 1) { "Invalid layer range" }
+    }
+
+    val srcFormat = this.internalformat
+    if (internalformat != srcFormat) {
+        require(internalformat is ImageFormat.TextureViewAliasing && srcFormat is ImageFormat.TextureViewAliasing) { "Image format does not support aliasing" }
+        require(internalformat.viewClass == srcFormat.viewClass) { "Image format base must be match" }
+    }
+
+    val view = this.javaClass.getConstructor(GLObjectType.Texture::class.java).newInstance(GLObjectType.Texture.View)
+    _createView(view, internalformat, minlevel, numlevels, minlayer, numlayers)
+    return view
 }

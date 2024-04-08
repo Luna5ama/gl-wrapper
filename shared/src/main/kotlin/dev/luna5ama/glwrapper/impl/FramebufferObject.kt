@@ -56,9 +56,9 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
 
-    fun attachLayerSingle(texture: LayeredAttachment, attachment: Int, face: Int, level: Int = 0) {
+    fun attachLayerSingle(texture: LayeredAttachment, attachment: Int, layer: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
-        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, face)
+        glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
     }
 
     fun attachNonLayered(texture: NonLayeredAttachment, attachment: Int, level: Int = 0) {
@@ -234,6 +234,8 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     }
 
     sealed interface Attachment : IGLObject, IGLSized1D
-    sealed interface LayeredAttachment : Attachment
+    sealed interface LayeredAttachment : Attachment {
+        val layers: Int
+    }
     sealed interface NonLayeredAttachment : Attachment
 }
