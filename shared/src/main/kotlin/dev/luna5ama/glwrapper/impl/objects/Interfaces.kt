@@ -1,6 +1,7 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper.impl.objects
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.impl.GLObjectType
 
 interface IGLBinding {
     fun bind()

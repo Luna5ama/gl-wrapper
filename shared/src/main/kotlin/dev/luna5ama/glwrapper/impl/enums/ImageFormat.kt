@@ -1,11 +1,10 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper.impl.enums
 
 import dev.luna5ama.glwrapper.api.*
 import kotlin.reflect.KClass
 
 @Suppress("ClassName")
-sealed interface ImageFormat {
-    val value: Int
+sealed interface ImageFormat: GLEnum {
     val channels: Int
 
     sealed interface TextureViewAliasing : ImageFormat {
@@ -425,7 +424,8 @@ sealed interface ImageFormat {
         override val aBits = 16
     }
 
-    data object R16_G16_B16_A16_SN : RGBA(GL_RGBA16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_64Bit {
+    data object R16_G16_B16_A16_SN : RGBA(GL_RGBA16_SNORM), Uncompressed, SignedNormalized,
+        TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
@@ -558,7 +558,8 @@ sealed interface ImageFormat {
         override val aBits = 0
     }
 
-    data object R8_G8_B8_A8_SRGB : RGBA(GL_SRGB8_ALPHA8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R8_G8_B8_A8_SRGB : RGBA(GL_SRGB8_ALPHA8), Uncompressed, UnsignedNormalized,
+        TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
@@ -586,14 +587,22 @@ sealed interface ImageFormat {
     data object RGB_SRGB_C : RGB(GL_COMPRESSED_SRGB), Compressed, Compressed.Generic, UnsignedNormalized
     data object RGBA_SRGB_C : RGBA(GL_COMPRESSED_SRGB_ALPHA), Compressed, Compressed.Generic, UnsignedNormalized
 
-    data object R_UN_RGTC1 : R(GL_COMPRESSED_RED_RGTC1), Compressed.RGTC, UnsignedNormalized, TextureViewAliasing.RGTC1_RED
-    data object R_SN_RGTC1 : R(GL_COMPRESSED_SIGNED_RED_RGTC1), Compressed.RGTC, SignedNormalized, TextureViewAliasing.RGTC1_RED
-    data object RG_UN_RGTC2 : RG(GL_COMPRESSED_RG_RGTC2), Compressed.RGTC, UnsignedNormalized, TextureViewAliasing.RGTC2_RG
-    data object RG_SN_RGTC2 : RG(GL_COMPRESSED_SIGNED_RG_RGTC2), Compressed.RGTC, SignedNormalized, TextureViewAliasing.RGTC2_RG
-    data object RGBA_UN_BPTC : RGBA(GL_COMPRESSED_RGBA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized, TextureViewAliasing.BPTC_UNORM
-    data object RGBA_SRGB_BPTC : RGBA(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized, TextureViewAliasing.BPTC_UNORM
-    data object RGB_SF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT), Compressed.BPTC, Float, TextureViewAliasing.BPTC_FLOAT
-    data object RGB_UF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT), Compressed.BPTC, Float, TextureViewAliasing.BPTC_FLOAT
+    data object R_UN_RGTC1 : R(GL_COMPRESSED_RED_RGTC1), Compressed.RGTC, UnsignedNormalized,
+        TextureViewAliasing.RGTC1_RED
+    data object R_SN_RGTC1 : R(GL_COMPRESSED_SIGNED_RED_RGTC1), Compressed.RGTC, SignedNormalized,
+        TextureViewAliasing.RGTC1_RED
+    data object RG_UN_RGTC2 : RG(GL_COMPRESSED_RG_RGTC2), Compressed.RGTC, UnsignedNormalized,
+        TextureViewAliasing.RGTC2_RG
+    data object RG_SN_RGTC2 : RG(GL_COMPRESSED_SIGNED_RG_RGTC2), Compressed.RGTC, SignedNormalized,
+        TextureViewAliasing.RGTC2_RG
+    data object RGBA_UN_BPTC : RGBA(GL_COMPRESSED_RGBA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized,
+        TextureViewAliasing.BPTC_UNORM
+    data object RGBA_SRGB_BPTC : RGBA(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized,
+        TextureViewAliasing.BPTC_UNORM
+    data object RGB_SF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT), Compressed.BPTC, Float,
+        TextureViewAliasing.BPTC_FLOAT
+    data object RGB_UF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT), Compressed.BPTC, Float,
+        TextureViewAliasing.BPTC_FLOAT
 
     data object R11_UN_EAC : R(GL_COMPRESSED_R11_EAC), Compressed.EAC, UnsignedNormalized
     data object R11_SN_EAC : R(GL_COMPRESSED_SIGNED_R11_EAC), Compressed.EAC, SignedNormalized
@@ -614,10 +623,14 @@ sealed interface ImageFormat {
     data object R8_G8_B8_A8_SRGB_ETC2 : RGBA(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC), Compressed.ETC2, Compressed.EAC,
         UnsignedNormalized
 
-    data object RGB_S3TC_DXT1 : RGB(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1, UnsignedNormalized
-    data object RGBA_S3TC_DXT1 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1, UnsignedNormalized
-    data object RGBA_S3TC_DXT3 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT), Compressed.S3TC, Compressed.S3TC.DXT3, UnsignedNormalized
-    data object RGBA_S3TC_DXT5 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT), Compressed.S3TC, Compressed.S3TC.DXT5, UnsignedNormalized
+    data object RGB_S3TC_DXT1 : RGB(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1,
+        UnsignedNormalized
+    data object RGBA_S3TC_DXT1 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1,
+        UnsignedNormalized
+    data object RGBA_S3TC_DXT3 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT), Compressed.S3TC, Compressed.S3TC.DXT3,
+        UnsignedNormalized
+    data object RGBA_S3TC_DXT5 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT), Compressed.S3TC, Compressed.S3TC.DXT5,
+        UnsignedNormalized
 
     data object Depth16 : Depth {
         override val value = GL_DEPTH_COMPONENT16

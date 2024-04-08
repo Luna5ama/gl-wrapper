@@ -1,7 +1,8 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper.impl.objects
 
 import dev.luna5ama.glwrapper.api.glNamedRenderbufferStorage
 import dev.luna5ama.glwrapper.api.glNamedRenderbufferStorageMultisample
+import dev.luna5ama.glwrapper.impl.GLObjectType
 
 class RenderbufferObject :
     IGLObject by IGLObject.Impl(GLObjectType.Renderbuffer),

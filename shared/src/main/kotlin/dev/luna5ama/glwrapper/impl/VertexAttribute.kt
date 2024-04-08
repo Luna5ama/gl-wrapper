@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.impl.objects.VertexArrayObject
 
 class VertexAttribute private constructor(val stride: Int, private val divisor: Int, private val entries: List<Entry>) {
     fun apply(vao: VertexArrayObject, binding: Int) {
