@@ -746,6 +746,14 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 }
             }
             "GL40" -> {
+                visitor.addFuncWithTopLevel(
+                    "glGetSubroutineIndex",
+                    listOf(INT to "program", INT to "shadertype", CHAR_SEQUENCE to "name"),
+                    INT
+                ) {
+                    addModifiers(KModifier.ABSTRACT)
+                }
+
                 visitor.addFuncWithTopLevel("glDeleteTransformFeedbacks", listOf(INT to "transformFeedback"), UNIT) {
                     addModifiers(KModifier.ABSTRACT)
                 }

@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper.impl
 
 import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 import it.unimi.dsi.fastutil.objects.Object2ByteMap
 import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap
@@ -22,6 +23,7 @@ open class ShaderProgram(
     private val uniformLocations = Object2IntOpenHashMap<String>().apply {
         defaultReturnValue(-1)
     }
+    private val subroutineIndices = EnumMap<ShaderType, Object2IntOpenHashMap<String>>(ShaderType::class.java)
 
     private var labelName: String? = null
 
@@ -111,6 +113,32 @@ open class ShaderProgram(
         uniformLookUpCache = loc
 
         return loc
+    }
+
+    fun locateSubroutineIndex(shaderType: ShaderType, name: String): Int {
+        val map = subroutineIndices.getOrPut(shaderType) {
+            Object2IntOpenHashMap<String>().apply {
+                defaultReturnValue(-1)
+            }
+        }
+        var index = map.getInt(name)
+        if (index == -1) {
+            index = glGetSubroutineIndex(id, shaderType.value, name)
+            map.put(name, index)
+        }
+
+        return index
+    }
+
+    fun uniformSubroutines(shaderType: ShaderType, vararg subroutineNames: String) {
+        MemoryStack {
+            val arr = malloc(subroutineNames.size * 4L)
+            val ptr = arr.ptr
+            for (i in subroutineNames.indices) {
+                ptr.setInt(i * 4L, locateSubroutineIndex(shaderType, subroutineNames[i]))
+            }
+            glUniformSubroutinesuiv(shaderType.value, subroutineNames.size, ptr)
+        }
     }
 
     fun uniform1i(name: String, value: Int) {
