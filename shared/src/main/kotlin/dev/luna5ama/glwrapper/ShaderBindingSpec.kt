@@ -1,9 +1,9 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.impl.enums.BufferTarget
-import dev.luna5ama.glwrapper.impl.objects.BufferObject
-import dev.luna5ama.glwrapper.impl.objects.SamplerObject
-import dev.luna5ama.glwrapper.impl.objects.TextureObject
+import dev.luna5ama.glwrapper.enums.BufferTarget
+import dev.luna5ama.glwrapper.objects.BufferObject
+import dev.luna5ama.glwrapper.objects.SamplerObject
+import dev.luna5ama.glwrapper.objects.TextureObject
 import kotlin.contracts.contract
 
 sealed interface ShaderBindingSpec {

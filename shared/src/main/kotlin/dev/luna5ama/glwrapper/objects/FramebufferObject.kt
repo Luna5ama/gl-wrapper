@@ -1,7 +1,8 @@
-package dev.luna5ama.glwrapper.impl.objects
+package dev.luna5ama.glwrapper.objects
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.impl.*
+import dev.luna5ama.glwrapper.*
+import dev.luna5ama.glwrapper.enums.GLObjectType
 import dev.luna5ama.kmogus.MemoryStack
 
 class FramebufferObject private constructor(private val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding,

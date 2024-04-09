@@ -1,8 +1,8 @@
-package dev.luna5ama.glwrapper.impl.objects
+package dev.luna5ama.glwrapper.objects
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.impl.GLObjectType
-import dev.luna5ama.glwrapper.impl.enums.ImageFormat
+import dev.luna5ama.glwrapper.enums.GLObjectType
+import dev.luna5ama.glwrapper.enums.ImageFormat
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 

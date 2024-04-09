@@ -1,4 +1,4 @@
-package dev.luna5ama.glwrapper.impl.enums
+package dev.luna5ama.glwrapper.enums
 
 import dev.luna5ama.glwrapper.api.*
 

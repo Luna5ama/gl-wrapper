@@ -1,11 +1,12 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.impl.enums.BufferTarget
-import dev.luna5ama.glwrapper.impl.enums.GLSLDataType
-import dev.luna5ama.glwrapper.impl.enums.ShaderType
-import dev.luna5ama.glwrapper.impl.objects.IGLBinding
-import dev.luna5ama.glwrapper.impl.objects.IGLObject
+import dev.luna5ama.glwrapper.enums.BufferTarget
+import dev.luna5ama.glwrapper.enums.GLObjectType
+import dev.luna5ama.glwrapper.enums.GLSLDataType
+import dev.luna5ama.glwrapper.enums.ShaderType
+import dev.luna5ama.glwrapper.objects.IGLBinding
+import dev.luna5ama.glwrapper.objects.IGLObject
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.memcpy

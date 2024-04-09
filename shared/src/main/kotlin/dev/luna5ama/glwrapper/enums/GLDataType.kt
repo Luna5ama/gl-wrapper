@@ -1,4 +1,4 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper.enums
 
 enum class GLDataType(val glEnum: Int, val size: Int) {
     GL_BYTE(dev.luna5ama.glwrapper.api.GL_BYTE, 1),

@@ -1,4 +1,4 @@
-package dev.luna5ama.glwrapper.impl
+package dev.luna5ama.glwrapper
 
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.kmogus.Arr

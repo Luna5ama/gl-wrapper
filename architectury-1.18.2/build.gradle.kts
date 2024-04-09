@@ -12,7 +12,7 @@ architecturyProject {
 
         tasks {
             jar {
-                destinationDirectory.set(file("${project.buildDir}/libs"))
+                destinationDirectory.set(project.layout.buildDirectory.dir("libs"))
                 destinationDirectory.disallowChanges()
             }
         }
