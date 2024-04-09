@@ -72,7 +72,7 @@ sealed interface ImageFormat: GLEnum {
             get() = rBits + gBits + bBits + aBits
     }
 
-    sealed interface Compressed : ImageFormat {
+    sealed interface Compressed : ImageFormat, Sized {
         sealed interface Generic : Compressed
         sealed interface Specific : Compressed
         sealed interface RGTC : Specific

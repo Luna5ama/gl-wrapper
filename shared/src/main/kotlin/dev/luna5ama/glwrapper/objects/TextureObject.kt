@@ -1,15 +1,16 @@
 package dev.luna5ama.glwrapper.objects
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.enums.GLObjectType
 import dev.luna5ama.glwrapper.enums.ImageFormat
 import dev.luna5ama.kmogus.MemoryStack
 import dev.luna5ama.kmogus.Ptr
+import dev.luna5ama.glwrapper.enums.GLObjectType.Texture as TextureObjectType
+import dev.luna5ama.glwrapper.enums.GLObjectType.Texture.Storage as TextureStorage
+import dev.luna5ama.glwrapper.objects.FramebufferObject as FBO
 
-@Suppress("FunctionName")
 sealed class TextureObject private constructor(val target: Int, private val delegate: IGLObject.Impl) :
-    IGLObject by delegate, IGLSampler, FramebufferObject.Attachment {
-    constructor(type: GLObjectType.Texture = GLObjectType.Texture.Storage, target: Int) : this(
+    IGLObject by delegate, IGLSampler, FBO.Attachment {
+    constructor(type: TextureObjectType = TextureStorage, target: Int) : this(
         target,
         IGLObject.Impl(type, target)
     )
@@ -150,7 +151,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         }
     }
 
-    sealed interface LayeredTexture : FramebufferObject.LayeredAttachment {
+    sealed interface LayeredTexture : FBO.LayeredAttachment {
         override val layers: Int
     }
 
@@ -161,10 +162,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             get() = 6
     }
 
-    sealed interface RegularTexture : FramebufferObject.Attachment
+    sealed interface RegularTexture : FBO.Attachment
 
-    sealed class Tex1D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
-        IGLSized1D {
+    sealed class Tex1D(type: TextureObjectType, target: Int) : TextureObject(type, target), IGLSized1D {
         final override var sizeX = 0; private set
 
         override fun reset() {
@@ -271,13 +271,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             checkCreated()
             glInvalidateTexSubImage(id, level, xoffset, 0, 0, width, 1, 1)
         }
-
-        class Texture1D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex1D(type, GL_TEXTURE_1D),
-            RegularTexture, FramebufferObject.NonLayeredAttachment
     }
 
-    sealed class Tex2D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
-        IGLSized2D {
+    sealed class Tex2D(type: TextureObjectType, target: Int) : TextureObject(type, target), IGLSized2D {
         final override var sizeX = 0; private set
         final override var sizeY = 0; private set
 
@@ -398,22 +394,9 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             checkCreated()
             glInvalidateTexSubImage(id, level, xoffset, yoffset, 0, width, height, 1)
         }
-
-        class Texture2D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex2D(type, GL_TEXTURE_2D),
-            RegularTexture, FramebufferObject.NonLayeredAttachment
-
-        class Texture1DArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
-            Tex2D(type, GL_TEXTURE_1D_ARRAY), ArrayTexture {
-            override val layers: Int
-                get() = sizeY
-        }
-
-        class TextureCubemap(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
-            Tex2D(type, GL_TEXTURE_CUBE_MAP), CubemapTexture
     }
 
-    sealed class Tex3D private constructor(type: GLObjectType.Texture, target: Int) : TextureObject(type, target),
-        IGLSized3D {
+    sealed class Tex3D(type: TextureObjectType, target: Int) : TextureObject(type, target), IGLSized3D {
         final override var sizeX = 0; private set
         final override var sizeY = 0; private set
         final override var sizeZ = 0; private set
@@ -572,24 +555,40 @@ sealed class TextureObject private constructor(val target: Int, private val dele
             checkCreated()
             glInvalidateTexSubImage(id, level, xoffset, yoffset, zoffset, width, height, depth)
         }
+    }
 
-        class Texture3D(type: GLObjectType.Texture = GLObjectType.Texture.Storage) : Tex3D(type, GL_TEXTURE_3D),
-            RegularTexture, FramebufferObject.LayeredAttachment {
-            override val layers: Int
-                get() = sizeZ
-        }
+    class Texture1D(type: TextureObjectType = TextureStorage) : Tex1D(type, GL_TEXTURE_1D),
+        RegularTexture, FBO.NonLayeredAttachment
 
-        class Texture2DArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
-            Tex3D(type, GL_TEXTURE_2D_ARRAY), ArrayTexture {
-            override val layers: Int
-                get() = sizeZ
-        }
+    class Texture2D(type: TextureObjectType = TextureStorage) : Tex2D(type, GL_TEXTURE_2D),
+        RegularTexture, FBO.NonLayeredAttachment
 
-        class TextureCubemapArray(type: GLObjectType.Texture = GLObjectType.Texture.Storage) :
-            Tex3D(type, GL_TEXTURE_CUBE_MAP_ARRAY), CubemapTexture, ArrayTexture {
-            override val layers: Int
-                get() = sizeZ
-        }
+    class Texture1DArray(type: TextureObjectType = TextureStorage) : Tex2D(type, GL_TEXTURE_1D_ARRAY),
+        ArrayTexture {
+        override val layers: Int
+            get() = sizeY
+    }
+
+    class TextureCubemap(type: TextureObjectType = TextureStorage) : Tex2D(type, GL_TEXTURE_CUBE_MAP),
+        CubemapTexture
+
+    class Texture3D(type: TextureObjectType = TextureStorage) : Tex3D(type, GL_TEXTURE_3D),
+        RegularTexture, FBO.LayeredAttachment {
+        override val layers: Int
+            get() = sizeZ
+    }
+
+    class Texture2DArray(type: TextureObjectType = TextureStorage) : Tex3D(type, GL_TEXTURE_2D_ARRAY),
+        ArrayTexture {
+        override val layers: Int
+            get() = sizeZ
+    }
+
+    class TextureCubemapArray(type: TextureObjectType = TextureStorage) : Tex3D(type, GL_TEXTURE_CUBE_MAP_ARRAY),
+        CubemapTexture,
+        ArrayTexture {
+        override val layers: Int
+            get() = sizeZ
     }
 }
 
@@ -760,7 +759,7 @@ fun <T : TextureObject> T.createView(
         require(internalformat.viewClass == srcFormat.viewClass) { "Image format base must be match" }
     }
 
-    val view = this.javaClass.getConstructor(GLObjectType.Texture::class.java).newInstance(GLObjectType.Texture.View)
+    val view = this.javaClass.getConstructor(TextureObjectType::class.java).newInstance(TextureObjectType.View)
     _createView(view, internalformat, minlevel, numlevels, minlayer, numlayers)
     return view
 }
