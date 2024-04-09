@@ -2,7 +2,7 @@ package dev.luna5ama.glwrapper.impl.enums
 
 import dev.luna5ama.glwrapper.api.*
 
-sealed interface GLSLDataTypes : GLEnum {
+sealed interface GLSLDataType : GLEnum {
     sealed interface UniformType {
         sealed interface Bool : UniformType
         sealed interface Int : UniformType
@@ -18,13 +18,13 @@ sealed interface GLSLDataTypes : GLEnum {
         sealed interface Shadow : ImageType
     }
 
-    sealed interface Value : GLSLDataTypes {
+    sealed interface Value : GLSLDataType {
         sealed class Scalar(override val value: kotlin.Int) : Value
         sealed class Vector(override val value: kotlin.Int) : Value
         sealed class Matrix(override val value: kotlin.Int) : Value
     }
 
-    sealed class Opaque : GLSLDataTypes {
+    sealed class Opaque : GLSLDataType {
         sealed class Sampler private constructor(): Opaque(), UniformType.Int {
             sealed class Sampler1D(override val value: kotlin.Int) : Sampler()
             sealed class Sampler2D(override val value: kotlin.Int) : Sampler()
@@ -157,7 +157,7 @@ sealed interface GLSLDataTypes : GLEnum {
     }
 
     companion object {
-        operator fun get(value: kotlin.Int): GLSLDataTypes = when (value) {
+        operator fun get(value: kotlin.Int): GLSLDataType = when (value) {
             GL_BOOL -> Bool
             GL_INT -> Int
             GL_UNSIGNED_INT -> UInt
