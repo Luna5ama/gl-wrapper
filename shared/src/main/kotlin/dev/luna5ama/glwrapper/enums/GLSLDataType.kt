@@ -146,6 +146,40 @@ sealed interface GLSLDataType : GLEnum {
     data object SamplerCubeArrayShadow : Opaque.Sampler.SamplerCubeArray(GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW),
         ImageType.Shadow
 
+    data object Image1D : Opaque.Image.Image1D(GL_IMAGE_1D), ImageType.Float
+    data object Image2D : Opaque.Image.Image2D(GL_IMAGE_2D), ImageType.Float
+    data object Image3D : Opaque.Image.Image3D(GL_IMAGE_3D), ImageType.Float
+    data object ImageCube : Opaque.Image.ImageCube(GL_IMAGE_CUBE), ImageType.Float
+    data object ImageBuffer : Opaque.Image.ImageBuffer(GL_IMAGE_BUFFER), ImageType.Float
+    data object Image1DArray : Opaque.Image.Image1DArray(GL_IMAGE_1D_ARRAY), ImageType.Float
+    data object Image2DArray : Opaque.Image.Image2DArray(GL_IMAGE_2D_ARRAY), ImageType.Float
+    data object Image2DMS : Opaque.Image.Image2DMS(GL_IMAGE_2D_MULTISAMPLE), ImageType.Float
+    data object Image2DMSArray : Opaque.Image.Image2DMSArray(GL_IMAGE_2D_MULTISAMPLE_ARRAY), ImageType.Float
+    data object ImageCubeArray : Opaque.Image.ImageCubeArray(GL_IMAGE_CUBE_MAP_ARRAY), ImageType.Float
+
+    data object IImage1D : Opaque.Image.Image1D(GL_INT_IMAGE_1D), ImageType.Int
+    data object IImage2D : Opaque.Image.Image2D(GL_INT_IMAGE_2D), ImageType.Int
+    data object IImage3D : Opaque.Image.Image3D(GL_INT_IMAGE_3D), ImageType.Int
+    data object IImageCube : Opaque.Image.ImageCube(GL_INT_IMAGE_CUBE), ImageType.Int
+    data object IImageBuffer : Opaque.Image.ImageBuffer(GL_INT_IMAGE_BUFFER), ImageType.Int
+    data object IImage1DArray : Opaque.Image.Image1DArray(GL_INT_IMAGE_1D_ARRAY), ImageType.Int
+    data object IImage2DArray : Opaque.Image.Image2DArray(GL_INT_IMAGE_2D_ARRAY), ImageType.Int
+    data object IImage2DMS : Opaque.Image.Image2DMS(GL_INT_IMAGE_2D_MULTISAMPLE), ImageType.Int
+    data object IImage2DMSArray : Opaque.Image.Image2DMSArray(GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY), ImageType.Int
+    data object IImageCubeArray : Opaque.Image.ImageCubeArray(GL_INT_IMAGE_CUBE_MAP_ARRAY), ImageType.Int
+
+    data object UImage1D : Opaque.Image.Image1D(GL_UNSIGNED_INT_IMAGE_1D), ImageType.UInt
+    data object UImage2D : Opaque.Image.Image2D(GL_UNSIGNED_INT_IMAGE_2D), ImageType.UInt
+    data object UImage3D : Opaque.Image.Image3D(GL_UNSIGNED_INT_IMAGE_3D), ImageType.UInt
+    data object UImageCube : Opaque.Image.ImageCube(GL_UNSIGNED_INT_IMAGE_CUBE), ImageType.UInt
+    data object UImageBuffer : Opaque.Image.ImageBuffer(GL_UNSIGNED_INT_IMAGE_BUFFER), ImageType.UInt
+    data object UImage1DArray : Opaque.Image.Image1DArray(GL_UNSIGNED_INT_IMAGE_1D_ARRAY), ImageType.UInt
+    data object UImage2DArray : Opaque.Image.Image2DArray(GL_UNSIGNED_INT_IMAGE_2D_ARRAY), ImageType.UInt
+    data object UImage2DMS : Opaque.Image.Image2DMS(GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE), ImageType.UInt
+    data object UImage2DMSArray : Opaque.Image.Image2DMSArray(GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY), ImageType.UInt
+    data object UImageCubeArray : Opaque.Image.ImageCubeArray(GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY), ImageType.UInt
+
+
     data object AtomicCounter : Opaque.AtomicCounter() {
         override val value: kotlin.Int
             get() = GL_UNSIGNED_INT_ATOMIC_COUNTER
@@ -246,6 +280,39 @@ sealed interface GLSLDataType : GLEnum {
             GL_SAMPLER_2D_ARRAY_SHADOW -> Sampler2DArrayShadow
             GL_SAMPLER_CUBE_SHADOW -> SamplerCubeShadow
             GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW -> SamplerCubeArrayShadow
+
+            GL_IMAGE_1D -> Image1D
+            GL_IMAGE_2D -> Image2D
+            GL_IMAGE_3D -> Image3D
+            GL_IMAGE_CUBE -> ImageCube
+            GL_IMAGE_BUFFER -> ImageBuffer
+            GL_IMAGE_1D_ARRAY -> Image1DArray
+            GL_IMAGE_2D_ARRAY -> Image2DArray
+            GL_IMAGE_2D_MULTISAMPLE -> Image2DMS
+            GL_IMAGE_2D_MULTISAMPLE_ARRAY -> Image2DMSArray
+            GL_IMAGE_CUBE_MAP_ARRAY -> ImageCubeArray
+
+            GL_INT_IMAGE_1D -> IImage1D
+            GL_INT_IMAGE_2D -> IImage2D
+            GL_INT_IMAGE_3D -> IImage3D
+            GL_INT_IMAGE_CUBE -> IImageCube
+            GL_INT_IMAGE_BUFFER -> IImageBuffer
+            GL_INT_IMAGE_1D_ARRAY -> IImage1DArray
+            GL_INT_IMAGE_2D_ARRAY -> IImage2DArray
+            GL_INT_IMAGE_2D_MULTISAMPLE -> IImage2DMS
+            GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY -> IImage2DMSArray
+            GL_INT_IMAGE_CUBE_MAP_ARRAY -> IImageCubeArray
+
+            GL_UNSIGNED_INT_IMAGE_1D -> UImage1D
+            GL_UNSIGNED_INT_IMAGE_2D -> UImage2D
+            GL_UNSIGNED_INT_IMAGE_3D -> UImage3D
+            GL_UNSIGNED_INT_IMAGE_CUBE -> UImageCube
+            GL_UNSIGNED_INT_IMAGE_BUFFER -> UImageBuffer
+            GL_UNSIGNED_INT_IMAGE_1D_ARRAY -> UImage1DArray
+            GL_UNSIGNED_INT_IMAGE_2D_ARRAY -> UImage2DArray
+            GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE -> UImage2DMS
+            GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY -> UImage2DMSArray
+            GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY -> UImageCubeArray
 
             else -> throw IllegalArgumentException("Invalid value: $value")
         }
