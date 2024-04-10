@@ -32,6 +32,16 @@ sealed interface ShaderBindingSpec {
                 bindings[name] = Binding(name, texture, sampler)
             }
 
+            fun add(binding: Binding) {
+                bindings[binding.name] = binding
+            }
+
+            fun add(bindings: Sampler) {
+                bindings.bindings.values.forEach {
+                    add(it)
+                }
+            }
+
             fun build() = Sampler(bindings)
         }
 
@@ -68,6 +78,16 @@ sealed interface ShaderBindingSpec {
 
             fun add(name: String, texture: TextureObject) {
                 bindings[name] = Binding(name, texture)
+            }
+
+            fun add(binding: Binding) {
+                bindings[binding.name] = binding
+            }
+
+            fun add(bindings: Image) {
+                bindings.bindings.values.forEach {
+                    add(it)
+                }
             }
 
             fun build() = Image(bindings)
@@ -110,6 +130,18 @@ sealed interface ShaderBindingSpec {
 
             fun add(name: String, buffer: BufferObject, target: BufferTarget.Shader, offset: Int = 0, size: Int = -1) {
                 bindings.computeIfAbsent(target) { mutableMapOf() }[name] = Binding(name, buffer, target, offset, size)
+            }
+
+            fun add(binding: Binding) {
+                bindings.computeIfAbsent(binding.target) { mutableMapOf() }[binding.name] = binding
+            }
+
+            fun add(bindings: Buffer) {
+                bindings.bindings.values.forEach { map ->
+                    map.values.forEach {
+                        add(it)
+                    }
+                }
             }
 
             fun build() = Buffer(bindings)
