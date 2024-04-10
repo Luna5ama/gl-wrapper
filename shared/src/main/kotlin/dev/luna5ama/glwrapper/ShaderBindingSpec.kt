@@ -13,6 +13,17 @@ sealed interface ShaderBindingSpec {
 
         class Binding(val name: String, val texture: TextureObject, val sampler: SamplerObject)
 
+        inline fun copy(block: Builder.() -> Unit): Sampler {
+            contract {
+                callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE)
+            }
+            return Builder(this).apply(block).build()
+        }
+
+        operator fun plus(other: Sampler): Sampler {
+            return Sampler(bindings + other.bindings)
+        }
+
         class Builder private constructor(private val bindings: MutableMap<String, Binding>) {
             constructor() : this(mutableMapOf())
             constructor(samplers: Sampler) : this(samplers.bindings.toMutableMap())
@@ -22,13 +33,6 @@ sealed interface ShaderBindingSpec {
             }
 
             fun build() = Sampler(bindings)
-        }
-
-        inline fun copy(block: Builder.() -> Unit): Sampler {
-            contract {
-                callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE)
-            }
-            return Builder(this).apply(block).build()
         }
 
         companion object {
@@ -44,16 +48,8 @@ sealed interface ShaderBindingSpec {
 
         class Binding(
             val name: String,
-            val texture: TextureObject,
-            val access: Int,
-            val format: Int,
-            val level: Int,
-            val layered: Int,
-            val layer: Int,
-        ) {
-            constructor(name: String, texture: TextureObject) :
-                this(name, texture, 0, 0, 0, -1, 0)
-        }
+            val texture: TextureObject
+        )
 
         inline fun copy(block: Builder.() -> Unit) {
             contract {
@@ -62,27 +58,16 @@ sealed interface ShaderBindingSpec {
             Builder(this).apply(block).build()
         }
 
+        operator fun plus(other: Image): Image {
+            return Image(bindings + other.bindings)
+        }
+
         class Builder private constructor(private val bindings: MutableMap<String, Binding>) {
             constructor() : this(mutableMapOf())
             constructor(images: Image) : this(images.bindings.toMutableMap())
 
-            fun add(
-                name: String,
-                texture: TextureObject
-            ) {
+            fun add(name: String, texture: TextureObject) {
                 bindings[name] = Binding(name, texture)
-            }
-
-            fun add(
-                name: String,
-                texture: TextureObject,
-                access: Int,
-                format: Int,
-                level: Int,
-                layered: Int,
-                layer: Int,
-            ) {
-                bindings[name] = Binding(name, texture, access, format, level, layered, layer)
             }
 
             fun build() = Image(bindings)
@@ -113,6 +98,10 @@ sealed interface ShaderBindingSpec {
                 callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE)
             }
             Builder(this).apply(block).build()
+        }
+
+        operator fun plus(other: Buffer): Buffer {
+            return Buffer(bindings + other.bindings)
         }
 
         class Builder private constructor(private val bindings: MutableMap<BufferTarget.Shader, MutableMap<String, Binding>>) {

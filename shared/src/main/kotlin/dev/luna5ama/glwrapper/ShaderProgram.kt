@@ -553,18 +553,6 @@ open class ShaderProgram(
                     textures.setInt(index * 4L, binding.texture.id)
                 }
                 glBindImageTextures(0, spec.bindings.size, textures)
-                for (binding in spec.bindings.values) {
-                    if (binding.format == 0) continue
-                    glBindImageTexture(
-                        bindingIndices.getInt(binding.name),
-                        binding.texture.id,
-                        binding.level,
-                        binding.layered == 1,
-                        binding.layer,
-                        binding.access,
-                        binding.format
-                    )
-                }
             }
         }
     }
