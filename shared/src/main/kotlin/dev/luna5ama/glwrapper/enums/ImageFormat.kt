@@ -620,25 +620,6 @@ sealed interface ImageFormat : GLEnum {
     data object RGB_UF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT), Compressed.BPTC, Float,
         TextureViewAliasing.BPTC_FLOAT
 
-    data object R11_UN_EAC : R(GL_COMPRESSED_R11_EAC), Compressed.EAC, UnsignedNormalized
-    data object R11_SN_EAC : R(GL_COMPRESSED_SIGNED_R11_EAC), Compressed.EAC, SignedNormalized
-    data object RG11_UN_EAC : RG(GL_COMPRESSED_RG11_EAC), Compressed.EAC, UnsignedNormalized
-    data object RG11_SN_EAC : RG(GL_COMPRESSED_SIGNED_RG11_EAC), Compressed.EAC, SignedNormalized
-
-    data object R8_G8_B8_UN_ETC2 : R(GL_COMPRESSED_RGB8_ETC2), Compressed.ETC2, UnsignedNormalized
-    data object R8_G8_B8_SRGB_ETC2 : R(GL_COMPRESSED_SRGB8_ETC2), Compressed.ETC2, UnsignedNormalized
-    data object R8_G8_B8_A1_UN_ETC2 : RGBA(GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2), Compressed.ETC2,
-        UnsignedNormalized
-
-    data object R8_G8_B8_A1_SRGB_ETC2 : RGBA(GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2), Compressed.ETC2,
-        UnsignedNormalized
-
-    data object R8_G8_B8_A8_UN_ETC2 : RGBA(GL_COMPRESSED_RGBA8_ETC2_EAC), Compressed.ETC2, Compressed.EAC,
-        UnsignedNormalized
-
-    data object R8_G8_B8_A8_SRGB_ETC2 : RGBA(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC), Compressed.ETC2, Compressed.EAC,
-        UnsignedNormalized
-
     data object RGB_S3TC_DXT1 : RGB(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1,
         UnsignedNormalized
 
