@@ -495,7 +495,7 @@ open class ShaderProgram(
         fun apply(spec: T)
     }
 
-    inner class SamplerBindings : BindingManager<ShaderBindingSpec.Samplers> {
+    inner class SamplerBindings : BindingManager<ShaderBindingSpec.Sampler> {
         private val bindingIndices = Object2IntOpenHashMap<String>().apply {
             defaultReturnValue(-1)
         }
@@ -511,7 +511,7 @@ open class ShaderProgram(
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Samplers) {
+        override fun apply(spec: ShaderBindingSpec.Sampler) {
             require(spec.bindings.size == bindingIndices.size) { "Sampler binding size mismatch" }
             MemoryStack {
                 val textures = malloc(spec.bindings.size * 4L).ptr
@@ -528,7 +528,7 @@ open class ShaderProgram(
         }
     }
 
-    inner class ImageBindings : BindingManager<ShaderBindingSpec.Images> {
+    inner class ImageBindings : BindingManager<ShaderBindingSpec.Image> {
         private val bindingIndices = Object2IntOpenHashMap<String>().apply {
             defaultReturnValue(-1)
         }
@@ -543,7 +543,7 @@ open class ShaderProgram(
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Images) {
+        override fun apply(spec: ShaderBindingSpec.Image) {
             require(spec.bindings.size == bindingIndices.size) { "Image binding size mismatch" }
             MemoryStack {
                 val textures = malloc(spec.bindings.size * 4L).ptr
@@ -569,7 +569,7 @@ open class ShaderProgram(
         }
     }
 
-    inner class BufferBindings : BindingManager<ShaderBindingSpec.Buffers> {
+    inner class BufferBindings : BindingManager<ShaderBindingSpec.Buffer> {
         private val bindingIndicesMap = Object2ObjectOpenHashMap<BufferTarget.Shader, Object2IntOpenHashMap<String>>()
 
         init {
@@ -600,7 +600,7 @@ open class ShaderProgram(
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Buffers) {
+        override fun apply(spec: ShaderBindingSpec.Buffer) {
             require(spec.bindings.size == bindingIndicesMap.size) { "Sampler binding size mismatch" }
             for ((target, bindings) in spec.bindings) {
                 MemoryStack {
