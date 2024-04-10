@@ -4,57 +4,68 @@ import dev.luna5ama.glwrapper.api.*
 import kotlin.reflect.KClass
 
 @Suppress("ClassName")
-sealed interface ImageFormat: GLEnum {
+sealed interface ImageFormat : GLEnum {
     val channels: Int
 
     sealed interface TextureViewAliasing : ImageFormat {
         val viewClass: KClass<out TextureViewAliasing>
 
-        sealed interface UC_128Bit: TextureViewAliasing {
+        sealed interface UC_128Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_128Bit::class
         }
-        sealed interface UC_96Bit: TextureViewAliasing {
+
+        sealed interface UC_96Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_96Bit::class
         }
-        sealed interface UC_64Bit: TextureViewAliasing {
+
+        sealed interface UC_64Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_64Bit::class
         }
-        sealed interface UC_48Bit: TextureViewAliasing {
+
+        sealed interface UC_48Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_48Bit::class
         }
-        sealed interface UC_32Bit: TextureViewAliasing {
+
+        sealed interface UC_32Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_32Bit::class
         }
-        sealed interface UC_24Bit: TextureViewAliasing {
+
+        sealed interface UC_24Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_24Bit::class
         }
-        sealed interface UC_16Bit: TextureViewAliasing {
+
+        sealed interface UC_16Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_16Bit::class
         }
-        sealed interface UC_8Bit: TextureViewAliasing {
+
+        sealed interface UC_8Bit : TextureViewAliasing {
             override val viewClass
                 get() = UC_8Bit::class
         }
-        sealed interface RGTC1_RED: TextureViewAliasing {
+
+        sealed interface RGTC1_RED : TextureViewAliasing {
             override val viewClass
                 get() = RGTC1_RED::class
         }
-        sealed interface RGTC2_RG: TextureViewAliasing {
+
+        sealed interface RGTC2_RG : TextureViewAliasing {
             override val viewClass
                 get() = RGTC2_RG::class
         }
-        sealed interface BPTC_UNORM: TextureViewAliasing {
+
+        sealed interface BPTC_UNORM : TextureViewAliasing {
             override val viewClass
                 get() = BPTC_UNORM::class
         }
-        sealed interface BPTC_FLOAT: TextureViewAliasing {
+
+        sealed interface BPTC_FLOAT : TextureViewAliasing {
             override val viewClass
                 get() = BPTC_FLOAT::class
         }
@@ -99,8 +110,6 @@ sealed interface ImageFormat: GLEnum {
         override val channels: Int
             get() = 1
     }
-
-    sealed interface DepthFloat : Depth, Float
 
     sealed interface Stencil : ImageFormat {
         val stencilBits: Int
@@ -589,18 +598,25 @@ sealed interface ImageFormat: GLEnum {
 
     data object R_UN_RGTC1 : R(GL_COMPRESSED_RED_RGTC1), Compressed.RGTC, UnsignedNormalized,
         TextureViewAliasing.RGTC1_RED
+
     data object R_SN_RGTC1 : R(GL_COMPRESSED_SIGNED_RED_RGTC1), Compressed.RGTC, SignedNormalized,
         TextureViewAliasing.RGTC1_RED
+
     data object RG_UN_RGTC2 : RG(GL_COMPRESSED_RG_RGTC2), Compressed.RGTC, UnsignedNormalized,
         TextureViewAliasing.RGTC2_RG
+
     data object RG_SN_RGTC2 : RG(GL_COMPRESSED_SIGNED_RG_RGTC2), Compressed.RGTC, SignedNormalized,
         TextureViewAliasing.RGTC2_RG
+
     data object RGBA_UN_BPTC : RGBA(GL_COMPRESSED_RGBA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized,
         TextureViewAliasing.BPTC_UNORM
+
     data object RGBA_SRGB_BPTC : RGBA(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM), Compressed.BPTC, UnsignedNormalized,
         TextureViewAliasing.BPTC_UNORM
+
     data object RGB_SF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT), Compressed.BPTC, Float,
         TextureViewAliasing.BPTC_FLOAT
+
     data object RGB_UF_BPTC : RGB(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT), Compressed.BPTC, Float,
         TextureViewAliasing.BPTC_FLOAT
 
@@ -625,46 +641,49 @@ sealed interface ImageFormat: GLEnum {
 
     data object RGB_S3TC_DXT1 : RGB(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1,
         UnsignedNormalized
+
     data object RGBA_S3TC_DXT1 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT), Compressed.S3TC, Compressed.S3TC.DXT1,
         UnsignedNormalized
+
     data object RGBA_S3TC_DXT3 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT), Compressed.S3TC, Compressed.S3TC.DXT3,
         UnsignedNormalized
+
     data object RGBA_S3TC_DXT5 : RGBA(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT), Compressed.S3TC, Compressed.S3TC.DXT5,
         UnsignedNormalized
 
-    data object Depth16 : Depth {
+    data object Depth16 : Depth, Sized, UnsignedNormalized {
         override val value = GL_DEPTH_COMPONENT16
         override val depthBits = 16
     }
 
-    data object Depth24 : Depth {
+    data object Depth24 : Depth, Sized, UnsignedNormalized {
         override val value = GL_DEPTH_COMPONENT24
         override val depthBits = 24
     }
 
-    data object Depth32 : Depth {
+    data object Depth32 : Depth, Sized, UnsignedNormalized {
         override val value = GL_DEPTH_COMPONENT32
         override val depthBits = 32
     }
 
-    data object Depth32F : DepthFloat {
+    data object Depth32F : Depth, Sized, Float {
         override val value = GL_DEPTH_COMPONENT32F
         override val depthBits = 32
     }
 
-    data object Depth24Stencil8 : DepthStencil {
+    data object Depth24Stencil8 : DepthStencil, Sized, UnsignedNormalized {
         override val value = GL_DEPTH24_STENCIL8
         override val depthBits = 24
         override val stencilBits = 8
     }
 
-    data object Depth32FStencil8 : DepthStencil, DepthFloat {
+    data object Depth32FStencil8 : DepthStencil, Sized, Float {
         override val value = GL_DEPTH32F_STENCIL8
         override val depthBits = 32
         override val stencilBits = 8
     }
 
-    data object Stencil8 : Stencil {
+    data object Stencil8 : Stencil, Sized {
         override val value = GL_STENCIL_INDEX8
         override val stencilBits = 8
     }
