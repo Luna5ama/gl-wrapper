@@ -16,7 +16,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
     )
 
     var levels = -1; protected set
-    var internalformat: ImageFormat? = null; protected set
+    var internalformat: ImageFormat.Sized? = null; protected set
 
     protected open fun reset() {
         levels = -1
