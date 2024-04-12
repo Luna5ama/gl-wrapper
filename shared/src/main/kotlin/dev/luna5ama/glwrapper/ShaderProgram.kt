@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import java.util.*
 
 open class ShaderProgram(
@@ -84,10 +83,25 @@ open class ShaderProgram(
     val uniformResource = ResourceInterface.Uniform(id)
     val uniformBlockResource = ResourceInterface.UniformBlock(id)
     val shaderStorageBlockResource = ResourceInterface.ShaderStorageBlock(id)
+    val atomicCounterResource = ResourceInterface.AtomicCounter(id)
 
-    val samplerBindings = SamplerBindings()
-    val imageBindings = ImageBindings()
-    val bufferBindings = BufferBindings()
+    private val samplerBindings = SamplerBindings()
+    private val imageBindings = ImageBindings()
+    private val bufferBindings = BufferBindings()
+
+    fun applyBinding(spec: ShaderBindingSpecs) {
+        runCatching {
+            samplerBindings.apply(spec)
+            imageBindings.apply(spec)
+            bufferBindings.apply(spec)
+        }.onFailure {
+            it.printStackTrace()
+        }
+    }
+
+    inline fun applyBinding(block: ShaderBindingSpecs.Builder.() -> Unit) {
+        applyBinding(ShaderBindingSpecs.Builder().apply(block).build())
+    }
 
     override fun label(label: String) {
         if (label != labelName) {
@@ -304,10 +318,9 @@ open class ShaderProgram(
 
                     val values = malloc(7 * 4L).ptr
 
-                    iterateResourceIndex(program, GL_UNIFORM) { (i, name) ->
+                    iterateResourceNamedIndex(program, GL_UNIFORM) { (i, name) ->
                         glGetProgramResourceiv(program, GL_UNIFORM, i, 7, properties, 7, Ptr.NULL, values)
                         val blockIndex = values.getInt(0)
-                        if (blockIndex != -1) return@iterateResourceIndex
                         val location = values.getInt(4)
                         val type = GLSLDataType[values.getInt(8)]
                         val arraySize = values.getInt(12)
@@ -359,8 +372,8 @@ open class ShaderProgram(
                     val activeVariableIndicesPtr = malloc(maxNumActiveVariables * 4L).ptr
                     var bindingIndex = 0
 
-                    iterateResourceIndex(program, GL_UNIFORM_BLOCK) { (i, name) ->
-                        glGetProgramResourceiv(program, GL_UNIFORM_BLOCK, i, 4, properties, 4, Ptr.NULL, values)
+                    iterateResourceNamedIndex(program, GL_UNIFORM_BLOCK) { (i, name) ->
+                        glGetProgramResourceiv(program, GL_UNIFORM_BLOCK, i, 2, properties, 2, Ptr.NULL, values)
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
                         glGetProgramResourceiv(
@@ -409,20 +422,30 @@ open class ShaderProgram(
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
                 MemoryStack {
-                    val properties = malloc(2 * 4L).ptr
+                    val propN = 2
+                    val properties = malloc(propN * 4L).ptr
                     properties.setIntInc(GL_BUFFER_DATA_SIZE)
                         .setIntInc(GL_NUM_ACTIVE_VARIABLES)
-                    val values = malloc(2 * 4L).ptr
+                    val values = malloc(propN * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
                     glGetProgramInterfaceiv(program, GL_SHADER_STORAGE_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
                     val maxNumActiveVariables = temp.getInt()
 
-                    val activeVariableIndicesPtr = malloc(maxNumActiveVariables * 4L).ptr
+                    val activeVariableIndicesPtr = calloc(maxNumActiveVariables * 4L).ptr
                     var bindingIndex = 0
 
-                    iterateResourceIndex(program, GL_SHADER_STORAGE_BLOCK) { (i, name) ->
-                        glGetProgramResourceiv(program, GL_SHADER_STORAGE_BLOCK, i, 4, properties, 4, Ptr.NULL, values)
+                    iterateResourceNamedIndex(program, GL_SHADER_STORAGE_BLOCK) { (i, name) ->
+                        glGetProgramResourceiv(
+                            program,
+                            GL_SHADER_STORAGE_BLOCK,
+                            i,
+                            propN,
+                            properties,
+                            propN,
+                            Ptr.NULL,
+                            values
+                        )
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
                         glGetProgramResourceiv(
@@ -439,6 +462,7 @@ open class ShaderProgram(
                         val activeVariableIndices = List(numActiveVariables) { j ->
                             activeVariableIndicesPtr.getInt(j * 4L)
                         }
+
 
                         glShaderStorageBlockBinding(program, i, bindingIndex)
                         entries.put(
@@ -457,8 +481,65 @@ open class ShaderProgram(
             }
         }
 
+        class AtomicCounter(program: Int) : ResourceInterface<AtomicCounter.Entry>() {
+            class Entry(
+                val bufferBinding: Int,
+                val dataSize: Int,
+                val numActiveVariables: Int,
+                val activeVariableIndices: List<Int>,
+            ) : ResourceInterface.Entry
+
+            override val entries: Int2ObjectMap<Entry>
+
+            init {
+                val entries = Int2ObjectOpenHashMap<Entry>()
+                MemoryStack {
+                    val properties = malloc(3 * 4L).ptr
+                    properties.setIntInc(GL_BUFFER_BINDING)
+                        .setIntInc(GL_BUFFER_DATA_SIZE)
+                        .setIntInc(GL_NUM_ACTIVE_VARIABLES)
+
+                    val values = malloc(3 * 4L).ptr
+
+                    val temp = malloc(4L).ptr
+                    glGetProgramInterfaceiv(program, GL_ATOMIC_COUNTER_BUFFER, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    val maxNumActiveVariables = temp.getInt() * 4
+                    val activeVariableIndicesPtr = calloc(maxNumActiveVariables.toLong()).ptr
+
+                    iterateResourceIndex(program, GL_ATOMIC_COUNTER_BUFFER) { i ->
+                        glGetProgramResourceiv(program, GL_ATOMIC_COUNTER_BUFFER, i, 3, properties, 3, Ptr.NULL, values)
+                        val bufferBinding = values.getInt(0)
+                        val dataSize = values.getInt(4)
+                        val numActiveVariables = values.getInt(8)
+                        glGetProgramResourceiv(
+                            program,
+                            GL_ATOMIC_COUNTER_BUFFER,
+                            i,
+                            1,
+                            properties,
+                            maxNumActiveVariables,
+                            Ptr.NULL,
+                            activeVariableIndicesPtr
+                        )
+                        val activeVariableIndices = List(numActiveVariables) { j ->
+                            activeVariableIndicesPtr.getInt(j * 4L)
+                        }
+                        entries.put(
+                            i, Entry(
+                                bufferBinding = bufferBinding,
+                                dataSize = dataSize,
+                                numActiveVariables = numActiveVariables,
+                                activeVariableIndices = activeVariableIndices
+                            )
+                        )
+                    }
+                }
+                this.entries = Int2ObjectMaps.unmodifiable(entries)
+            }
+        }
+
         private companion object {
-            fun iterateResourceIndex(
+            fun iterateResourceNamedIndex(
                 program: Int,
                 resourceType: Int,
                 block: (IndexedValue<String>) -> Unit,
@@ -488,17 +569,32 @@ open class ShaderProgram(
                     }
                 }
             }
+
+            fun iterateResourceIndex(
+                program: Int,
+                resourceType: Int,
+                block: (Int) -> Unit,
+            ) {
+                MemoryStack {
+                    val singleBuffer = malloc(4L).ptr
+                    glGetProgramInterfaceiv(program, resourceType, GL_ACTIVE_RESOURCES, singleBuffer)
+                    val numUniforms = singleBuffer.getInt()
+                    for (i in 0 until numUniforms) {
+                        block(i)
+                    }
+                }
+            }
         }
     }
 
-    sealed interface BindingManager<T : ShaderBindingSpec> {
-        fun apply(spec: T)
+    sealed class BindingManager {
+        internal abstract fun apply(specs: ShaderBindingSpecs)
+
+        data class BindingPoint(val name: String, val index: Int)
     }
 
-    inner class SamplerBindings : BindingManager<ShaderBindingSpec.Sampler> {
-        private val bindingIndices = Object2IntOpenHashMap<String>().apply {
-            defaultReturnValue(-1)
-        }
+    inner class SamplerBindings : BindingManager() {
+        private val bindingPoints = mutableListOf<BindingPoint>()
 
         init {
             var bindingIndex = 0
@@ -506,104 +602,99 @@ open class ShaderProgram(
                 if (entry.type !is GLSLDataType.Opaque.Sampler) continue
                 if (entry.blockIndex != -1) continue
                 glProgramUniform1i(id, entry.location, bindingIndex)
-                bindingIndices.put(entry.name, bindingIndex)
+                bindingPoints.add(BindingPoint(entry.name, bindingIndex))
                 bindingIndex++
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Sampler) {
-            require(spec.bindings.size == bindingIndices.size) { "Sampler binding size mismatch" }
+        override fun apply(specs: ShaderBindingSpecs) {
             MemoryStack {
-                val textures = malloc(spec.bindings.size * 4L).ptr
-                val samplers = malloc(spec.bindings.size * 4L).ptr
-                for (binding in spec.bindings.values) {
-                    val index = bindingIndices.getInt(binding.name)
-                    require(index != -1) { "Sampler binding not found: ${binding.name}" }
+                val bindings = specs.samplers
+                val count = bindingPoints.size
+                val textures = malloc(count * 4L).ptr
+                val samplers = malloc(count * 4L).ptr
+                for ((name, index) in bindingPoints) {
+                    val binding = bindings[name]
+                    require(binding != null) { "Missing binding for sampler unit: $name" }
                     textures.setInt(index * 4L, binding.texture.id)
-                    samplers.setInt(index * 4L, binding.sampler.id)
+                    samplers.setInt(index * 4L, binding.sampler?.id ?: 0)
                 }
-                glBindTextures(0, spec.bindings.size, textures)
-                glBindSamplers(0, spec.bindings.size, samplers)
+                glBindTextures(0, count, textures)
+                glBindSamplers(0, count, samplers)
             }
         }
     }
 
-    inner class ImageBindings : BindingManager<ShaderBindingSpec.Image> {
-        private val bindingIndices = Object2IntOpenHashMap<String>().apply {
-            defaultReturnValue(-1)
-        }
+    inner class ImageBindings : BindingManager() {
+        private val bindingPoints = mutableListOf<BindingPoint>()
 
         init {
             var bindingIndex = 0
             for (entry in uniformResource.entries.values) {
                 if (entry.type !is GLSLDataType.Opaque.Image) continue
                 glProgramUniform1i(id, entry.location, bindingIndex)
-                bindingIndices.put(entry.name, bindingIndex)
+                bindingPoints.add(BindingPoint(entry.name, bindingIndex))
                 bindingIndex++
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Image) {
-            require(spec.bindings.size == bindingIndices.size) { "Image binding size mismatch" }
+        override fun apply(specs: ShaderBindingSpecs) {
             MemoryStack {
-                val textures = malloc(spec.bindings.size * 4L).ptr
-                for (binding in spec.bindings.values) {
-                    val index = bindingIndices.getInt(binding.name)
-                    require(index != -1) { "Image binding not found: ${binding.name}" }
+                val bindings = specs.images
+                val count = bindingPoints.size
+                val textures = malloc(count * 4L).ptr
+                for ((name, index) in bindingPoints) {
+                    val binding = bindings[name]
+                    require(binding != null) { "Missing binding for image unit: $name" }
                     textures.setInt(index * 4L, binding.texture.id)
                 }
-                glBindImageTextures(0, spec.bindings.size, textures)
+                glBindImageTextures(0, count, textures)
             }
         }
     }
 
-    inner class BufferBindings : BindingManager<ShaderBindingSpec.Buffer> {
-        private val bindingIndicesMap = Object2ObjectOpenHashMap<BufferTarget.Shader, Object2IntOpenHashMap<String>>()
+    inner class BufferBindings : BindingManager() {
+        private val bindingPointMap = mutableMapOf<BufferTarget.Shader, MutableList<BindingPoint>>()
 
         init {
             for (entry in uniformResource.entries.values) {
                 if (entry.type !is GLSLDataType.Opaque.AtomicCounter) continue
-                val map = bindingIndicesMap.computeIfAbsent(BufferTarget.AtomicCounter) {
-                    Object2IntOpenHashMap<String>().apply {
-                        defaultReturnValue(-1)
-                    }
-                }
-                map.put(entry.name, entry.atomicCounterBufferIndex)
+                bindingPointMap.getOrPut(BufferTarget.AtomicCounter, ::mutableListOf)
+                    .add(BindingPoint(entry.name, entry.atomicCounterBufferIndex))
             }
             for (entry in shaderStorageBlockResource.entries.values) {
-                val map = bindingIndicesMap.computeIfAbsent(BufferTarget.ShaderStorage) {
-                    Object2IntOpenHashMap<String>().apply {
-                        defaultReturnValue(-1)
-                    }
-                }
-                map.put(entry.name, entry.bindingIndex)
+                bindingPointMap.getOrPut(BufferTarget.ShaderStorage, ::mutableListOf)
+                    .add(BindingPoint(entry.name, entry.bindingIndex))
             }
             for (entry in uniformBlockResource.entries.values) {
-                val map = bindingIndicesMap.computeIfAbsent(BufferTarget.Uniform) {
-                    Object2IntOpenHashMap<String>().apply {
-                        defaultReturnValue(-1)
-                    }
-                }
-                map.put(entry.name, entry.bindingIndex)
+                bindingPointMap.getOrPut(BufferTarget.Uniform, ::mutableListOf)
+                    .add(BindingPoint(entry.name, entry.bindingIndex))
             }
         }
 
-        override fun apply(spec: ShaderBindingSpec.Buffer) {
-            require(spec.bindings.size == bindingIndicesMap.size) { "Sampler binding size mismatch" }
-            for ((target, bindings) in spec.bindings) {
+        override fun apply(specs: ShaderBindingSpecs) {
+            val bindingMap = specs.buffers
+            for ((target, bindingPoints) in bindingPointMap) {
+                val bindings = bindingMap[target]
+                require(bindings != null) { "Missing bindings for targer: $target" }
                 MemoryStack {
-                    val bindingIndices = bindingIndicesMap[target] ?: throw IllegalArgumentException("Buffer binding target not found: $target")
-                    val buffers = malloc(bindings.size * 4L).ptr
-                    val offsets = malloc(bindings.size * 4L).ptr
-                    val sizes = malloc(bindings.size * 4L).ptr
-                    for (binding in bindings.values) {
-                        val index = bindingIndices.getInt(binding.name)
-                        require(index != -1) { "Buffer binding not found: ${binding.name}" }
+                    val targetBindingCount = bindingPoints.size
+                    val buffers = malloc(targetBindingCount * 4L).ptr
+                    val offsets = malloc(targetBindingCount * 8L).ptr
+                    val sizes = malloc(targetBindingCount * 8L).ptr
+                    for ((name, index) in bindingPoints) {
+                        val binding = bindings[name]
+                        require(binding != null) { "Missing binding for $target buffer block: $name" }
+                        check(index < targetBindingCount)
+                        check(index >= 0)
+                        check(binding.buffer.id != 0)
+                        check(binding.offset < binding.buffer.size)
+                        check(binding.offset + binding.size <= binding.buffer.size)
                         buffers.setInt(index * 4L, binding.buffer.id)
-                        offsets.setInt(index * 4L, binding.offset)
-                        sizes.setInt(index * 4L, binding.size)
+                        offsets.setLong(index * 8L, if (binding.offset == -1L) 0 else binding.offset)
+                        sizes.setLong(index * 8L, if (binding.size == -1L) binding.buffer.size else binding.size)
                     }
-                    glBindBuffersRange(target.value, 0, bindings.size, buffers, offsets, sizes)
+                    glBindBuffersRange(target.value, 0, targetBindingCount, buffers, offsets, sizes)
                 }
             }
         }

@@ -95,8 +95,8 @@ fun IGLSampler.setMipLevels(base: Int, max: Int) {
 
 fun IGLSampler.setMipLod(min: Float, max: Float, bias: Float = 0.0f) {
     parameterf(GL_TEXTURE_MIN_LOD, min)
-        parameterf(GL_TEXTURE_MAX_LOD, max)
-        parameterf(GL_TEXTURE_LOD_BIAS, bias)
+    parameterf(GL_TEXTURE_MAX_LOD, max)
+    parameterf(GL_TEXTURE_LOD_BIAS, bias)
 }
 
 fun IGLSampler.setAnisotropy(anisotropy: Float) {
@@ -105,13 +105,13 @@ fun IGLSampler.setAnisotropy(anisotropy: Float) {
 
 fun IGLSampler.setWrap(s: Int, t: Int) {
     parameteri(GL_TEXTURE_WRAP_S, s)
-        parameteri(GL_TEXTURE_WRAP_T, t)
+    parameteri(GL_TEXTURE_WRAP_T, t)
 }
 
 fun IGLSampler.setWrap(s: Int, t: Int, r: Int) {
     parameteri(GL_TEXTURE_WRAP_S, s)
-        parameteri(GL_TEXTURE_WRAP_T, t)
-        parameteri(GL_TEXTURE_WRAP_R, r)
+    parameteri(GL_TEXTURE_WRAP_T, t)
+    parameteri(GL_TEXTURE_WRAP_R, r)
 }
 
 fun IGLSampler.setBorderColor(r: Float, g: Float, b: Float, a: Float) {

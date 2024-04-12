@@ -25,7 +25,7 @@ sealed interface GLSLDataType : GLEnum {
     }
 
     sealed class Opaque : GLSLDataType {
-        sealed class Sampler private constructor(): Opaque(), UniformType.Int {
+        sealed class Sampler private constructor() : Opaque(), UniformType.Int {
             sealed class Sampler1D(override val value: kotlin.Int) : Sampler()
             sealed class Sampler2D(override val value: kotlin.Int) : Sampler()
             sealed class Sampler3D(override val value: kotlin.Int) : Sampler()
@@ -38,7 +38,7 @@ sealed interface GLSLDataType : GLEnum {
             sealed class SamplerCubeArray(override val value: kotlin.Int) : Sampler()
         }
 
-        sealed class Image private constructor(): Opaque(), UniformType.Int {
+        sealed class Image private constructor() : Opaque(), UniformType.Int {
             sealed class Image1D(override val value: kotlin.Int) : Image()
             sealed class Image2D(override val value: kotlin.Int) : Image()
             sealed class Image3D(override val value: kotlin.Int) : Image()
@@ -135,6 +135,7 @@ sealed interface GLSLDataType : GLEnum {
     data object USampler2DMS : Opaque.Sampler.Sampler2DMS(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE), ImageType.UInt
     data object USampler2DMSArray : Opaque.Sampler.Sampler2DMSArray(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY),
         ImageType.UInt
+
     data object USamplerCubeArray : Opaque.Sampler.SamplerCubeArray(GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY),
         ImageType.UInt
 
@@ -176,7 +177,9 @@ sealed interface GLSLDataType : GLEnum {
     data object UImage1DArray : Opaque.Image.Image1DArray(GL_UNSIGNED_INT_IMAGE_1D_ARRAY), ImageType.UInt
     data object UImage2DArray : Opaque.Image.Image2DArray(GL_UNSIGNED_INT_IMAGE_2D_ARRAY), ImageType.UInt
     data object UImage2DMS : Opaque.Image.Image2DMS(GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE), ImageType.UInt
-    data object UImage2DMSArray : Opaque.Image.Image2DMSArray(GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY), ImageType.UInt
+    data object UImage2DMSArray : Opaque.Image.Image2DMSArray(GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY),
+        ImageType.UInt
+
     data object UImageCubeArray : Opaque.Image.ImageCubeArray(GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY), ImageType.UInt
 
 
@@ -313,6 +316,8 @@ sealed interface GLSLDataType : GLEnum {
             GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE -> UImage2DMS
             GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY -> UImage2DMSArray
             GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY -> UImageCubeArray
+
+            GL_UNSIGNED_INT_ATOMIC_COUNTER -> AtomicCounter
 
             else -> throw IllegalArgumentException("Invalid value: $value")
         }

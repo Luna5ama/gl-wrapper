@@ -40,13 +40,16 @@ sealed interface BufferTarget : GLEnum {
     data object AtomicCounter : Shader {
         override val value = GL_ATOMIC_COUNTER_BUFFER
     }
+
     data object Uniform : Shader {
         override val value = GL_UNIFORM_BUFFER
     }
+
     data object ShaderStorage : Shader {
         override val value = GL_SHADER_STORAGE_BUFFER
     }
-    data object TransformFeedback: BufferTarget  {
+
+    data object TransformFeedback : BufferTarget {
         override val value = GL_TRANSFORM_FEEDBACK_BUFFER
     }
 

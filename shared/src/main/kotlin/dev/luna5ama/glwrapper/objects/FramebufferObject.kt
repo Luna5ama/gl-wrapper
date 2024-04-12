@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper.objects
 
 import dev.luna5ama.glwrapper.api.*
-import dev.luna5ama.glwrapper.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
 import dev.luna5ama.kmogus.MemoryStack
 
@@ -118,16 +117,20 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
             GL_DEPTH_ATTACHMENT -> {
                 depthAttachment = obj
             }
+
             GL_STENCIL_ATTACHMENT -> {
                 stencilAttachment = obj
             }
+
             GL_DEPTH_STENCIL_ATTACHMENT -> {
                 depthAttachment = obj
                 stencilAttachment = obj
             }
+
             in GL_COLOR_ATTACHMENT0..GL_COLOR_ATTACHMENT31 -> {
                 colorAttachments[attachment - GL_COLOR_ATTACHMENT0] = obj
             }
+
             else -> {
                 throw IllegalArgumentException("Invalid attachment: $attachment")
             }
@@ -239,5 +242,6 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     sealed interface LayeredAttachment : Attachment {
         val layers: Int
     }
+
     sealed interface NonLayeredAttachment : Attachment
 }

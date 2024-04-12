@@ -2,6 +2,7 @@ rootProject.name = "gl-wrapper"
 
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         maven("https://maven.luna5ama.dev")
         maven("https://maven.fabricmc.net/")

@@ -87,14 +87,14 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IG
     }
 
     fun copyTo(dst: BufferObject) {
-        require(size == dst.size) { "Buffer sizes must be equal" }
+        require(size == dst.size) { "Buffers sizes must be equal" }
         checkAllocated()
         glCopyNamedBufferSubData(id, dst.id, 0, 0, size)
     }
 
     fun checkAllocated() {
         checkCreated()
-        check(size != -1L) { "Buffer is not allocated" }
+        check(size != -1L) { "Buffers is not allocated" }
     }
 
     override fun bind(target: Int) {

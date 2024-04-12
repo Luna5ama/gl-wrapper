@@ -15,27 +15,27 @@ sealed interface FilterMode : GLEnum {
     sealed interface Mag : FilterMode
     sealed interface Mipmap : FilterMode
 
-    data object Nearest: Min, Mag {
+    data object Nearest : Min, Mag {
         override val value = GL_NEAREST
     }
 
-    data object Linear: Min, Mag {
+    data object Linear : Min, Mag {
         override val value = GL_LINEAR
     }
 
-    data object NearestMipmapNearest: Min, Mipmap {
+    data object NearestMipmapNearest : Min, Mipmap {
         override val value = GL_NEAREST_MIPMAP_NEAREST
     }
 
-    data object LinearMipmapNearest: Min, Mipmap {
+    data object LinearMipmapNearest : Min, Mipmap {
         override val value = GL_LINEAR_MIPMAP_NEAREST
     }
 
-    data object NearestMipmapLinear: Min, Mipmap {
+    data object NearestMipmapLinear : Min, Mipmap {
         override val value = GL_NEAREST_MIPMAP_LINEAR
     }
 
-    data object LinearMipmapLinear: Min, Mipmap {
+    data object LinearMipmapLinear : Min, Mipmap {
         override val value = GL_LINEAR_MIPMAP_LINEAR
     }
 }

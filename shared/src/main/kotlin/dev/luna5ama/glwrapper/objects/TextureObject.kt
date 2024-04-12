@@ -91,39 +91,33 @@ sealed class TextureObject private constructor(val target: Int, private val dele
         glBindImageTexture(unit, 0, 0, false, 0, GL_READ_WRITE, format.value)
     }
 
+    private fun getClearFormat() = when (internalformat) {
+        is ImageFormat.DepthStencil -> GL_DEPTH_STENCIL
+        is ImageFormat.Depth -> GL_DEPTH_COMPONENT
+        is ImageFormat.Stencil -> GL_STENCIL_INDEX
+        is ImageFormat.UnsignedInteger, is ImageFormat.SignedInteger -> GL_RGBA_INTEGER
+        else -> GL_RGBA
+    }
+
+    private fun getClearType() = when (internalformat) {
+        ImageFormat.Depth32FStencil8 -> GL_FLOAT_32_UNSIGNED_INT_24_8_REV
+        ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
+        ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE
+        is ImageFormat.Depth, is ImageFormat.Float -> GL_FLOAT
+        else -> GL_UNSIGNED_BYTE
+    }
+
     fun clearImage() {
         checkCreated()
-        val clearFormat = when (internalformat) {
-            is ImageFormat.DepthStencil -> GL_DEPTH_STENCIL
-            is ImageFormat.Depth -> GL_DEPTH_COMPONENT
-            is ImageFormat.Stencil -> GL_STENCIL_INDEX
-            else -> GL_RGBA
-        }
-        val clearType = when (internalformat) {
-            ImageFormat.Depth32FStencil8 -> GL_DEPTH32F_STENCIL8
-            ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
-            ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE
-            is ImageFormat.Depth, is ImageFormat.Float -> GL_FLOAT
-            else -> GL_UNSIGNED_BYTE
-        }
+        val clearFormat = getClearFormat()
+        val clearType = getClearType()
         clearImage(clearFormat, clearType, Ptr.NULL)
     }
 
     fun clearImage(level: Int) {
         checkCreated()
-        val clearFormat = when (internalformat) {
-            is ImageFormat.DepthStencil -> GL_DEPTH_STENCIL
-            is ImageFormat.Depth -> GL_DEPTH_COMPONENT
-            is ImageFormat.Stencil -> GL_STENCIL_INDEX
-            else -> GL_RGBA
-        }
-        val clearType = when (internalformat) {
-            ImageFormat.Depth32FStencil8 -> GL_DEPTH32F_STENCIL8
-            ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
-            ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE
-            is ImageFormat.Depth, is ImageFormat.Float -> GL_FLOAT
-            else -> GL_UNSIGNED_BYTE
-        }
+        val clearFormat = getClearFormat()
+        val clearType = getClearType()
         clearImage(level, clearFormat, clearType, Ptr.NULL)
     }
 
@@ -755,11 +749,17 @@ fun <T : TextureObject> T.createView(
 
     val srcFormat = this.internalformat
     if (internalformat != srcFormat) {
-        require(internalformat is ImageFormat.TextureViewAliasing && srcFormat is ImageFormat.TextureViewAliasing) { "Image format does not support aliasing" }
-        require(internalformat.viewClass == srcFormat.viewClass) { "Image format base must be match" }
+        require(internalformat is ImageFormat.TextureViewAliasing && srcFormat is ImageFormat.TextureViewAliasing) { "Images format does not support aliasing" }
+        require(internalformat.viewClass == srcFormat.viewClass) { "Images format base must be match" }
     }
 
     val view = this.javaClass.getConstructor(TextureObjectType::class.java).newInstance(TextureObjectType.View)
     _createView(view, internalformat, minlevel, numlevels, minlayer, numlayers)
     return view
+}
+
+fun <T : TextureObject> T.createView(
+    internalformat: ImageFormat.Sized
+): T {
+    return createView(internalformat, 0, 1, 0, 1)
 }
