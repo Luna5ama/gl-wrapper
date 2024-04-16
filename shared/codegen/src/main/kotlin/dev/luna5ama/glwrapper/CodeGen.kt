@@ -673,6 +673,16 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 visitor.addFuncWithTopLevel("glDeleteBuffers", listOf(INT to "buffer"), UNIT) {
                     addModifiers(KModifier.ABSTRACT)
                 }
+                visitor.addFuncWithTopLevel("glGetQueryObjecti", listOf(INT to "id", INT to "pname"), INT) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectiv", "id", "pname", "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
+                }
+                visitor.addFuncWithTopLevel("glGetQueryObjectui", listOf(INT to "id", INT to "pname"), INT) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectuiv", "id", "pname", "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
+                }
             }
             "GL20" -> {
                 getScalar("glGetShaderi", "glGetShaderiv", INT, listOf(INT to "shader", INT to "pname"))
@@ -741,6 +751,16 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf(INT to "sampler", INT to "pname"),
                     listOf("v1", "v2", "v3", "v4")
                 )
+                visitor.addFuncWithTopLevel("glGetQueryObjecti64", listOf(INT to "id", INT to "pname"), LONG) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
+                }
+                visitor.addFuncWithTopLevel("glGetQueryObjectui64", listOf(INT to "id", INT to "pname"), LONG) {
+                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
+                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
+                }
                 visitor.addFuncWithTopLevel("glDeleteSamplers", listOf(INT to "sampler"), UNIT) {
                     addModifiers(KModifier.ABSTRACT)
                 }
