@@ -153,6 +153,7 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     }
 
     fun check() {
+        if (!FBO_CHECK) return
         checkCreated()
         val status = glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER)
         check(status == GL_FRAMEBUFFER_COMPLETE) {
@@ -244,4 +245,8 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
     }
 
     sealed interface NonLayeredAttachment : Attachment
+
+    companion object {
+        val FBO_CHECK = System.getenv("GLWRAPPER_FBO_CHECK")?.toBoolean() ?: false
+    }
 }

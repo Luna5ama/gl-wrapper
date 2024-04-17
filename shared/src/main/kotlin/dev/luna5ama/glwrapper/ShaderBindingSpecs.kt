@@ -1,17 +1,20 @@
 package dev.luna5ama.glwrapper
 
 import dev.luna5ama.glwrapper.enums.BufferTarget
+import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.glwrapper.objects.BufferObject
 import dev.luna5ama.glwrapper.objects.SamplerObject
 import dev.luna5ama.glwrapper.objects.TextureObject
+import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 data class ShaderBindingSpecs(
-    val samplers: Map<String, SamplerBinding>,
-    val images: Map<String, ImageBinding>,
-    val buffers: Map<BufferTarget.Shader, Map<String, BufferBinding>>
+    val samplers: Map<String, Sampler>,
+    val images: Map<String, Image>,
+    val buffers: Map<BufferTarget.Shader, Map<String, Buffer>>,
+    val subroutines: Map<ShaderStage, Map<String, Subroutine>>
 ) {
-    data class SamplerBinding(
+    data class Sampler(
         val name: String,
         val texture: TextureObject,
         val sampler: SamplerObject?
@@ -19,12 +22,12 @@ data class ShaderBindingSpecs(
         constructor(name: String, texture: TextureObject) : this(name, texture, null)
     }
 
-    data class ImageBinding(
+    data class Image(
         val name: String,
         val texture: TextureObject
     )
 
-    data class BufferBinding(
+    data class Buffer(
         val name: String,
         val buffer: BufferObject,
         val target: BufferTarget.Shader,
@@ -34,13 +37,20 @@ data class ShaderBindingSpecs(
         constructor(name: String, buffer: BufferObject, target: BufferTarget.Shader) : this(name, buffer, target, -1, -1)
     }
 
+    data class Subroutine(
+        val uniformName: String,
+        val stage: ShaderStage,
+        val funcName: String
+    )
+
 
     class Builder {
-        private val samplers = mutableMapOf<String, SamplerBinding>()
-        private val images = mutableMapOf<String, ImageBinding>()
-        private val buffers = mutableMapOf<BufferTarget.Shader, MutableMap<String, BufferBinding>>()
+        private val samplers = mutableMapOf<String, Sampler>()
+        private val images = mutableMapOf<String, Image>()
+        private val buffers = mutableMapOf<BufferTarget.Shader, MutableMap<String, Buffer>>()
+        private val subroutines = mutableMapOf<ShaderStage, MutableMap<String, Subroutine>>()
 
-        fun sampler(binding: SamplerBinding) {
+        fun sampler(binding: Sampler) {
             val v = samplers.put(binding.name, binding)
             require(v == null) {
                 "Duplicated sampler unit name: ${binding.name}, existing: $v, new: $binding"
@@ -48,22 +58,22 @@ data class ShaderBindingSpecs(
         }
 
         fun sampler(name: String, texture: TextureObject, sampler: SamplerObject) {
-            sampler(SamplerBinding(name, texture, sampler))
+            sampler(Sampler(name, texture, sampler))
         }
 
         fun sampler(name: String, texture: TextureObject) {
-            sampler(SamplerBinding(name, texture))
+            sampler(Sampler(name, texture))
         }
 
-        fun sampler(bindings: Collection<SamplerBinding>) {
+        fun sampler(bindings: Collection<Sampler>) {
             bindings.forEach { sampler(it) }
         }
 
-        fun sampler(bindings: Collection<SamplerBinding>, sampler: SamplerObject) {
+        fun sampler(bindings: Collection<Sampler>, sampler: SamplerObject) {
             bindings.forEach { sampler(it.copy(sampler = sampler)) }
         }
 
-        fun image(binding: ImageBinding) {
+        fun image(binding: Image) {
             val v = images.put(binding.name, binding)
             require(v == null) {
                 "Duplicated image unit name: ${binding.name}, existing: $v, new: $binding"
@@ -71,14 +81,14 @@ data class ShaderBindingSpecs(
         }
 
         fun image(name: String, texture: TextureObject) {
-            image(ImageBinding(name, texture))
+            image(Image(name, texture))
         }
 
-        fun image(bindings: Collection<ImageBinding>) {
+        fun image(bindings: Collection<Image>) {
             bindings.forEach { image(it) }
         }
 
-        fun buffer(binding: BufferBinding) {
+        fun buffer(binding: Buffer) {
             val map = buffers.getOrPut(binding.target, ::mutableMapOf)
             val v = map.put(binding.name, binding)
             require(v == null) {
@@ -87,21 +97,34 @@ data class ShaderBindingSpecs(
         }
 
         fun buffer(name: String, buffer: BufferObject, target: BufferTarget.Shader) {
-            buffer(BufferBinding(name, buffer, target))
+            buffer(Buffer(name, buffer, target))
         }
 
         fun buffer(name: String, buffer: BufferObject, target: BufferTarget.Shader, offset: Long, size: Long) {
-            buffer(BufferBinding(name, buffer, target, offset, size))
+            buffer(Buffer(name, buffer, target, offset, size))
         }
 
-        fun buffer(bindings: Collection<BufferBinding>) {
+        fun buffer(bindings: Collection<Buffer>) {
             bindings.forEach { buffer(it) }
         }
 
-        fun build() = ShaderBindingSpecs(samplers, images, buffers)
+        fun subroutine(binding: Subroutine) {
+            val map = subroutines.getOrPut(binding.stage, ::mutableMapOf)
+            val v = map.put(binding.uniformName, binding)
+            require(v == null) {
+                "Duplicated ${binding.stage} subroutine name: ${binding.uniformName}, existing: $v, new: $binding"
+            }
+        }
+
+        fun subroutine(name: String, stage: ShaderStage, funcName: String) {
+            subroutine(Subroutine(name, stage, funcName))
+        }
+
+        fun build() = ShaderBindingSpecs(samplers, images, buffers, subroutines)
     }
 
     companion object {
+        @OptIn(ExperimentalContracts::class)
         inline fun of(block: Builder.() -> Unit): ShaderBindingSpecs {
             contract {
                 callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE)

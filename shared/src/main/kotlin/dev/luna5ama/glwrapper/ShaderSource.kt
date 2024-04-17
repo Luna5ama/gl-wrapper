@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.asByteBuffer
 import dev.luna5ama.kmogus.ensureCapacity
@@ -12,7 +12,7 @@ import java.nio.charset.CodingErrorAction
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
-sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: CharSequence) {
+sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val codeSrc: CharSequence) {
     private val lines by lazy { codeSrc.lines() }
     protected abstract val provider: Provider<*>
     protected abstract val typeName: String
@@ -22,7 +22,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class Vert private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_VERTEX_SHADER, codeSrc) {
+        ShaderSource(name, ShaderStage.VertexShader, codeSrc) {
         override val provider: Provider<Vert> get() = Companion
         override val typeName get() = "Vert"
 
@@ -34,7 +34,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class Geom private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_GEOMETRY_SHADER, codeSrc) {
+        ShaderSource(name, ShaderStage.GeometryShader, codeSrc) {
         override val provider: Provider<Geom> get() = Companion
         override val typeName get() = "Geom"
 
@@ -46,7 +46,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class TessCtrl private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_TESS_CONTROL_SHADER, codeSrc) {
+        ShaderSource(name, ShaderStage.TessControlShader, codeSrc) {
         override val provider: Provider<TessCtrl> get() = Companion
         override val typeName get() = "TessCtrl"
 
@@ -58,7 +58,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class TessEval private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_TESS_EVALUATION_SHADER, codeSrc) {
+        ShaderSource(name, ShaderStage.TessEvaluationShader, codeSrc) {
         override val provider: Provider<TessEval> get() = Companion
         override val typeName get() = "TessEval"
 
@@ -70,7 +70,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class Frag private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_FRAGMENT_SHADER, codeSrc) {
+        ShaderSource(name, ShaderStage.FragmentShader, codeSrc) {
         override val provider: Provider<Frag> get() = Companion
         override val typeName get() = "Frag"
 
@@ -82,7 +82,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
     }
 
     class Comp private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, GL_COMPUTE_SHADER, codeSrc) {
+     ShaderSource(name, ShaderStage.ComputeShader, codeSrc) {
         override val provider: Provider<Comp> get() = Companion
         override val typeName get() = "Comp"
 
@@ -93,7 +93,7 @@ sealed class ShaderSource(val name: String, val glTypeEnum: Int, val codeSrc: Ch
         }
     }
 
-    private class Lib private constructor(name: String, codeSrc: CharSequence) : ShaderSource(name, -1, codeSrc) {
+    private class Lib private constructor(name: String, codeSrc: CharSequence) : ShaderSource(name, null, codeSrc) {
         override val provider: Provider<Lib> get() = Companion
         override val typeName = "Lib"
 
