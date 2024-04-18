@@ -120,6 +120,10 @@ data class ShaderBindingSpecs(
             subroutine(Subroutine(name, stage, funcName))
         }
 
+        fun subroutine(bindings: Collection<Subroutine>) {
+            bindings.forEach { subroutine(it) }
+        }
+
         fun build() = ShaderBindingSpecs(samplers, images, buffers, subroutines)
     }
 

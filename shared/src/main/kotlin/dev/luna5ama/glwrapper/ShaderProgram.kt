@@ -821,14 +821,14 @@ open class ShaderProgram(
         class SubroutineUniforms(program: ShaderProgram) : BindingManager() {
             private data class BindingPoint(
                 val name: String,
-                val index: Int,
+                val location: Int,
                 val compatibleSubroutines: Map<String, ResourceInterface.Subroutine.Entry>
             )
 
             private val bindingPoints =
                 program.subroutineUniformResource.entries.associateTo(EnumMap(ShaderStage::class.java)) { (stage, resource) ->
                     stage to resource.entries.values.map { entry ->
-                        BindingPoint(entry.name, entry.index, entry.compatibleSubroutines.associateBy { it.name })
+                        BindingPoint(entry.name, entry.location, entry.compatibleSubroutines.associateBy { it.name })
                     }
                 }
 
@@ -836,20 +836,21 @@ open class ShaderProgram(
                 MemoryStack {
                     val bindingMap = specs.subroutines
                     for ((stage, bindingPoints) in bindingPoints) {
-                        if (bindingPoints.isEmpty()) return
+                        if (bindingPoints.isEmpty()) continue
                         val bindings = bindingMap[stage]
                         require(bindings != null) { "Missing bindings for $stage subroutine" }
                         val count = bindingPoints.size
                         val values = malloc(count * 4L).ptr
-                        for ((name, index, compatibleSubroutines) in bindingPoints) {
+                        for ((name, location, compatibleSubroutines) in bindingPoints) {
                             val binding = bindings[name]
                             require(binding != null) { "Missing binding for $stage subroutine uniform: $name" }
                             val compatibleSubroutine = compatibleSubroutines[binding.funcName]
                             require(compatibleSubroutine != null) {
                                 "Invalid subroutine function name: ${binding.funcName} for $stage subroutine uniform: $name"
                             }
-                            values.setInt(index * 4L, compatibleSubroutine.index)
+                            values.setInt(location * 4L, compatibleSubroutine.index)
                         }
+                        glUniformSubroutinesuiv(stage.value, count, values)
                     }
                 }
             }

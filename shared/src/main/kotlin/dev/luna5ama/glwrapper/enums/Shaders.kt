@@ -18,13 +18,15 @@ enum class ShaderStage(
     FragmentShader(GL_FRAGMENT_SHADER, Subroutine.FragmentShader, SubroutineUniform.FragmentShader),
     ComputeShader(GL_COMPUTE_SHADER, Subroutine.ComputeShader, SubroutineUniform.ComputeShader);
 
-    enum class Subroutine(override val value: Int, val shaderStage: ShaderStage) : GLEnum {
-        VertexShader(GL_VERTEX_SUBROUTINE, ShaderStage.VertexShader),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE, ShaderStage.TessControlShader),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE, ShaderStage.TessEvaluationShader),
-        GeometryShader(GL_GEOMETRY_SUBROUTINE, ShaderStage.GeometryShader),
-        FragmentShader(GL_FRAGMENT_SUBROUTINE, ShaderStage.FragmentShader),
-        ComputeShader(GL_COMPUTE_SUBROUTINE, ShaderStage.ComputeShader);
+    enum class Subroutine(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
+        VertexShader(GL_VERTEX_SUBROUTINE, { ShaderStage.VertexShader }),
+        TessControlShader(GL_TESS_CONTROL_SUBROUTINE, { ShaderStage.TessControlShader }),
+        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE, { ShaderStage.TessEvaluationShader }),
+        GeometryShader(GL_GEOMETRY_SUBROUTINE, { ShaderStage.GeometryShader }),
+        FragmentShader(GL_FRAGMENT_SUBROUTINE, { ShaderStage.FragmentShader }),
+        ComputeShader(GL_COMPUTE_SUBROUTINE, { ShaderStage.ComputeShader });
+
+        val shaderStage by lazy(shaderStage)
 
         companion object {
             operator fun get(value: Int) = when (value) {
@@ -39,13 +41,15 @@ enum class ShaderStage(
         }
     }
 
-    enum class SubroutineUniform(override val value: Int, val shaderStage: ShaderStage) : GLEnum {
-        VertexShader(GL_VERTEX_SUBROUTINE_UNIFORM, ShaderStage.VertexShader),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, ShaderStage.TessControlShader),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, ShaderStage.TessEvaluationShader),
-        GeometryShader(GL_GEOMETRY_SUBROUTINE_UNIFORM, ShaderStage.GeometryShader),
-        FragmentShader(GL_FRAGMENT_SUBROUTINE_UNIFORM, ShaderStage.FragmentShader),
-        ComputeShader(GL_COMPUTE_SUBROUTINE_UNIFORM, ShaderStage.ComputeShader);
+    enum class SubroutineUniform(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
+        VertexShader(GL_VERTEX_SUBROUTINE_UNIFORM, { ShaderStage.VertexShader }),
+        TessControlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, { ShaderStage.TessControlShader }),
+        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, { ShaderStage.TessEvaluationShader }),
+        GeometryShader(GL_GEOMETRY_SUBROUTINE_UNIFORM, { ShaderStage.GeometryShader }),
+        FragmentShader(GL_FRAGMENT_SUBROUTINE_UNIFORM, { ShaderStage.FragmentShader }),
+        ComputeShader(GL_COMPUTE_SUBROUTINE_UNIFORM, { ShaderStage.ComputeShader });
+
+        val shaderStage by lazy(shaderStage)
 
         companion object {
             operator fun get(value: Int) = when (value) {
