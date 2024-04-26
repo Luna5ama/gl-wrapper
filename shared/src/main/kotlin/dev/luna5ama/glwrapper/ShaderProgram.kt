@@ -40,7 +40,7 @@ open class ShaderProgram(
         fun createShader(source: ShaderSource): Int {
             val id = glCreateShader(source.shaderStage!!.value)
 
-            glShaderSource(id, source.codeSrc)
+            glShaderSource(id, source.finalCodeSrc)
             glCompileShader(id)
 
             val compiled = glGetShaderi(id, GL_COMPILE_STATUS)
@@ -48,7 +48,7 @@ open class ShaderProgram(
                 System.err.print(buildString {
                     append(glGetShaderInfoLog(id, glGetShaderi(id, GL_INFO_LOG_LENGTH)))
                     appendLine("Shader source:")
-                    source.codeSrc.lines().forEachIndexed { i, it ->
+                    source.finalCodeSrc.lines().forEachIndexed { i, it ->
                         append(i + 1)
                         append('\t')
                         appendLine(it)

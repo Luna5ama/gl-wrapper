@@ -34,7 +34,7 @@ enum class GpuVendor {
             val vendorStr = glWrapper.GL11.glGetString(GL_VENDOR) ?: ""
             return GpuVendor.entries.find {
                 vendorStr.contains(it.name, true)
-            } ?: GpuVendor.UNKNOWN
+            } ?: UNKNOWN
         }
     }
 }

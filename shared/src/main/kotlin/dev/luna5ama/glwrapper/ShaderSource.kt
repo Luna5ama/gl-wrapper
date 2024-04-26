@@ -1,5 +1,6 @@
 package dev.luna5ama.glwrapper
 
+import dev.luna5ama.glwrapper.api.GpuVendor
 import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.asByteBuffer
@@ -14,6 +15,15 @@ import java.security.MessageDigest
 
 sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val codeSrc: CharSequence) {
     private val lines by lazy { codeSrc.lines() }
+    val finalCodeSrc by lazy {
+        buildString {
+            appendLine(lines[0])
+            appendLine("#define GPU_VENDOR_${GpuVendor.get().name}")
+            for (i in 1 until lines.size) {
+                appendLine(lines[i])
+            }
+        }
+    }
     protected abstract val provider: Provider<*>
     protected abstract val typeName: String
 
