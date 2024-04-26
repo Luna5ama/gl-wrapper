@@ -300,10 +300,10 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
         override fun visitClass(node: ClassTree, p: Unit?) {
             val simpleName = node.simpleName.toString()
             if (!(simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)
-                    || simpleName.startsWith("ARB")
-                    || simpleName.startsWith("EXT")
-                    )
-            ) return
+                        || simpleName.startsWith("ARB")
+                        || simpleName.startsWith("EXT")
+                        || simpleName.startsWith("KHR")
+                    )) return
 
             val lookUpName = simpleName.replace("_", "").lowercase()
             if (core.contains(lookUpName)) return

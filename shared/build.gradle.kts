@@ -11,8 +11,8 @@ dependencies {
     compileOnly("it.unimi.dsi:fastutil:7.1.0")
 
     ktgen(project(":shared:codegen"))
-    ktgenInput("org.lwjgl:lwjgl:3.2.2:sources")
-    ktgenInput("org.lwjgl:lwjgl-opengl:3.2.2:sources")
+    ktgenInput("org.lwjgl:lwjgl:3.3.3:sources")
+    ktgenInput("org.lwjgl:lwjgl-opengl:3.3.3:sources")
 }
 
 publishing {

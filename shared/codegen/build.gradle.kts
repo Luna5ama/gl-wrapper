@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 dependencies {
     implementation("dev.luna5ama:ktgen-api:1.0.0")
-    implementation("org.lwjgl:lwjgl-opengl:3.2.2")
+    implementation("org.lwjgl:lwjgl-opengl:3.3.3")
 }
 
 java {
