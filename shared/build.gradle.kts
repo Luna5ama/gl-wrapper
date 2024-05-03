@@ -7,7 +7,8 @@ base {
 }
 
 dependencies {
-    api("dev.luna5ama:kmogus-core:1.0-SNAPSHOT")
+    val kmogusVersion: String by project
+    api("dev.luna5ama:kmogus-core:$kmogusVersion")
     compileOnly("it.unimi.dsi:fastutil:7.1.0")
 
     ktgen(project(":shared:codegen"))
