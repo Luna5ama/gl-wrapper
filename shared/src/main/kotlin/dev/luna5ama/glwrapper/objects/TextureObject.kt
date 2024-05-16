@@ -100,6 +100,7 @@ sealed class TextureObject private constructor(val target: Int, private val dele
     }
 
     private fun getClearType() = when (internalformat) {
+        ImageFormat.Depth32FStencil8NV -> GL_FLOAT_32_UNSIGNED_INT_24_8_REV_NV
         ImageFormat.Depth32FStencil8 -> GL_FLOAT_32_UNSIGNED_INT_24_8_REV
         ImageFormat.Depth24Stencil8 -> GL_UNSIGNED_INT_24_8
         ImageFormat.Stencil8 -> GL_UNSIGNED_BYTE

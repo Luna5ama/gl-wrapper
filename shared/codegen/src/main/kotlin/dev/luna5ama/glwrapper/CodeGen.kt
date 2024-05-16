@@ -161,6 +161,8 @@ GLX_ARB_create_context
 GL_ARB_vertex_program
 GL_ARB_vertex_shader""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
 
+    private val extraExtension = """GL_NV_depth_buffer_float""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
+
     private val excluded = """GL_EXT_memory_object
 GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
 
@@ -299,13 +301,13 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
         override fun visitClass(node: ClassTree, p: Unit?) {
             val simpleName = node.simpleName.toString()
-            if (!(simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)
+            val lookUpName = simpleName.replace("_", "").lowercase()
+            if (!extraExtension.contains(lookUpName) && !(simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)
                         || simpleName.startsWith("ARB")
                         || simpleName.startsWith("EXT")
                         || simpleName.startsWith("KHR")
                     )) return
 
-            val lookUpName = simpleName.replace("_", "").lowercase()
             if (core.contains(lookUpName)) return
             if (excluded.contains(lookUpName)) return
 

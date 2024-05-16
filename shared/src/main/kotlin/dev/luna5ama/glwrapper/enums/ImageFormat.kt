@@ -652,6 +652,11 @@ sealed interface ImageFormat : GLEnum {
         override val depthBits = 32
     }
 
+    data object Depth32FNV : Depth, Sized, Float {
+        override val value = GL_DEPTH_COMPONENT32F_NV
+        override val depthBits = 32
+    }
+
     data object Depth24Stencil8 : DepthStencil, Sized, UnsignedNormalized {
         override val value = GL_DEPTH24_STENCIL8
         override val depthBits = 24
@@ -660,6 +665,12 @@ sealed interface ImageFormat : GLEnum {
 
     data object Depth32FStencil8 : DepthStencil, Sized, Float {
         override val value = GL_DEPTH32F_STENCIL8
+        override val depthBits = 32
+        override val stencilBits = 8
+    }
+
+    data object Depth32FStencil8NV : DepthStencil, Sized, Float {
+        override val value = GL_DEPTH32F_STENCIL8_NV
         override val depthBits = 32
         override val stencilBits = 8
     }
