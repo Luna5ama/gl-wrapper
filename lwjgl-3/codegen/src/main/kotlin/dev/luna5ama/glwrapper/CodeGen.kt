@@ -27,15 +27,6 @@ class CodeGen : KtgenProcessor {
         val ptrReturnAnnotationSpec = AnnotationSpec.builder(ptrReturnClass).build()
         val nullableReturnAnnotationSpec = AnnotationSpec.builder(nullableReturnClass).build()
 
-        val glWrapperProviderTypeSpecBuilder = TypeSpec.classBuilder("GLWrapperProviderLWJGL3")
-            .addSuperinterface(ClassName("dev.luna5ama.glwrapper.api", "GLWrapperProvider"))
-            .addProperty(
-                PropertySpec.builder("priority", Int::class)
-                    .addModifiers(KModifier.OVERRIDE)
-                    .initializer("0")
-                    .build()
-            )
-
 
         val types = ClassUtils.findClasses("dev.luna5ama.glwrapper.api").parallelStream().asSequence()
             .filter { it.isInterface }
@@ -64,7 +55,7 @@ class CodeGen : KtgenProcessor {
 
                 interfaceClass.methods.asSequence()
                     .filter { it.name.startsWith("gl") || it.name.startsWith("ngl") }
-                    .filter { method -> method.annotations.none { it.annotationClass == coreOverloadClass }}
+                    .filter { method -> method.annotations.none { it.annotationClass == coreOverloadClass } }
                     .forEach { method ->
                         val methodName = method.name.substringBefore('-')
                         val returnType = method.returnType
@@ -176,30 +167,48 @@ class CodeGen : KtgenProcessor {
             .map { it.simpleName to "${it.simpleName}LWJGL3" }
             .toList()
 
-        val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.api", "GLWrapper")
-        glWrapperProviderTypeSpecBuilder
-            .addFunction(
-                FunSpec.builder("create")
-                    .addModifiers(KModifier.OVERRIDE)
-                    .returns(glWrapperClassName)
-                    .addCode(
-                        CodeBlock.builder()
-                            .add("return %T(", glWrapperClassName)
-                            .apply {
-                                for ((interfaceName, implName) in types) {
-                                    add("%N = %T(), ", interfaceName, ClassName("dev.luna5ama.glwrapper.api", implName))
-                                }
-                            }
-                            .add(")\n")
+        FileSpec.builder("dev.luna5ama.glwrapper.api", "GLWrapperProviderLWJGL3")
+            .addType(
+                TypeSpec.classBuilder("GLWrapperProviderLWJGL3")
+                    .addSuperinterface(ClassName("dev.luna5ama.glwrapper.api", "GLWrapperProvider"))
+                    .addProperty(
+                        PropertySpec.builder("priority", Int::class)
+                            .addModifiers(KModifier.OVERRIDE)
+                            .initializer("0")
                             .build()
                     )
+                    .generateGLWrapper(types)
                     .build()
             )
-
-        FileSpec.builder("dev.luna5ama.glwrapper.api", "GLWrapperProviderLWJGL3")
-            .addType(glWrapperProviderTypeSpecBuilder.build())
             .build()
             .writeTo(outputDir)
+    }
+
+    private fun TypeSpec.Builder.generateGLWrapper(types: List<Pair<String, String>>): TypeSpec.Builder {
+        val shaderSrcPathResolverClassName = ClassName("dev.luna5ama.glwrapper", "ShaderSource", "PathResolver")
+        val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.api", "GLWrapper")
+        this.addFunction(
+            FunSpec.builder("create")
+                .addModifiers(KModifier.OVERRIDE)
+                .addParameter(
+                    ParameterSpec.builder("shaderSrcPathResolver", shaderSrcPathResolverClassName)
+                        .build()
+                )
+                .returns(glWrapperClassName)
+                .addCode(
+                    CodeBlock.builder()
+                        .add("return %T(%N, ", glWrapperClassName, "shaderSrcPathResolver")
+                        .apply {
+                            for ((interfaceName, implName) in types) {
+                                add("%N = %T(), ", interfaceName, ClassName("dev.luna5ama.glwrapper.api", implName))
+                            }
+                        }
+                        .add(")\n")
+                        .build()
+                )
+                .build()
+        )
+        return this
     }
 
     private fun Class<*>.typeName(nullable: Boolean): TypeName {

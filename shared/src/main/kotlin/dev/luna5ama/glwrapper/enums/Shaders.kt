@@ -8,8 +8,8 @@ enum class ShaderStage(
     val subroutineUniform: SubroutineUniform
 ) : GLEnum {
     VertexShader(GL_VERTEX_SHADER, Subroutine.VertexShader, SubroutineUniform.VertexShader),
-    TessControlShader(GL_TESS_CONTROL_SHADER, Subroutine.TessControlShader, SubroutineUniform.TessControlShader),
-    TessEvaluationShader(
+    TessCtrlShader(GL_TESS_CONTROL_SHADER, Subroutine.TessControlShader, SubroutineUniform.TessControlShader),
+    TessEvalShader(
         GL_TESS_EVALUATION_SHADER,
         Subroutine.TessEvaluationShader,
         SubroutineUniform.TessEvaluationShader
@@ -20,8 +20,8 @@ enum class ShaderStage(
 
     enum class Subroutine(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
         VertexShader(GL_VERTEX_SUBROUTINE, { ShaderStage.VertexShader }),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE, { ShaderStage.TessControlShader }),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE, { ShaderStage.TessEvaluationShader }),
+        TessControlShader(GL_TESS_CONTROL_SUBROUTINE, { ShaderStage.TessCtrlShader }),
+        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE, { ShaderStage.TessEvalShader }),
         GeometryShader(GL_GEOMETRY_SUBROUTINE, { ShaderStage.GeometryShader }),
         FragmentShader(GL_FRAGMENT_SUBROUTINE, { ShaderStage.FragmentShader }),
         ComputeShader(GL_COMPUTE_SUBROUTINE, { ShaderStage.ComputeShader });
@@ -43,8 +43,8 @@ enum class ShaderStage(
 
     enum class SubroutineUniform(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
         VertexShader(GL_VERTEX_SUBROUTINE_UNIFORM, { ShaderStage.VertexShader }),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, { ShaderStage.TessControlShader }),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, { ShaderStage.TessEvaluationShader }),
+        TessControlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, { ShaderStage.TessCtrlShader }),
+        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, { ShaderStage.TessEvalShader }),
         GeometryShader(GL_GEOMETRY_SUBROUTINE_UNIFORM, { ShaderStage.GeometryShader }),
         FragmentShader(GL_FRAGMENT_SUBROUTINE_UNIFORM, { ShaderStage.FragmentShader }),
         ComputeShader(GL_COMPUTE_SUBROUTINE_UNIFORM, { ShaderStage.ComputeShader });
@@ -67,8 +67,8 @@ enum class ShaderStage(
     companion object {
         operator fun get(value: Int) = when (value) {
             GL_VERTEX_SHADER -> VertexShader
-            GL_TESS_CONTROL_SHADER -> TessControlShader
-            GL_TESS_EVALUATION_SHADER -> TessEvaluationShader
+            GL_TESS_CONTROL_SHADER -> TessCtrlShader
+            GL_TESS_EVALUATION_SHADER -> TessEvalShader
             GL_GEOMETRY_SHADER -> GeometryShader
             GL_FRAGMENT_SHADER -> FragmentShader
             GL_COMPUTE_SHADER -> ComputeShader

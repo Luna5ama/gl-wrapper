@@ -17,30 +17,38 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import java.util.*
 
 @Suppress("LeakingThis")
-open class ShaderProgram(
-    vararg shaders: ShaderSource,
+open class ShaderProgram private constructor(
+    val shaderSources: List<ShaderSource>,
 ) : IGLObject, IGLBinding {
-    final override val id: Int
+    constructor(vararg shaderSources: ShaderSource) : this(shaderSources.toList())
+
+    final override var id = 0; private set
     override val type: GLObjectType
         get() = GLObjectType.Program
 
-    private var uniformLookUpCacheStr: String? = null
-    private var uniformLookUpCache = -1
-    private val uniformLocations = Object2IntOpenHashMap<String>().apply {
-        defaultReturnValue(-1)
-    }
-
     private var labelName: String? = null
 
-    private val shaderStages: Set<ShaderStage> = shaders.mapTo(EnumSet.noneOf(ShaderStage::class.java)) {
+    private val shaderStages: Set<ShaderStage> = shaderSources.mapTo(EnumSet.noneOf(ShaderStage::class.java)) {
         it.shaderStage ?: throw IllegalArgumentException("Shader type is not specified $it")
     }
-
+    
+    private lateinit var resources: Resources
+    
     init {
+        initialize()
+    }
+    
+    fun reload() {
+        destroy()
+        initialize()
+    }
+
+    private fun initialize() {
         fun createShader(source: ShaderSource): Int {
             val id = glCreateShader(source.shaderStage!!.value)
 
-            glShaderSource(id, source.finalCodeSrc)
+            val codeSrc = source.resolveCodeSrc()
+            glShaderSource(id, codeSrc)
             glCompileShader(id)
 
             val compiled = glGetShaderi(id, GL_COMPILE_STATUS)
@@ -48,7 +56,7 @@ open class ShaderProgram(
                 System.err.print(buildString {
                     append(glGetShaderInfoLog(id, glGetShaderi(id, GL_INFO_LOG_LENGTH)))
                     appendLine("Shader source:")
-                    source.finalCodeSrc.lines().forEachIndexed { i, it ->
+                    codeSrc.lineSequence().forEachIndexed { i, it ->
                         append(i + 1)
                         append('\t')
                         appendLine(it)
@@ -63,8 +71,11 @@ open class ShaderProgram(
         }
 
         val programID = glCreateProgram()
-        val shaderIDs = IntArray(shaders.size) { i ->
-            createShader(shaders[i]).also {
+        if (labelName != null) {
+            glObjectLabel(type.identifier, programID, labelName!!)
+        }
+        val shaderIDs = IntArray(shaderSources.size) { i ->
+            createShader(shaderSources[i]).also {
                 glAttachShader(programID, it)
             }
         }
@@ -82,35 +93,16 @@ open class ShaderProgram(
             glDetachShader(programID, it)
             glDeleteShader(it)
         }
+        
+        resources = Resources(programID, shaderStages)
     }
-
-    val uniformResource = ResourceInterface.Uniform(this)
-    val uniformBlockResource = ResourceInterface.UniformBlock(this)
-    val shaderStorageBlockResource = ResourceInterface.ShaderStorageBlock(this)
-    val atomicCounterResource = ResourceInterface.AtomicCounter(this)
-    val subroutineResource: Map<ShaderStage, ResourceInterface.Subroutine>
-    val subroutineUniformResource: Map<ShaderStage, ResourceInterface.SubroutineUniform>
-
-    init {
-        subroutineResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
-            ResourceInterface.Subroutine(this, it)
-        }
-        subroutineUniformResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
-            ResourceInterface.SubroutineUniform(this, it)
-        }
-    }
-
-    private val samplerBindings = BindingManager.Samplers(this)
-    private val imageBindings = BindingManager.Images(this)
-    private val bufferBindings = BindingManager.Buffers(this)
-    private val subroutineUniformBindings = BindingManager.SubroutineUniforms(this)
 
     fun applyBinding(spec: ShaderBindingSpecs) {
         runCatching {
-            samplerBindings.apply(spec)
-            imageBindings.apply(spec)
-            bufferBindings.apply(spec)
-            subroutineUniformBindings.apply(spec)
+            resources.samplerBindings.apply(spec)
+            resources.imageBindings.apply(spec)
+            resources.bufferBindings.apply(spec)
+            resources.subroutineUniformBindings.apply(spec)
         }.onFailure {
             it.printStackTrace()
         }
@@ -144,20 +136,7 @@ open class ShaderProgram(
     }
 
     fun locateUniform(name: String): Int {
-        if (uniformLookUpCacheStr == name) {
-            return uniformLookUpCache
-        }
-
-        var loc = uniformLocations.getInt(name)
-        if (loc == -1) {
-            loc = glGetUniformLocation(id, name)
-            uniformLocations.put(name, loc)
-        }
-
-        uniformLookUpCacheStr = name
-        uniformLookUpCache = loc
-
-        return loc
+        return resources.locateUniform(name)
     }
 
     fun uniform1i(name: String, value: Int) {
@@ -276,6 +255,48 @@ open class ShaderProgram(
         glDeleteProgram(id)
     }
 
+    internal inner class Resources(val programID: Int, val stages: Set<ShaderStage>) {
+        private var uniformLookUpCacheStr: String? = null
+        private var uniformLookUpCache = -1
+        private val uniformLocations = Object2IntOpenHashMap<String>().apply {
+            defaultReturnValue(-1)
+        }
+
+        fun locateUniform(name: String): Int {
+            if (uniformLookUpCacheStr == name) {
+                return uniformLookUpCache
+            }
+
+            var loc = uniformLocations.getInt(name)
+            if (loc == -1) {
+                loc = glGetUniformLocation(id, name)
+                uniformLocations.put(name, loc)
+            }
+
+            uniformLookUpCacheStr = name
+            uniformLookUpCache = loc
+
+            return loc
+        }
+
+        val uniformResource = ResourceInterface.Uniform(this)
+        val uniformBlockResource = ResourceInterface.UniformBlock(this)
+        val shaderStorageBlockResource = ResourceInterface.ShaderStorageBlock(this)
+        val atomicCounterResource = ResourceInterface.AtomicCounter(this)
+        val subroutineResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
+            ResourceInterface.Subroutine(this, it)
+        }
+
+        val subroutineUniformResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
+            ResourceInterface.SubroutineUniform(this, it)
+        }
+
+        val samplerBindings = BindingManager.Samplers(this)
+        val imageBindings = BindingManager.Images(this)
+        val bufferBindings = BindingManager.Buffers(this)
+        val subroutineUniformBindings = BindingManager.SubroutineUniforms(this)
+    }
+
     sealed class ResourceInterface<T : ResourceInterface.Entry> {
         abstract val entries: Int2ObjectMap<T>
 
@@ -285,7 +306,7 @@ open class ShaderProgram(
             val index: Int
         }
 
-        class Uniform(program: ShaderProgram) : ResourceInterface<Uniform.Entry>() {
+        class Uniform internal constructor(resources: Resources) : ResourceInterface<Uniform.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String,
@@ -315,9 +336,9 @@ open class ShaderProgram(
 
                     val values = malloc(propCount * 4L).ptr
 
-                    iterateResourceNamedIndex(program.id, GL_UNIFORM) { (i, name) ->
+                    iterateResourceNamedIndex(resources.programID, GL_UNIFORM) { (i, name) ->
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             GL_UNIFORM,
                             i,
                             propCount,
@@ -353,7 +374,7 @@ open class ShaderProgram(
             }
         }
 
-        class UniformBlock(program: ShaderProgram) : ResourceInterface<UniformBlock.Entry>() {
+        class UniformBlock internal constructor(resources: Resources) : ResourceInterface<UniformBlock.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String,
@@ -375,22 +396,22 @@ open class ShaderProgram(
                     val values = malloc(propCount * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
-                    glGetProgramInterfaceiv(program.id, GL_UNIFORM_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    glGetProgramInterfaceiv(resources.programID, GL_UNIFORM_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
                     val maxNumActiveVariables = temp.getInt()
 
                     val activeVariableIndicesPtr = malloc(maxNumActiveVariables * 4L).ptr
                     var bindingIndex = 0
 
-                    iterateResourceNamedIndex(program.id, GL_UNIFORM_BLOCK) { (i, name) ->
+                    iterateResourceNamedIndex(resources.programID, GL_UNIFORM_BLOCK) { (i, name) ->
                         glGetProgramResourceiv(
-                            program.id, GL_UNIFORM_BLOCK, i,
+                            resources.programID, GL_UNIFORM_BLOCK, i,
                             propCount, properties,
                             propCount, Ptr.NULL, values
                         )
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             GL_UNIFORM_BLOCK,
                             i,
                             1,
@@ -404,7 +425,7 @@ open class ShaderProgram(
                             activeVariableIndicesPtr.getInt(j * 4L)
                         }
 
-                        glUniformBlockBinding(program.id, i, bindingIndex)
+                        glUniformBlockBinding(resources.programID, i, bindingIndex)
                         entries.put(
                             i, Entry(
                                 index = i,
@@ -422,7 +443,7 @@ open class ShaderProgram(
             }
         }
 
-        class ShaderStorageBlock(program: ShaderProgram) : ResourceInterface<ShaderStorageBlock.Entry>() {
+        class ShaderStorageBlock internal constructor(resources: Resources) : ResourceInterface<ShaderStorageBlock.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String,
@@ -444,15 +465,15 @@ open class ShaderProgram(
                     val values = malloc(propN * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
-                    glGetProgramInterfaceiv(program.id, GL_SHADER_STORAGE_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    glGetProgramInterfaceiv(resources.programID, GL_SHADER_STORAGE_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
                     val maxNumActiveVariables = temp.getInt()
 
                     val activeVariableIndicesPtr = calloc(maxNumActiveVariables * 4L).ptr
                     var bindingIndex = 0
 
-                    iterateResourceNamedIndex(program.id, GL_SHADER_STORAGE_BLOCK) { (i, name) ->
+                    iterateResourceNamedIndex(resources.programID, GL_SHADER_STORAGE_BLOCK) { (i, name) ->
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             GL_SHADER_STORAGE_BLOCK,
                             i,
                             propN,
@@ -464,7 +485,7 @@ open class ShaderProgram(
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             GL_SHADER_STORAGE_BLOCK,
                             i,
                             1,
@@ -479,7 +500,7 @@ open class ShaderProgram(
                         }
 
 
-                        glShaderStorageBlockBinding(program.id, i, bindingIndex)
+                        glShaderStorageBlockBinding(resources.programID, i, bindingIndex)
                         entries.put(
                             i, Entry(
                                 index = i,
@@ -497,7 +518,7 @@ open class ShaderProgram(
             }
         }
 
-        class AtomicCounter(program: ShaderProgram) : ResourceInterface<AtomicCounter.Entry>() {
+        class AtomicCounter internal constructor(resources: Resources) : ResourceInterface<AtomicCounter.Entry>() {
             class Entry(
                 override val index: Int,
                 val bufferBinding: Int,
@@ -520,13 +541,13 @@ open class ShaderProgram(
                     val values = malloc(propCount * 4L).ptr
 
                     val temp = malloc(4L).ptr
-                    glGetProgramInterfaceiv(program.id, GL_ATOMIC_COUNTER_BUFFER, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    glGetProgramInterfaceiv(resources.programID, GL_ATOMIC_COUNTER_BUFFER, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
                     val maxNumActiveVariables = temp.getInt() * 4
                     val activeVariableIndicesPtr = calloc(maxNumActiveVariables.toLong()).ptr
 
-                    iterateResourceIndex(program.id, GL_ATOMIC_COUNTER_BUFFER) { i ->
+                    iterateResourceIndex(resources.programID, GL_ATOMIC_COUNTER_BUFFER) { i ->
                         glGetProgramResourceiv(
-                            program.id, GL_ATOMIC_COUNTER_BUFFER, i,
+                            resources.programID, GL_ATOMIC_COUNTER_BUFFER, i,
                             propCount, properties,
                             propCount, Ptr.NULL, values
                         )
@@ -534,7 +555,7 @@ open class ShaderProgram(
                         val dataSize = values.getInt(4)
                         val numActiveVariables = values.getInt(8)
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             GL_ATOMIC_COUNTER_BUFFER,
                             i,
                             1,
@@ -561,7 +582,7 @@ open class ShaderProgram(
             }
         }
 
-        class Subroutine(program: ShaderProgram, stage: ShaderStage) : ResourceInterface<Subroutine.Entry>() {
+        class Subroutine internal constructor(resources: Resources, stage: ShaderStage) : ResourceInterface<Subroutine.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String
@@ -572,7 +593,7 @@ open class ShaderProgram(
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
                 MemoryStack {
-                    iterateResourceNamedIndex(program.id, stage.subroutine.value) { (i, name) ->
+                    iterateResourceNamedIndex(resources.programID, stage.subroutine.value) { (i, name) ->
                         entries.put(i, Entry(i, name))
                     }
                 }
@@ -580,9 +601,7 @@ open class ShaderProgram(
             }
         }
 
-        class SubroutineUniform(program: ShaderProgram, stage: ShaderStage) :
-            ResourceInterface<SubroutineUniform.Entry>() {
-            class Entry(
+        class SubroutineUniform internal constructor(resources: Resources, stage: ShaderStage) : ResourceInterface<SubroutineUniform.Entry>() { class Entry(
                 override val index: Int,
                 val name: String,
                 val location: Int,
@@ -594,7 +613,7 @@ open class ShaderProgram(
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
                 MemoryStack {
-                    val subroutines = program.subroutineResource[stage]
+                    val subroutines = resources.subroutineResource[stage]
                         ?: error("Subroutine resource not found for $stage")
 
                     val propCount = 2
@@ -607,7 +626,7 @@ open class ShaderProgram(
 
                     val temp = malloc(1 * 4L).ptr
                     glGetProgramInterfaceiv(
-                        program.id,
+                        resources.programID,
                         stage.subroutineUniform.value,
                         GL_MAX_NUM_COMPATIBLE_SUBROUTINES,
                         temp
@@ -615,9 +634,9 @@ open class ShaderProgram(
                     val maxNumCompatibleSubroutines = temp.getInt()
                     val compatibleSubroutinesPtr = malloc(maxNumCompatibleSubroutines * 4L).ptr
 
-                    iterateResourceNamedIndex(program.id, stage.subroutineUniform.value) { (i, name) ->
+                    iterateResourceNamedIndex(resources.programID, stage.subroutineUniform.value) { (i, name) ->
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             stage.subroutineUniform.value,
                             i,
                             propCount,
@@ -629,7 +648,7 @@ open class ShaderProgram(
                         val location = values.getInt(0)
                         val numCompatibleSubroutines = values.getInt(4)
                         glGetProgramResourceiv(
-                            program.id,
+                            resources.programID,
                             stage.subroutineUniform.value,
                             i,
                             1,
@@ -711,15 +730,15 @@ open class ShaderProgram(
 
         data class BindingPoint(val name: String, val index: Int)
 
-        class Samplers(program: ShaderProgram) : BindingManager() {
+        class Samplers internal constructor(resources: Resources) : BindingManager() {
             private val bindingPoints = mutableListOf<BindingPoint>()
 
             init {
                 var bindingIndex = 0
-                for (entry in program.uniformResource.entries.values) {
+                for (entry in resources.uniformResource.entries.values) {
                     if (entry.type !is GLSLDataType.Opaque.Sampler) continue
                     if (entry.blockIndex != -1) continue
-                    glProgramUniform1i(program.id, entry.location, bindingIndex)
+                    glProgramUniform1i(resources.programID, entry.location, bindingIndex)
                     bindingPoints.add(BindingPoint(entry.name, bindingIndex))
                     bindingIndex++
                 }
@@ -743,14 +762,14 @@ open class ShaderProgram(
             }
         }
 
-        class Images(program: ShaderProgram) : BindingManager() {
+        class Images internal constructor(resources: Resources) : BindingManager() {
             private val bindingPoints = mutableListOf<BindingPoint>()
 
             init {
                 var bindingIndex = 0
-                for (entry in program.uniformResource.entries.values) {
+                for (entry in resources.uniformResource.entries.values) {
                     if (entry.type !is GLSLDataType.Opaque.Image) continue
-                    glProgramUniform1i(program.id, entry.location, bindingIndex)
+                    glProgramUniform1i(resources.programID, entry.location, bindingIndex)
                     bindingPoints.add(BindingPoint(entry.name, bindingIndex))
                     bindingIndex++
                 }
@@ -771,20 +790,20 @@ open class ShaderProgram(
             }
         }
 
-        class Buffers(program: ShaderProgram) : BindingManager() {
+        class Buffers internal constructor(resources: Resources) : BindingManager() {
             private val bindingPointMap = mutableMapOf<BufferTarget.Shader, MutableList<BindingPoint>>()
 
             init {
-                for (entry in program.uniformResource.entries.values) {
+                for (entry in resources.uniformResource.entries.values) {
                     if (entry.type !is GLSLDataType.Opaque.AtomicCounter) continue
                     bindingPointMap.getOrPut(BufferTarget.AtomicCounter, ::mutableListOf)
                         .add(BindingPoint(entry.name, entry.atomicCounterBufferIndex))
                 }
-                for (entry in program.shaderStorageBlockResource.entries.values) {
+                for (entry in resources.shaderStorageBlockResource.entries.values) {
                     bindingPointMap.getOrPut(BufferTarget.ShaderStorage, ::mutableListOf)
                         .add(BindingPoint(entry.name, entry.bindingIndex))
                 }
-                for (entry in program.uniformBlockResource.entries.values) {
+                for (entry in resources.uniformBlockResource.entries.values) {
                     bindingPointMap.getOrPut(BufferTarget.Uniform, ::mutableListOf)
                         .add(BindingPoint(entry.name, entry.bindingIndex))
                 }
@@ -818,7 +837,7 @@ open class ShaderProgram(
             }
         }
 
-        class SubroutineUniforms(program: ShaderProgram) : BindingManager() {
+        class SubroutineUniforms internal constructor(resources: Resources) : BindingManager() {
             private data class BindingPoint(
                 val name: String,
                 val location: Int,
@@ -826,7 +845,7 @@ open class ShaderProgram(
             )
 
             private val bindingPoints =
-                program.subroutineUniformResource.entries.associateTo(EnumMap(ShaderStage::class.java)) { (stage, resource) ->
+                resources.subroutineUniformResource.entries.associateTo(EnumMap(ShaderStage::class.java)) { (stage, resource) ->
                     stage to resource.entries.values.map { entry ->
                         BindingPoint(entry.name, entry.location, entry.compatibleSubroutines.associateBy { it.name })
                     }

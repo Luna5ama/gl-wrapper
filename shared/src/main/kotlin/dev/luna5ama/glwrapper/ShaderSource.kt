@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.api.GpuVendor
+import dev.luna5ama.glwrapper.api.GLWrapper
 import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.asByteBuffer
@@ -9,163 +9,192 @@ import dev.luna5ama.kmogus.nullByteBuffer
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.lang.ref.SoftReference
+import java.net.URI
+import java.net.URL
 import java.nio.charset.CodingErrorAction
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
-sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val codeSrc: CharSequence) {
-    private val lines by lazy { codeSrc.lines() }
-    val finalCodeSrc by lazy {
-        buildString {
-            appendLine(lines[0])
-            appendLine("#define GPU_VENDOR_${GpuVendor.get().name}")
-            for (i in 1 until lines.size) {
-                appendLine(lines[i])
-            }
-        }
+sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val sourceKey: SourceKey) {
+    val name = with(sourceKey.path.uri.path) {
+        substring(lastIndexOf('/') + 1, lastIndexOf('.'))
     }
-    protected abstract val provider: Provider<*>
-    protected abstract val typeName: String
+
+    fun resolveCodeSrc(): String {
+        return provider.resolveCodeSrc(sourceKey)
+    }
+
+    abstract val shaderStage: ShaderStage?
+    abstract val typeName: String
 
     override fun toString(): String {
         return "[$typeName]$name"
     }
 
-    class Vert private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, ShaderStage.VertexShader, codeSrc) {
-        override val provider: Provider<Vert> get() = Companion
+    class Vert private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.VertexShader
         override val typeName get() = "Vert"
 
-        companion object : Provider<Vert>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): Vert {
-                return Vert(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<Vert>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Vert {
+                return Vert(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<Vert>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.vert
         }
     }
 
-    class Geom private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, ShaderStage.GeometryShader, codeSrc) {
-        override val provider: Provider<Geom> get() = Companion
+    class Geom private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.GeometryShader
         override val typeName get() = "Geom"
 
-        companion object : Provider<Geom>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): Geom {
-                return Geom(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<Geom>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Geom {
+                return Geom(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<Geom>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.geom
         }
     }
 
-    class TessCtrl private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, ShaderStage.TessControlShader, codeSrc) {
-        override val provider: Provider<TessCtrl> get() = Companion
+    class TessCtrl private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.TessCtrlShader
         override val typeName get() = "TessCtrl"
 
-        companion object : Provider<TessCtrl>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): TessCtrl {
-                return TessCtrl(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<TessCtrl>(providers) {
+            override fun newInstance(sourceKey: SourceKey): TessCtrl {
+                return TessCtrl(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<TessCtrl>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.tessCtrl
         }
     }
 
-    class TessEval private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, ShaderStage.TessEvaluationShader, codeSrc) {
-        override val provider: Provider<TessEval> get() = Companion
+    class TessEval private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.TessEvalShader
         override val typeName get() = "TessEval"
 
-        companion object : Provider<TessEval>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): TessEval {
-                return TessEval(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<TessEval>(providers) {
+            override fun newInstance(sourceKey: SourceKey): TessEval {
+                return TessEval(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<TessEval>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.tessEval
         }
     }
 
-    class Frag private constructor(name: String, codeSrc: CharSequence) :
-        ShaderSource(name, ShaderStage.FragmentShader, codeSrc) {
-        override val provider: Provider<Frag> get() = Companion
+    class Frag private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.FragmentShader
         override val typeName get() = "Frag"
 
-        companion object : Provider<Frag>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): Frag {
-                return Frag(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<Frag>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Frag {
+                return Frag(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<Frag>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.frag
         }
     }
 
-    class Comp private constructor(name: String, codeSrc: CharSequence) :
-     ShaderSource(name, ShaderStage.ComputeShader, codeSrc) {
-        override val provider: Provider<Comp> get() = Companion
+    class Comp private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.ComputeShader
         override val typeName get() = "Comp"
 
-        companion object : Provider<Comp>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): Comp {
-                return Comp(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<Comp>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Comp {
+                return Comp(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<Comp>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.comp
         }
     }
 
-    private class Lib private constructor(name: String, codeSrc: CharSequence) : ShaderSource(name, null, codeSrc) {
-        override val provider: Provider<Lib> get() = Companion
+    class Lib private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = null
         override val typeName = "Lib"
 
-        companion object : Provider<Lib>() {
-            override fun newInstance(name: String, codeSrc: CharSequence): Lib {
-                return Lib(name, codeSrc)
+        class Provider internal constructor(providers: Providers) : ProviderBase<Lib>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Lib {
+                return Lib(this, sourceKey)
             }
+        }
+
+        companion object : ProviderAccessor<Lib>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.lib
         }
     }
 
-    abstract class Provider<T : ShaderSource> protected constructor() {
-        private val cacheMap = Object2ObjectOpenHashMap<String, SoftReference<Cache>>()
+    abstract class ProviderAccessor<T : ShaderSource> {
+        abstract val provider: ProviderBase<T>
+
+        operator fun invoke(path: String): T {
+            return invoke(provider.providers.pathResolver, path)
+        }
+
+        inline operator fun invoke(path: String, block: DefineBuilder.() -> Unit): T {
+            return invoke(provider.providers.pathResolver, path, block)
+        }
+
+        operator fun invoke(pathResolver: PathResolver, path: String): T {
+            return provider.newInstance(SourceKey(pathResolver.resolve(path), ""))
+        }
+
+        inline operator fun invoke(
+            pathResolver: PathResolver,
+            path: String,
+            block: DefineBuilder.() -> Unit
+        ): T {
+            return provider.newInstance(SourceKey(pathResolver.resolve(path), DefineBuilder().apply(block).build()))
+        }
+    }
+
+    abstract class ProviderBase<T : ShaderSource>(val providers: Providers) {
+        private val cacheMap = Object2ObjectOpenHashMap<SourceKey, SoftReference<Cache>>()
 
         private val bufferArr = Arr.malloc(1024)
         private val byteBuffer = nullByteBuffer()
 
-        protected abstract fun newInstance(name: String, codeSrc: CharSequence): T
+        abstract fun newInstance(sourceKey: SourceKey): T
 
-        operator fun invoke(path: String): T {
-            return getCache(path).instance
-        }
-
-        inline operator fun invoke(path: String, crossinline block: DefineBuilder.() -> Unit): T {
-            return getWithDefines(path, DefineBuilder().apply(block))
-        }
-
-        fun getWithDefines(path: String, defines: DefineBuilder): T {
-            return getWithDefines(getCache(path), defines)
-        }
-
-        private fun getWithDefines(cache: Cache, defines: DefineBuilder): T {
-            return if (defines.stringBuilder.isEmpty()) {
-                cache.instance
-            } else {
-                buildWithDefines(cache.name, cache.lines, defines)
-            }
-        }
-
-        fun buildWithDefines(name: String, lines: List<CharSequence>, defines: DefineBuilder): T {
-            val stringBuilder = StringBuilder()
-
+        private fun resolveCodeSrc(stringBuilder: StringBuilder, sourceKey: SourceKey) {
             var inserted = false
-
-            for (i in lines.indices) {
-                val line = lines[i]
-                if (!inserted && !line.startsWith("#version") && !line.startsWith("#define")) {
-                    stringBuilder.append(defines.stringBuilder)
-                    inserted = true
+            getCache(sourceKey).lines.forEachIndexed { index, line ->
+                when (line) {
+                    is String -> {
+                        if (!inserted && !line.startsWith("#version") && !line.startsWith("#define")) {
+                            stringBuilder.appendLine(sourceKey.defines)
+                            inserted = true
+                        }
+                        stringBuilder.appendLine(line)
+                    }
+                    is Lib -> line.provider.resolveCodeSrc(stringBuilder, line.sourceKey)
                 }
-                stringBuilder.appendLine(line)
             }
-
-            return newInstance(name, stringBuilder)
         }
 
-        private fun getCache(path: String): Cache {
-            val url = javaClass.getResource(path) ?: throw IllegalArgumentException("Invalid shader path ($path)")
-            val md5 = MessageDigest.getInstance("MD5")
+        internal fun resolveCodeSrc(sourceKey: SourceKey): String {
+            return buildString {
+                resolveCodeSrc(this, sourceKey)
+            }
+        }
 
+        private fun getCache(sourceKey: SourceKey): Cache {
+            val md5 = MessageDigest.getInstance("MD5")
             var offset = 0L
 
-            url.openStream().use { inputStream ->
+            sourceKey.path.uri.toURL().openStream().use { inputStream ->
                 DigestInputStream(inputStream, md5).use {
                     var byte = it.read()
                     while (byte != -1) {
@@ -176,25 +205,33 @@ sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val c
                 }
             }
 
-            if (offset == 0L) throw IllegalArgumentException("Shader file is empty ($path)")
+            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path.uri})")
 
-            val hash = MD5Hash(md5.digest())
+            val newHash = MD5Hash(md5.digest())
+
+            fun resolveIncludeURL(includePath: String): URL {
+                return sourceKey.path.uri.resolve(includePath).toURL()
+            }
+
+            fun processLines(input: String): Any {
+                return includeRegex.matchEntire(input)?.let {
+                    val sourcePath = SourceKey.Path(sourceKey.path.root, resolveIncludeURL(it.groupValues[1]).toURI())
+                    providers.lib.newInstance(SourceKey(sourcePath, ""))
+                } ?: input
+            }
 
             synchronized(this) {
-                var source = cacheMap[path]?.get()
-                if (source == null || source.hash != hash) {
+                var source = cacheMap[sourceKey]?.get()
+                if (source == null || source.srcHash != newHash) {
                     val decoder = Charsets.UTF_8.newDecoder()
                         .onMalformedInput(CodingErrorAction.REPORT)
                         .onUnmappableCharacter(CodingErrorAction.REPORT)
 
-                    val lines =
-                        decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
-                            .mapTo(ObjectArrayList()) {
-                                processLines(path, it)
-                            }
+                    val lines = decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
+                        .mapTo(ObjectArrayList()) { processLines(it) }
 
-                    source = Cache(path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.')), lines, hash)
-                    cacheMap[path] = SoftReference(source)
+                    source = Cache(newHash, lines)
+                    cacheMap[sourceKey] = SoftReference(source)
                 }
 
                 return source
@@ -203,50 +240,37 @@ sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val c
 
         private val includeRegex = "#include\\s+\"([^\"]+)\"".toRegex()
 
-        private fun processLines(path: String, input: String): CharSequence {
-            var line = input
-
-            line = includeRegex.replace(line) {
-                val includePath = it.groupValues[1]
-                val importContent = Lib(resolveIncludePath(path, includePath)).codeSrc
-                importContent
-            }
-
-            return line
-        }
-
-        fun resolveIncludePath(currentPath: String, includePath: String): String {
-            if (includePath[0] == '/') return includePath
-
-            val currentPathDir = currentPath.substring(0, currentPath.lastIndexOf('/'))
-            return if (includePath.startsWith("..")) {
-                val currentPathDirParent = currentPathDir.substring(0, currentPathDir.lastIndexOf('/'))
-                "$currentPathDirParent${includePath.substring(2)}"
-            } else {
-                "$currentPathDir/${includePath.substring(if (includePath[0] == '.') 2 else 0)}"
-            }
-        }
-
         fun clearCache() {
             synchronized(this) {
                 cacheMap.clear()
             }
         }
 
-        private inner class Cache(val name: String, val lines: List<CharSequence>, val hash: MD5Hash) {
-            val str by lazy {
-                buildString {
-                    for (i in lines.indices) {
-                        appendLine(lines[i])
-                    }
-                }
-            }
-            val instance by lazy { newInstance(name, str) }
+        private inner class Cache(val srcHash: MD5Hash, val lines: List<Any>)
+    }
+    
+    class Providers(val pathResolver: PathResolver) {
+        val vert = Vert.Provider(this)
+        val geom = Geom.Provider(this)
+        val tessCtrl = TessCtrl.Provider(this)
+        val tessEval = TessEval.Provider(this)
+        val frag = Frag.Provider(this)
+        val comp = Comp.Provider(this)
+        val lib = Lib.Provider(this)
+
+        fun clearCache() {
+            vert.clearCache()
+            geom.clearCache()
+            tessCtrl.clearCache()
+            tessEval.clearCache()
+            frag.clearCache()
+            comp.clearCache()
+            lib.clearCache()
         }
     }
 
     class DefineBuilder {
-        internal val stringBuilder = StringBuilder()
+        private val stringBuilder = StringBuilder()
 
         fun define(name: String) {
             stringBuilder.append("#define")
@@ -281,6 +305,8 @@ sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val c
             stringBuilder.append(value)
             stringBuilder.appendLine()
         }
+
+        fun build() = stringBuilder.toString()
     }
 
     private class MD5Hash(array: ByteArray) {
@@ -327,26 +353,37 @@ sealed class ShaderSource(val name: String, val shaderStage: ShaderStage?, val c
         }
     }
 
-    companion object {
-        fun clearAllCache() {
-            Vert.clearCache()
-            Geom.clearCache()
-            TessCtrl.clearCache()
-            TessEval.clearCache()
-            Frag.clearCache()
-            Comp.clearCache()
+    data class SourceKey(val path: Path, val defines: String) {
+        data class Path(val root: URI, val uri: URI)
+    }
+
+    interface PathResolver {
+        fun resolve(path: String): SourceKey.Path
+
+        object Default : PathResolver {
+            private val root = javaClass.getResource("/ROOT_IDENTIFIER")!!.toURI().resolve("..")
+
+            override fun resolve(path: String): SourceKey.Path {
+                val url = Default::class.java.getResource("/$path")
+                    ?: throw IllegalArgumentException("Invalid shader path: $path")
+                return SourceKey.Path(root, url.toURI())
+            }
         }
+    }
+
+    companion object {
 
         inline operator fun <T : ShaderSource> T.invoke(crossinline block: DefineBuilder.() -> Unit): T {
             return this.withDefines(DefineBuilder().apply(block))
         }
 
         fun <T : ShaderSource> T.withDefines(defines: DefineBuilder): T {
-            return if (defines.stringBuilder.isEmpty()) {
+            val definesStr = defines.build()
+            return if (definesStr.isEmpty()) {
                 this
             } else {
                 @Suppress("UNCHECKED_CAST")
-                (this.provider as Provider<T>).buildWithDefines(this.name, this.lines, defines)
+                provider.newInstance(SourceKey(sourceKey.path, sourceKey.defines + "\n" + definesStr)) as T
             }
         }
     }

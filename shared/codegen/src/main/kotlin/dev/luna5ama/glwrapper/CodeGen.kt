@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper
 
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.sun.source.tree.*
 import com.sun.source.util.JavacTask
 import com.sun.source.util.SimpleTreeVisitor
@@ -18,6 +17,7 @@ class CodeGen : KtgenProcessor {
     private val kmogusArrClassName = ClassName("dev.luna5ama.kmogus", "Arr")
     private val kmogusPtrClassName = ClassName("dev.luna5ama.kmogus", "Ptr")
     private val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.api", "GLWrapper")
+    private val shaderSrcPathResolverClassName = ClassName("dev.luna5ama.glwrapper", "ShaderSource", "PathResolver")
     private val glBaseClassName = ClassName("dev.luna5ama.glwrapper.api", "GLBase")
 
     private val nativeTypePtrMethodRegex = "@NativeType\\(\".+? \\*\"\\)[\\W\n]+public static ".toRegex()
@@ -230,9 +230,14 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
         FileSpec.builder(glWrapperClassName)
             .addType(
                 TypeSpec.classBuilder("GLWrapper")
-                    .superclass(ClassName("dev.luna5ama.glwrapper.api", "GLBase", "Impl"))
+                    .superclass(ClassName("dev.luna5ama.glwrapper.api", "GLWrapperBase"))
+                    .addSuperclassConstructorParameter(CodeBlock.of("%N", "shaderSrcPathResolver"))
                     .primaryConstructor(
                         FunSpec.constructorBuilder()
+                            .addParameter(
+                                ParameterSpec.builder("shaderSrcPathResolver", shaderSrcPathResolverClassName)
+                                    .build()
+                            )
                             .addParameters(
                                 classNames.map {
                                     ParameterSpec.builder(it, ClassName("dev.luna5ama.glwrapper.api", it))
@@ -247,6 +252,11 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                                 ParameterSpec.builder("delegate", glWrapperClassName)
                                     .build()
                             )
+                            .addParameter(
+                                ParameterSpec.builder("shaderSrcPathResolver", shaderSrcPathResolverClassName)
+                                    .defaultValue("%N.%N", "delegate", "shaderSrcPathResolver")
+                                    .build()
+                            )
                             .addParameters(
                                 classNames.map {
                                     ParameterSpec.builder(it, ClassName("dev.luna5ama.glwrapper.api", it))
@@ -255,8 +265,11 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                                 }
                             )
                             .callThisConstructor(
-                                classNames.map {
-                                    CodeBlock.of("%N", it)
+                                buildList {
+                                    add(CodeBlock.of("%N", "shaderSrcPathResolver"))
+                                    classNames.mapTo(this) {
+                                        CodeBlock.of("%N", it)
+                                    }
                                 }
                             )
                             .build()
@@ -271,6 +284,11 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                                     )
                                     .build()
                             )
+                            .build()
+                    )
+                    .addProperty(
+                        PropertySpec.builder("shaderSrcPathResolver", shaderSrcPathResolverClassName)
+                            .initializer("shaderSrcPathResolver")
                             .build()
                     )
                     .addProperties(

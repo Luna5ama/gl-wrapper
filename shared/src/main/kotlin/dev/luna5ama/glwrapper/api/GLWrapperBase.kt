@@ -1,7 +1,12 @@
 package dev.luna5ama.glwrapper.api
 
+import dev.luna5ama.glwrapper.ShaderSource
 import dev.luna5ama.kmogus.Arr
 import java.util.*
+
+abstract class GLWrapperBase(shaderSrcPathResolver: ShaderSource.PathResolver) {
+    val shaderSrcProviders = ShaderSource.Providers(shaderSrcPathResolver)
+}
 
 abstract class GLWrapperControl {
     private val provider by lazy { ServiceLoader.load(GLWrapperProvider::class.java).maxBy { it.priority } }
@@ -45,4 +50,9 @@ abstract class GLWrapperControl {
         } else {
             instance0.get()!!
         }
+
+    fun init(block: (GLWrapper) -> GLWrapper) {
+        val wrapper = block(provider.create())
+        instance0.set(wrapper)
+    }
 }
