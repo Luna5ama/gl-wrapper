@@ -16,7 +16,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 
 sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val sourceKey: SourceKey) {
-    val name = with(sourceKey.path.uri.path) {
+    val name = with(sourceKey.path.url.toString()) {
         substring(lastIndexOf('/') + 1, lastIndexOf('.'))
     }
 
@@ -194,7 +194,7 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
             val md5 = MessageDigest.getInstance("MD5")
             var offset = 0L
 
-            sourceKey.path.uri.toURL().openStream().use { inputStream ->
+            sourceKey.path.url.openStream().use { inputStream ->
                 DigestInputStream(inputStream, md5).use {
                     var byte = it.read()
                     while (byte != -1) {
@@ -205,18 +205,17 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
                 }
             }
 
-            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path.uri})")
+            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path.url})")
 
             val newHash = MD5Hash(md5.digest())
 
-            fun resolveIncludeURL(includePath: String): URL {
-                return sourceKey.path.uri.resolve(includePath).toURL()
+            fun resolveIncludeURL(includePath: String): PathResolver.Path {
+                return sourceKey.path.resolve(includePath)
             }
 
             fun processLines(input: String): Any {
                 return includeRegex.matchEntire(input)?.let {
-                    val sourcePath = SourceKey.Path(sourceKey.path.root, resolveIncludeURL(it.groupValues[1]).toURI())
-                    providers.lib.newInstance(SourceKey(sourcePath, ""))
+                    providers.lib.newInstance(SourceKey(resolveIncludeURL(it.groupValues[1]), ""))
                 } ?: input
             }
 
@@ -353,21 +352,35 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
         }
     }
 
-    data class SourceKey(val path: Path, val defines: String) {
-        data class Path(val root: URI, val uri: URI)
-    }
-
+    data class SourceKey(val path: PathResolver.Path, val defines: String)
     interface PathResolver {
-        fun resolve(path: String): SourceKey.Path
+        fun resolve(path: String): Path
 
         object Default : PathResolver {
-            private val root = javaClass.getResource("/ROOT_IDENTIFIER")!!.toURI().resolve("..")
-
-            override fun resolve(path: String): SourceKey.Path {
-                val url = Default::class.java.getResource("/$path")
-                    ?: throw IllegalArgumentException("Invalid shader path: $path")
-                return SourceKey.Path(root, url.toURI())
+            override fun resolve(path: String): Path {
+                return PathImpl(URI("/$path"))
             }
+
+            private class PathImpl : Path {
+                private val uri: URI
+                override val url: URL
+
+                constructor(uri: URI) {
+                    this.uri = uri
+                    this.url = uri.path.let {
+                        Default::class.java.getResource(it) ?: throw IllegalArgumentException("Invalid shader path: $it")
+                    }
+                }
+
+                override fun resolve(path: String): Path {
+                    return PathImpl(uri.resolve(path))
+                }
+            }
+        }
+
+        interface Path {
+            val url: URL
+            fun resolve(path: String): Path
         }
     }
 
