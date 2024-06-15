@@ -121,6 +121,36 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
         }
     }
 
+    class Task private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.TaskShader
+        override val typeName get() = "Task"
+
+        class Provider internal constructor(providers: Providers) : ProviderBase<Task>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Task {
+                return Task(this, sourceKey)
+            }
+        }
+
+        companion object : ProviderAccessor<Task>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.task
+        }
+    }
+
+    class Mesh private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+        override val shaderStage get() = ShaderStage.MeshShader
+        override val typeName get() = "Mesh"
+
+        class Provider internal constructor(providers: Providers) : ProviderBase<Mesh>(providers) {
+            override fun newInstance(sourceKey: SourceKey): Mesh {
+                return Mesh(this, sourceKey)
+            }
+        }
+
+        companion object : ProviderAccessor<Mesh>() {
+            override val provider get() = GLWrapper.instance.shaderSrcProviders.mesh
+        }
+    }
+
     class Lib private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = null
         override val typeName = "Lib"
@@ -255,6 +285,8 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
         val tessEval = TessEval.Provider(this)
         val frag = Frag.Provider(this)
         val comp = Comp.Provider(this)
+        val task = Task.Provider(this)
+        val mesh = Mesh.Provider(this)
         val lib = Lib.Provider(this)
 
         fun clearCache() {

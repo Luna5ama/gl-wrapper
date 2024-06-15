@@ -161,7 +161,8 @@ GLX_ARB_create_context
 GL_ARB_vertex_program
 GL_ARB_vertex_shader""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
 
-    private val extraExtension = """GL_NV_depth_buffer_float""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
+    private val extraExtension = """GL_NV_depth_buffer_float
+GL_NV_mesh_shader""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()
 
     private val excluded = """GL_EXT_memory_object
 GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "").lowercase() }.toSet()

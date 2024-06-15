@@ -8,31 +8,31 @@ enum class ShaderStage(
     val subroutineUniform: SubroutineUniform
 ) : GLEnum {
     VertexShader(GL_VERTEX_SHADER, Subroutine.VertexShader, SubroutineUniform.VertexShader),
-    TessCtrlShader(GL_TESS_CONTROL_SHADER, Subroutine.TessControlShader, SubroutineUniform.TessControlShader),
-    TessEvalShader(
-        GL_TESS_EVALUATION_SHADER,
-        Subroutine.TessEvaluationShader,
-        SubroutineUniform.TessEvaluationShader
-    ),
+    TessCtrlShader(GL_TESS_CONTROL_SHADER, Subroutine.TessCtrlShader, SubroutineUniform.TessCtrlShader),
+    TessEvalShader(GL_TESS_EVALUATION_SHADER, Subroutine.TessEvalShader, SubroutineUniform.TessEvalShader),
     GeometryShader(GL_GEOMETRY_SHADER, Subroutine.GeometryShader, SubroutineUniform.GeometryShader),
     FragmentShader(GL_FRAGMENT_SHADER, Subroutine.FragmentShader, SubroutineUniform.FragmentShader),
-    ComputeShader(GL_COMPUTE_SHADER, Subroutine.ComputeShader, SubroutineUniform.ComputeShader);
+    ComputeShader(GL_COMPUTE_SHADER, Subroutine.ComputeShader, SubroutineUniform.ComputeShader),
+    TaskShader(GL_TASK_SHADER_NV, Subroutine.TaskShader, SubroutineUniform.TaskShader),
+    MeshShader(GL_MESH_SHADER_NV, Subroutine.MeshShader, SubroutineUniform.MeshShader),;
 
     enum class Subroutine(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
         VertexShader(GL_VERTEX_SUBROUTINE, { ShaderStage.VertexShader }),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE, { ShaderStage.TessCtrlShader }),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE, { ShaderStage.TessEvalShader }),
+        TessCtrlShader(GL_TESS_CONTROL_SUBROUTINE, { ShaderStage.TessCtrlShader }),
+        TessEvalShader(GL_TESS_EVALUATION_SUBROUTINE, { ShaderStage.TessEvalShader }),
         GeometryShader(GL_GEOMETRY_SUBROUTINE, { ShaderStage.GeometryShader }),
         FragmentShader(GL_FRAGMENT_SUBROUTINE, { ShaderStage.FragmentShader }),
-        ComputeShader(GL_COMPUTE_SUBROUTINE, { ShaderStage.ComputeShader });
+        ComputeShader(GL_COMPUTE_SUBROUTINE, { ShaderStage.ComputeShader }),
+        TaskShader(GL_TASK_SUBROUTINE_NV, { ShaderStage.TaskShader }),
+        MeshShader(GL_MESH_SUBROUTINE_NV, { ShaderStage.MeshShader });
 
         val shaderStage by lazy(shaderStage)
 
         companion object {
             operator fun get(value: Int) = when (value) {
                 GL_VERTEX_SUBROUTINE -> VertexShader
-                GL_TESS_CONTROL_SUBROUTINE -> TessControlShader
-                GL_TESS_EVALUATION_SUBROUTINE -> TessEvaluationShader
+                GL_TESS_CONTROL_SUBROUTINE -> TessCtrlShader
+                GL_TESS_EVALUATION_SUBROUTINE -> TessEvalShader
                 GL_GEOMETRY_SUBROUTINE -> GeometryShader
                 GL_FRAGMENT_SUBROUTINE -> FragmentShader
                 GL_COMPUTE_SUBROUTINE -> ComputeShader
@@ -43,19 +43,21 @@ enum class ShaderStage(
 
     enum class SubroutineUniform(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
         VertexShader(GL_VERTEX_SUBROUTINE_UNIFORM, { ShaderStage.VertexShader }),
-        TessControlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, { ShaderStage.TessCtrlShader }),
-        TessEvaluationShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, { ShaderStage.TessEvalShader }),
+        TessCtrlShader(GL_TESS_CONTROL_SUBROUTINE_UNIFORM, { ShaderStage.TessCtrlShader }),
+        TessEvalShader(GL_TESS_EVALUATION_SUBROUTINE_UNIFORM, { ShaderStage.TessEvalShader }),
         GeometryShader(GL_GEOMETRY_SUBROUTINE_UNIFORM, { ShaderStage.GeometryShader }),
         FragmentShader(GL_FRAGMENT_SUBROUTINE_UNIFORM, { ShaderStage.FragmentShader }),
-        ComputeShader(GL_COMPUTE_SUBROUTINE_UNIFORM, { ShaderStage.ComputeShader });
+        ComputeShader(GL_COMPUTE_SUBROUTINE_UNIFORM, { ShaderStage.ComputeShader }),
+        TaskShader(GL_TASK_SUBROUTINE_UNIFORM_NV, { ShaderStage.TaskShader }),
+        MeshShader(GL_MESH_SUBROUTINE_UNIFORM_NV, { ShaderStage.MeshShader });
 
         val shaderStage by lazy(shaderStage)
 
         companion object {
             operator fun get(value: Int) = when (value) {
                 GL_VERTEX_SUBROUTINE_UNIFORM -> VertexShader
-                GL_TESS_CONTROL_SUBROUTINE_UNIFORM -> TessControlShader
-                GL_TESS_EVALUATION_SUBROUTINE_UNIFORM -> TessEvaluationShader
+                GL_TESS_CONTROL_SUBROUTINE_UNIFORM -> TessCtrlShader
+                GL_TESS_EVALUATION_SUBROUTINE_UNIFORM -> TessEvalShader
                 GL_GEOMETRY_SUBROUTINE_UNIFORM -> GeometryShader
                 GL_FRAGMENT_SUBROUTINE_UNIFORM -> FragmentShader
                 GL_COMPUTE_SUBROUTINE_UNIFORM -> ComputeShader
