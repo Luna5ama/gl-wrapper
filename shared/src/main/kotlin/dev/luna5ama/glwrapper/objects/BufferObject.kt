@@ -1,12 +1,22 @@
 package dev.luna5ama.glwrapper.objects
 
+import dev.luna5ama.glwrapper.BufferView
 import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.Ptr
 
-sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IGLTargetBinding {
+sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IGLTargetBinding, BufferView {
     var size = -1L; private set
+
+    override val viewBuffer: BufferObject
+        get() = this
+
+    override val viewOffset: Long
+        get() = 0L
+
+    override val viewSize: Long
+        get() = -1L
 
     open fun allocate(size: Long, flags: Int) {
         // Intel workaround
@@ -97,6 +107,14 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IG
         check(size != -1L) { "Buffers is not allocated" }
     }
 
+    override fun createView(offset: Long, size: Long): BufferView {
+        return BufferViewImpl(offset, size)
+    }
+
+    override fun createView(offset: Long): BufferView {
+        return BufferViewImpl(offset, -1L)
+    }
+
     override fun bind(target: Int) {
         glBindBuffer(target, id)
     }
@@ -138,6 +156,30 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IG
         override fun allocate(size: Long, data: Ptr, flags: Int) {
             super.allocate(size, data, flags)
             glNamedBufferData(id, size, data, flags)
+        }
+    }
+
+    private inner class BufferViewImpl(
+        override val viewOffset: Long,
+        override val viewSize: Long
+    ) : BufferView {
+        init {
+            check(viewOffset >= 0) { "View offset must be positive" }
+        }
+
+        override val viewBuffer: BufferObject
+            get() = this@BufferObject
+
+        override fun createView(offset: Long, size: Long): BufferView {
+            return this@BufferObject.createView(offset + viewOffset, size)
+        }
+
+        override fun createView(offset: Long): BufferView {
+            return if (viewSize == -1L) {
+                this@BufferObject.createView(offset + viewOffset)
+            } else {
+                createView(offset, viewSize - offset)
+            }
         }
     }
 }

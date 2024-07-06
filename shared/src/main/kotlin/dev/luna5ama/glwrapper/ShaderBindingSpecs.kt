@@ -29,13 +29,9 @@ data class ShaderBindingSpecs(
 
     data class Buffer(
         val name: String,
-        val buffer: BufferObject,
+        val bufferView: BufferView,
         val target: BufferTarget.Shader,
-        val offset: Long,
-        val size: Long
-    ) {
-        constructor(name: String, buffer: BufferObject, target: BufferTarget.Shader) : this(name, buffer, target, -1, -1)
-    }
+    )
 
     data class Subroutine(
         val uniformName: String,
@@ -96,12 +92,8 @@ data class ShaderBindingSpecs(
             }
         }
 
-        fun buffer(name: String, buffer: BufferObject, target: BufferTarget.Shader) {
-            buffer(Buffer(name, buffer, target))
-        }
-
-        fun buffer(name: String, buffer: BufferObject, target: BufferTarget.Shader, offset: Long, size: Long) {
-            buffer(Buffer(name, buffer, target, offset, size))
+        fun buffer(name: String, bufferView: BufferView, target: BufferTarget.Shader) {
+            buffer(Buffer(name, bufferView, target))
         }
 
         fun buffer(bindings: Collection<Buffer>) {

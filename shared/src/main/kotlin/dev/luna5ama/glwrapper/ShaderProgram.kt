@@ -31,13 +31,13 @@ open class ShaderProgram private constructor(
     private val shaderStages: Set<ShaderStage> = shaderSources.mapTo(EnumSet.noneOf(ShaderStage::class.java)) {
         it.shaderStage ?: throw IllegalArgumentException("Shader type is not specified $it")
     }
-    
+
     private lateinit var resources: Resources
-    
+
     init {
         initialize()
     }
-    
+
     fun reload() {
         destroy()
         initialize()
@@ -93,7 +93,7 @@ open class ShaderProgram private constructor(
             glDetachShader(programID, it)
             glDeleteShader(it)
         }
-        
+
         resources = Resources(programID, shaderStages)
     }
 
@@ -443,7 +443,8 @@ open class ShaderProgram private constructor(
             }
         }
 
-        class ShaderStorageBlock internal constructor(resources: Resources) : ResourceInterface<ShaderStorageBlock.Entry>() {
+        class ShaderStorageBlock internal constructor(resources: Resources) :
+            ResourceInterface<ShaderStorageBlock.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String,
@@ -465,7 +466,12 @@ open class ShaderProgram private constructor(
                     val values = malloc(propN * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
-                    glGetProgramInterfaceiv(resources.programID, GL_SHADER_STORAGE_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    glGetProgramInterfaceiv(
+                        resources.programID,
+                        GL_SHADER_STORAGE_BLOCK,
+                        GL_MAX_NUM_ACTIVE_VARIABLES,
+                        temp
+                    )
                     val maxNumActiveVariables = temp.getInt()
 
                     val activeVariableIndicesPtr = calloc(maxNumActiveVariables * 4L).ptr
@@ -541,7 +547,12 @@ open class ShaderProgram private constructor(
                     val values = malloc(propCount * 4L).ptr
 
                     val temp = malloc(4L).ptr
-                    glGetProgramInterfaceiv(resources.programID, GL_ATOMIC_COUNTER_BUFFER, GL_MAX_NUM_ACTIVE_VARIABLES, temp)
+                    glGetProgramInterfaceiv(
+                        resources.programID,
+                        GL_ATOMIC_COUNTER_BUFFER,
+                        GL_MAX_NUM_ACTIVE_VARIABLES,
+                        temp
+                    )
                     val maxNumActiveVariables = temp.getInt() * 4
                     val activeVariableIndicesPtr = calloc(maxNumActiveVariables.toLong()).ptr
 
@@ -582,7 +593,8 @@ open class ShaderProgram private constructor(
             }
         }
 
-        class Subroutine internal constructor(resources: Resources, stage: ShaderStage) : ResourceInterface<Subroutine.Entry>() {
+        class Subroutine internal constructor(resources: Resources, stage: ShaderStage) :
+            ResourceInterface<Subroutine.Entry>() {
             class Entry(
                 override val index: Int,
                 val name: String
@@ -601,7 +613,9 @@ open class ShaderProgram private constructor(
             }
         }
 
-        class SubroutineUniform internal constructor(resources: Resources, stage: ShaderStage) : ResourceInterface<SubroutineUniform.Entry>() { class Entry(
+        class SubroutineUniform internal constructor(resources: Resources, stage: ShaderStage) :
+            ResourceInterface<SubroutineUniform.Entry>() {
+            class Entry(
                 override val index: Int,
                 val name: String,
                 val location: Int,
@@ -824,12 +838,18 @@ open class ShaderProgram private constructor(
                             require(binding != null) { "Missing binding for $target buffer block: $name" }
                             check(index < targetBindingCount)
                             check(index >= 0)
-                            check(binding.buffer.id != 0)
-                            check(binding.offset < binding.buffer.size)
-                            check(binding.offset + binding.size <= binding.buffer.size)
-                            buffers.setInt(index * 4L, binding.buffer.id)
-                            offsets.setLong(index * 8L, if (binding.offset == -1L) 0 else binding.offset)
-                            sizes.setLong(index * 8L, if (binding.size == -1L) binding.buffer.size else binding.size)
+                            val bufferView = binding.bufferView
+                            val bindingSize = if (bufferView.viewSize == -1L) {
+                                bufferView.viewBuffer.size - bufferView.viewOffset
+                            } else {
+                                bufferView.viewSize
+                            }
+                            check(bufferView.viewBuffer.id != 0)
+                            check(bufferView.viewOffset < bufferView.viewBuffer.size)
+                            check(bufferView.viewOffset + bindingSize <= bufferView.viewBuffer.size)
+                            buffers.setInt(index * 4L, bufferView.viewBuffer.id)
+                            offsets.setLong(index * 8L, bufferView.viewOffset)
+                            sizes.setLong(index * 8L, bindingSize)
                         }
                         glBindBuffersRange(target.value, 0, targetBindingCount, buffers, offsets, sizes)
                     }
