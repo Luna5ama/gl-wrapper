@@ -11,8 +11,7 @@ import kotlin.contracts.contract
 data class ShaderBindingSpecs(
     val samplers: Map<String, Sampler>,
     val images: Map<String, Image>,
-    val buffers: Map<BufferTarget.Shader, Map<String, Buffer>>,
-    val subroutines: Map<ShaderStage, Map<String, Subroutine>>
+    val buffers: Map<BufferTarget.Shader, Map<String, Buffer>>
 ) {
     data class Sampler(
         val name: String,
@@ -33,18 +32,10 @@ data class ShaderBindingSpecs(
         val target: BufferTarget.Shader,
     )
 
-    data class Subroutine(
-        val uniformName: String,
-        val stage: ShaderStage,
-        val funcName: String
-    )
-
-
     class Builder {
         private val samplers = mutableMapOf<String, Sampler>()
         private val images = mutableMapOf<String, Image>()
         private val buffers = mutableMapOf<BufferTarget.Shader, MutableMap<String, Buffer>>()
-        private val subroutines = mutableMapOf<ShaderStage, MutableMap<String, Subroutine>>()
 
         fun sampler(binding: Sampler) {
             val v = samplers.put(binding.name, binding)
@@ -100,23 +91,7 @@ data class ShaderBindingSpecs(
             bindings.forEach { buffer(it) }
         }
 
-        fun subroutine(binding: Subroutine) {
-            val map = subroutines.getOrPut(binding.stage, ::mutableMapOf)
-            val v = map.put(binding.uniformName, binding)
-            require(v == null) {
-                "Duplicated ${binding.stage} subroutine name: ${binding.uniformName}, existing: $v, new: $binding"
-            }
-        }
-
-        fun subroutine(name: String, stage: ShaderStage, funcName: String) {
-            subroutine(Subroutine(name, stage, funcName))
-        }
-
-        fun subroutine(bindings: Collection<Subroutine>) {
-            bindings.forEach { subroutine(it) }
-        }
-
-        fun build() = ShaderBindingSpecs(samplers, images, buffers, subroutines)
+        fun build() = ShaderBindingSpecs(samplers, images, buffers)
     }
 
     companion object {

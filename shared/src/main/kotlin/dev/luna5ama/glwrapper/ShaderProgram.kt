@@ -103,7 +103,6 @@ open class ShaderProgram private constructor(
             resources.samplerBindings.apply(spec)
             resources.imageBindings.apply(spec)
             resources.bufferBindings.apply(spec)
-            resources.subroutineUniformBindings.apply(spec)
         }.onFailure {
             it.printStackTrace()
         }
@@ -309,18 +308,10 @@ open class ShaderProgram private constructor(
         val uniformResource = ResourceInterface.Uniform(this)
         val uniformBlockResource = ResourceInterface.UniformBlock(this)
         val shaderStorageBlockResource = ResourceInterface.ShaderStorageBlock(this)
-        val subroutineResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
-            ResourceInterface.Subroutine(this, it)
-        }
-
-        val subroutineUniformResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
-            ResourceInterface.SubroutineUniform(this, it)
-        }
 
         val samplerBindings = BindingManager.Samplers(this)
         val imageBindings = BindingManager.Images(this)
         val bufferBindings = BindingManager.Buffers(this)
-        val subroutineUniformBindings = BindingManager.SubroutineUniforms(this)
     }
 
     sealed class ResourceInterface<T : ResourceInterface.Entry> {
@@ -569,83 +560,6 @@ open class ShaderProgram private constructor(
             }
         }
 
-        class SubroutineUniform internal constructor(resources: Resources, stage: ShaderStage) :
-            ResourceInterface<SubroutineUniform.Entry>() {
-            data class Entry(
-                override val index: Int,
-                val name: String,
-                val location: Int,
-                val compatibleSubroutines: Set<Subroutine.Entry>
-            ) : ResourceInterface.Entry
-
-            override val entries: Int2ObjectMap<Entry>
-
-            init {
-                val entries = Int2ObjectOpenHashMap<Entry>()
-                MemoryStack {
-                    val subroutines = resources.subroutineResource[stage]
-                        ?: error("Subroutine resource not found for $stage")
-
-                    val propCount = 2
-                    val properties = malloc(propCount * 4L).ptr
-                    properties.setIntInc(GL_LOCATION)
-                        .setIntInc(GL_NUM_COMPATIBLE_SUBROUTINES)
-                    val propertiesCompatibleSubroutines = malloc(1 * 4L).ptr
-                    propertiesCompatibleSubroutines.setInt(GL_COMPATIBLE_SUBROUTINES)
-                    val values = malloc(propCount * 4L).ptr
-
-                    val temp = malloc(1 * 4L).ptr
-                    glGetProgramInterfaceiv(
-                        resources.programID,
-                        stage.subroutineUniform.value,
-                        GL_MAX_NUM_COMPATIBLE_SUBROUTINES,
-                        temp
-                    )
-                    val maxNumCompatibleSubroutines = temp.getInt()
-                    val compatibleSubroutinesPtr = malloc(maxNumCompatibleSubroutines * 4L).ptr
-
-                    iterateResourceNamedIndex(resources.programID, stage.subroutineUniform.value) { (i, name) ->
-                        glGetProgramResourceiv(
-                            resources.programID,
-                            stage.subroutineUniform.value,
-                            i,
-                            propCount,
-                            properties,
-                            propCount,
-                            Ptr.NULL,
-                            values
-                        )
-                        val location = values.getInt(0)
-                        val numCompatibleSubroutines = values.getInt(4)
-                        glGetProgramResourceiv(
-                            resources.programID,
-                            stage.subroutineUniform.value,
-                            i,
-                            1,
-                            propertiesCompatibleSubroutines,
-                            maxNumCompatibleSubroutines,
-                            Ptr.NULL,
-                            compatibleSubroutinesPtr
-                        )
-                        val compatibleSubroutines = mutableSetOf<Subroutine.Entry>()
-                        for (j in 0 until numCompatibleSubroutines) {
-                            val compatibleSubroutineIndex = compatibleSubroutinesPtr.getInt(j * 4L)
-                            compatibleSubroutines.add(subroutines[compatibleSubroutineIndex])
-                        }
-                        entries.put(
-                            i, Entry(
-                                index = i,
-                                name = name,
-                                location = location,
-                                compatibleSubroutines = compatibleSubroutines
-                            )
-                        )
-                    }
-                }
-                this.entries = Int2ObjectMaps.unmodifiable(entries)
-            }
-        }
-
         private companion object {
             fun iterateResourceNamedIndex(
                 program: Int,
@@ -807,43 +721,15 @@ open class ShaderProgram private constructor(
                 }
             }
         }
+    }
 
-        class SubroutineUniforms internal constructor(resources: Resources) : BindingManager() {
-            private data class BindingPoint(
-                val name: String,
-                val location: Int,
-                val compatibleSubroutines: Map<String, ResourceInterface.Subroutine.Entry>
-            )
+    abstract class Variants<K> {
+        private val map = Object2ObjectOpenHashMap<K, ShaderProgram>()
 
-            private val bindingPoints =
-                resources.subroutineUniformResource.entries.associateTo(EnumMap(ShaderStage::class.java)) { (stage, resource) ->
-                    stage to resource.entries.values.map { entry ->
-                        BindingPoint(entry.name, entry.location, entry.compatibleSubroutines.associateBy { it.name })
-                    }
-                }
+        abstract fun create(key: K): ShaderProgram
 
-            override fun apply(specs: ShaderBindingSpecs) {
-                MemoryStack {
-                    val bindingMap = specs.subroutines
-                    for ((stage, bindingPoints) in bindingPoints) {
-                        if (bindingPoints.isEmpty()) continue
-                        val bindings = bindingMap[stage]
-                        require(bindings != null) { "Missing bindings for $stage subroutine" }
-                        val count = bindingPoints.size
-                        val values = malloc(count * 4L).ptr
-                        for ((name, location, compatibleSubroutines) in bindingPoints) {
-                            val binding = bindings[name]
-                            require(binding != null) { "Missing binding for $stage subroutine uniform: $name" }
-                            val compatibleSubroutine = compatibleSubroutines[binding.funcName]
-                            require(compatibleSubroutine != null) {
-                                "Invalid subroutine function name: ${binding.funcName} for $stage subroutine uniform: $name"
-                            }
-                            values.setInt(location * 4L, compatibleSubroutine.index)
-                        }
-                        glUniformSubroutinesuiv(stage.value, count, values)
-                    }
-                }
-            }
+        operator fun get(key: K): ShaderProgram {
+            return map.computeIfAbsent(key) { create(key) }
         }
     }
 }
