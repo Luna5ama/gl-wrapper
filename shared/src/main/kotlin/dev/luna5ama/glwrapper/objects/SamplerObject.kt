@@ -4,16 +4,6 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
 
 class SamplerObject : IGLObject by IGLObject.Impl(GLObjectType.Sampler), IGLSampler {
-    fun bindSamplerUnit(unit: Int) {
-        checkCreated()
-        glBindSampler(unit, id)
-    }
-
-    fun unbindSamplerUnit(unit: Int) {
-        checkCreated()
-        glBindSampler(unit, 0)
-    }
-
     override fun parameterf(pname: Int, param: Float) {
         tryCreate()
         glSamplerParameterf(id, pname, param)
