@@ -4,17 +4,41 @@ import dev.luna5ama.glwrapper.api.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
 import dev.luna5ama.kmogus.MemoryStack
 
-class FramebufferObject private constructor(private val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding,
+abstract class AbstractFramebufferObject private constructor(protected val delegate: IGLObject.Impl) : IGLObject by delegate, IGLBinding,
     IGLTargetBinding, IGLSized2D {
     constructor() : this(IGLObject.Impl(GLObjectType.Framebuffer))
 
-    val colorAttachments = arrayOfNulls<Attachment>(32)
-    var depthAttachment: Attachment? = null; private set
-    var stencilAttachment: Attachment? = null; private set
+    final override var sizeX = -1; protected set
+    final override var sizeY = -1; protected set
 
-    override var sizeX = -1; private set
-    override var sizeY = -1; private set
+    abstract fun destroyFbo()
 
+    abstract fun check()
+
+    fun parameteri(pname: Int, param: Int) {
+        glNamedFramebufferParameteri(id, pname, param)
+    }
+
+    override fun bind() {
+        bind(GL_FRAMEBUFFER)
+    }
+
+    override fun unbind() {
+        unbind(GL_FRAMEBUFFER)
+    }
+
+    override fun bind(target: Int) {
+        check()
+        glBindFramebuffer(target, id)
+    }
+
+    override fun unbind(target: Int) {
+        check()
+        glBindFramebuffer(target, 0)
+    }
+}
+
+class FramebufferObject : AbstractFramebufferObject() {
     override fun destroy() {
         if (delegate.id0 == 0) return
 
@@ -34,7 +58,7 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         destroyFbo()
     }
 
-    fun destroyFbo() {
+    override fun destroyFbo() {
         if (delegate.id0 == 0) return
 
         colorAttachments.fill(null)
@@ -46,11 +70,11 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
 
         delegate.destroy()
     }
-
-    fun parameteri(pname: Int, param: Int) {
-        glNamedFramebufferParameteri(id, pname, param)
-    }
-
+    
+    val colorAttachments = arrayOfNulls<Attachment>(32)
+    var depthAttachment: Attachment? = null; private set
+    var stencilAttachment: Attachment? = null; private set
+    
     fun attach(texture: LayeredAttachment, attachment: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
         glNamedFramebufferTexture(id, attachment, texture.id, level)
@@ -155,9 +179,15 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         sizeY = aSizeY
     }
 
-    fun check() {
+    override fun check() {
         if (!FBO_CHECK) return
         checkCreated()
+        if (colorAttachments.all { it == null } && depthAttachment == null && stencilAttachment == null) {
+            throw IllegalStateException("Framebuffer has no attachments")
+        }
+        if (sizeX == -1 || sizeY == -1) {
+            throw IllegalStateException("Framebuffer size not set")
+        }
         val status = glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER)
         check(status == GL_FRAMEBUFFER_COMPLETE) {
             val statusStr = when (status) {
@@ -226,20 +256,36 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         )
     }
 
-    override fun bind() {
-        bind(GL_DRAW_FRAMEBUFFER)
-    }
+    class Empty : AbstractFramebufferObject() {
+        override fun destroy() {
+            destroyFbo()
+        }
 
-    override fun unbind() {
-        unbind(GL_DRAW_FRAMEBUFFER)
-    }
+        override fun destroyFbo() {
+            sizeX = -1
+            sizeY = -1
 
-    override fun bind(target: Int) {
-        glBindFramebuffer(target, id)
-    }
+            delegate.destroy()
+        }
 
-    override fun unbind(target: Int) {
-        glBindFramebuffer(target, 0)
+        override fun check() {
+            if (!FBO_CHECK) return
+            checkCreated()
+            if (sizeX == -1 || sizeY == -1) {
+                throw IllegalStateException("Framebuffer size not set")
+            }
+        }
+
+        fun resize(sizeX: Int, sizeY: Int, layers: Int = 0, samples: Int = 0) {
+            require(sizeX > 0 && sizeY > 0) { "Invalid size: $sizeX x $sizeY" }
+            this.sizeX = sizeX
+            this.sizeY = sizeY
+
+            parameteri(GL_FRAMEBUFFER_DEFAULT_WIDTH, sizeX)
+            parameteri(GL_FRAMEBUFFER_DEFAULT_HEIGHT, sizeY)
+            parameteri(GL_FRAMEBUFFER_DEFAULT_LAYERS, layers)
+            parameteri(GL_FRAMEBUFFER_DEFAULT_SAMPLES, samples)
+        }
     }
 
     sealed interface Attachment : IGLObject, IGLSized1D
@@ -249,7 +295,7 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
 
     sealed interface NonLayeredAttachment : Attachment
 
-    companion object {
+    private companion object {
         val FBO_CHECK = System.getenv("GLWRAPPER_FBO_CHECK")?.toBoolean() ?: false
     }
 }
