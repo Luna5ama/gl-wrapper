@@ -13,10 +13,11 @@ import dev.luna5ama.kmogus.memcpy
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import java.util.*
 
-@Suppress("LeakingThis")
 open class ShaderProgram private constructor(
     val shaderSources: List<ShaderSource>,
 ) : IGLObject, IGLBinding {
@@ -94,7 +95,7 @@ open class ShaderProgram private constructor(
             glDeleteShader(it)
         }
 
-        resources = Resources(programID, shaderStages)
+        resources = Resources(programID)
     }
 
     fun applyBinding(spec: ShaderBindingSpecs) {
@@ -135,112 +136,144 @@ open class ShaderProgram private constructor(
         throw UnsupportedOperationException("Shader program cannot be reset manually")
     }
 
-    fun locateUniform(name: String): Int {
-        return resources.locateUniform(name)
-    }
-
     fun uniform1i(name: String, value: Int) {
-        glProgramUniform1i(id, locateUniform(name), value)
+        glProgramUniform1i(id, resources.locateUniform(name).location, value)
     }
 
     fun uniform1iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1iv(id, locateUniform(name), count, value)
+        glProgramUniform1iv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform2i(name: String, value1: Int, value2: Int) {
-        glProgramUniform2i(id, locateUniform(name), value1, value2)
+        glProgramUniform2i(id, resources.locateUniform(name).location, value1, value2)
     }
 
     fun uniform2iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2iv(id, locateUniform(name), count, value)
+        glProgramUniform2iv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform3i(name: String, value1: Int, value2: Int, value3: Int) {
-        glProgramUniform3i(id, locateUniform(name), value1, value2, value3)
+        glProgramUniform3i(id, resources.locateUniform(name).location, value1, value2, value3)
     }
 
     fun uniform3iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3iv(id, locateUniform(name), count, value)
+        glProgramUniform3iv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform4i(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
-        glProgramUniform4i(id, locateUniform(name), value1, value2, value3, value4)
+        glProgramUniform4i(id, resources.locateUniform(name).location, value1, value2, value3, value4)
     }
 
     fun uniform4iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4iv(id, locateUniform(name), count, value)
+        glProgramUniform4iv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform1ui(name: String, value: Int) {
-        glProgramUniform1ui(id, locateUniform(name), value)
+        glProgramUniform1ui(id, resources.locateUniform(name).location, value)
     }
 
     fun uniform1uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1uiv(id, locateUniform(name), count, value)
+        glProgramUniform1uiv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform2ui(name: String, value1: Int, value2: Int) {
-        glProgramUniform2ui(id, locateUniform(name), value1, value2)
+        glProgramUniform2ui(id, resources.locateUniform(name).location, value1, value2)
     }
 
     fun uniform2uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2uiv(id, locateUniform(name), count, value)
+        glProgramUniform2uiv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform3ui(name: String, value1: Int, value2: Int, value3: Int) {
-        glProgramUniform3ui(id, locateUniform(name), value1, value2, value3)
+        glProgramUniform3ui(id, resources.locateUniform(name).location, value1, value2, value3)
     }
 
     fun uniform3uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3uiv(id, locateUniform(name), count, value)
+        glProgramUniform3uiv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform4ui(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
-        glProgramUniform4ui(id, locateUniform(name), value1, value2, value3, value4)
+        glProgramUniform4ui(id, resources.locateUniform(name).location, value1, value2, value3, value4)
     }
 
     fun uniform4uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4uiv(id, locateUniform(name), count, value)
+        glProgramUniform4uiv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniformHandle(name: String, value: Long) {
-        glProgramUniformHandleui64ARB(id, locateUniform(name), value)
+        glProgramUniformHandleui64ARB(id, resources.locateUniform(name).location, value)
     }
 
     fun uniformHandle(name: String, count: Int, value: Ptr) {
-        glProgramUniformHandleui64vARB(id, locateUniform(name), count, value)
+        glProgramUniformHandleui64vARB(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform1f(name: String, value: Float) {
-        glProgramUniform1f(id, locateUniform(name), value)
+        glProgramUniform1f(id, resources.locateUniform(name).location, value)
     }
 
     fun uniform1fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1fv(id, locateUniform(name), count, value)
+        glProgramUniform1fv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform2f(name: String, value1: Float, value2: Float) {
-        glProgramUniform2f(id, locateUniform(name), value1, value2)
+        glProgramUniform2f(id, resources.locateUniform(name).location, value1, value2)
     }
 
     fun uniform2fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2fv(id, locateUniform(name), count, value)
+        glProgramUniform2fv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform3f(name: String, value1: Float, value2: Float, value3: Float) {
-        glProgramUniform3f(id, locateUniform(name), value1, value2, value3)
+        glProgramUniform3f(id, resources.locateUniform(name).location, value1, value2, value3)
     }
 
     fun uniform3fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3fv(id, locateUniform(name), count, value)
+        glProgramUniform3fv(id, resources.locateUniform(name).location, count, value)
     }
 
     fun uniform4f(name: String, value1: Float, value2: Float, value3: Float, value4: Float) {
-        glProgramUniform4f(id, locateUniform(name), value1, value2, value3, value4)
+        glProgramUniform4f(id, resources.locateUniform(name).location, value1, value2, value3, value4)
     }
 
     fun uniform4fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4fv(id, locateUniform(name), count, value)
+        glProgramUniform4fv(id, resources.locateUniform(name).location, count, value)
+    }
+
+    fun uniformMatrix2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix2fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix3fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix4fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix2x3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix2x3fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix3x2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix3x2fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix2x4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix2x4fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix4x2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix4x2fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix3x4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix3x4fv(id, resources.locateUniform(name).location, count, transpose, value)
+    }
+
+    fun uniformMatrix4x3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
+        glProgramUniformMatrix4x3fv(id, resources.locateUniform(name).location, count, transpose, value)
     }
 
     override fun bind() {
@@ -255,28 +288,22 @@ open class ShaderProgram private constructor(
         glDeleteProgram(id)
     }
 
-    internal inner class Resources(val programID: Int, val stages: Set<ShaderStage>) {
-        private var uniformLookUpCacheStr: String? = null
-        private var uniformLookUpCache = -1
-        private val uniformLocations = Object2IntOpenHashMap<String>().apply {
-            defaultReturnValue(-1)
-        }
+    internal inner class Resources(val programID: Int) {
+        private var uniformLookUpCacheName: String? = null
+        private var uniformLookUpCache: ResourceInterface.Uniform.Entry? = null
 
-        fun locateUniform(name: String): Int {
-            if (uniformLookUpCacheStr == name) {
-                return uniformLookUpCache
+        fun locateUniform(name: String): ResourceInterface.Uniform.Entry {
+            if (uniformLookUpCacheName == name) {
+                return uniformLookUpCache!!
             }
 
-            var loc = uniformLocations.getInt(name)
-            if (loc == -1) {
-                loc = glGetUniformLocation(id, name)
-                uniformLocations.put(name, loc)
-            }
+            val entry = resources.uniformResource.nameToEntryMap[name]
+            require(entry != null) { "Uniform not found: $name" }
 
-            uniformLookUpCacheStr = name
-            uniformLookUpCache = loc
+            uniformLookUpCacheName = name
+            uniformLookUpCache = entry
 
-            return loc
+            return entry
         }
 
         val uniformResource = ResourceInterface.Uniform(this)
@@ -307,7 +334,7 @@ open class ShaderProgram private constructor(
         }
 
         class Uniform internal constructor(resources: Resources) : ResourceInterface<Uniform.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val name: String,
                 val location: Int,
@@ -320,9 +347,11 @@ open class ShaderProgram private constructor(
             ) : ResourceInterface.Entry
 
             override val entries: Int2ObjectMap<Entry>
+            val nameToEntryMap: Object2ObjectMap<String, Entry>
 
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
+                val nameToEntryMap = Object2ObjectOpenHashMap<String, Entry>()
                 MemoryStack {
                     val propCount = 7
                     val properties = malloc(propCount * 4L).ptr
@@ -355,27 +384,28 @@ open class ShaderProgram private constructor(
                         val matrixStride = values.getInt(20)
                         val atomicCounterBufferIndex = values.getInt(24)
 
-                        entries.put(
-                            i, Entry(
-                                index = i,
-                                name = name,
-                                location = location,
-                                blockIndex = blockIndex,
-                                type = type,
-                                arraySize = arraySize,
-                                arrayStride = arrayStride,
-                                matrixStride = matrixStride,
-                                atomicCounterBufferIndex = atomicCounterBufferIndex
-                            )
+                        val entry = Entry(
+                            index = i,
+                            name = name,
+                            location = location,
+                            blockIndex = blockIndex,
+                            type = type,
+                            arraySize = arraySize,
+                            arrayStride = arrayStride,
+                            matrixStride = matrixStride,
+                            atomicCounterBufferIndex = atomicCounterBufferIndex
                         )
+                        nameToEntryMap.put(name, entry)
+                        entries.put(i, entry)
                     }
                 }
                 this.entries = Int2ObjectMaps.unmodifiable(entries)
+                this.nameToEntryMap = Object2ObjectMaps.unmodifiable(nameToEntryMap)
             }
         }
 
         class UniformBlock internal constructor(resources: Resources) : ResourceInterface<UniformBlock.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val name: String,
                 val bindingIndex: Int,
@@ -445,7 +475,7 @@ open class ShaderProgram private constructor(
 
         class ShaderStorageBlock internal constructor(resources: Resources) :
             ResourceInterface<ShaderStorageBlock.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val name: String,
                 val bindingIndex: Int,
@@ -525,7 +555,7 @@ open class ShaderProgram private constructor(
         }
 
         class AtomicCounter internal constructor(resources: Resources) : ResourceInterface<AtomicCounter.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val bufferBinding: Int,
                 val dataSize: Int,
@@ -595,7 +625,7 @@ open class ShaderProgram private constructor(
 
         class Subroutine internal constructor(resources: Resources, stage: ShaderStage) :
             ResourceInterface<Subroutine.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val name: String
             ) : ResourceInterface.Entry
@@ -615,7 +645,7 @@ open class ShaderProgram private constructor(
 
         class SubroutineUniform internal constructor(resources: Resources, stage: ShaderStage) :
             ResourceInterface<SubroutineUniform.Entry>() {
-            class Entry(
+            data class Entry(
                 override val index: Int,
                 val name: String,
                 val location: Int,
