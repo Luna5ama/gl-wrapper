@@ -309,7 +309,6 @@ open class ShaderProgram private constructor(
         val uniformResource = ResourceInterface.Uniform(this)
         val uniformBlockResource = ResourceInterface.UniformBlock(this)
         val shaderStorageBlockResource = ResourceInterface.ShaderStorageBlock(this)
-        val atomicCounterResource = ResourceInterface.AtomicCounter(this)
         val subroutineResource = shaderStages.associateWithTo(EnumMap(ShaderStage::class.java)) {
             ResourceInterface.Subroutine(this, it)
         }
@@ -343,7 +342,6 @@ open class ShaderProgram private constructor(
                 val arraySize: Int,
                 val arrayStride: Int,
                 val matrixStride: Int,
-                val atomicCounterBufferIndex: Int,
             ) : ResourceInterface.Entry
 
             override val entries: Int2ObjectMap<Entry>
@@ -353,7 +351,7 @@ open class ShaderProgram private constructor(
                 val entries = Int2ObjectOpenHashMap<Entry>()
                 val nameToEntryMap = Object2ObjectOpenHashMap<String, Entry>()
                 MemoryStack {
-                    val propCount = 7
+                    val propCount = 6
                     val properties = malloc(propCount * 4L).ptr
                     properties.setIntInc(GL_BLOCK_INDEX)
                         .setIntInc(GL_LOCATION)
@@ -361,7 +359,6 @@ open class ShaderProgram private constructor(
                         .setIntInc(GL_ARRAY_SIZE)
                         .setIntInc(GL_ARRAY_STRIDE)
                         .setIntInc(GL_MATRIX_STRIDE)
-                        .setIntInc(GL_ATOMIC_COUNTER_BUFFER_INDEX)
 
                     val values = malloc(propCount * 4L).ptr
 
@@ -382,7 +379,6 @@ open class ShaderProgram private constructor(
                         val arraySize = values.getInt(12)
                         val arrayStride = values.getInt(16)
                         val matrixStride = values.getInt(20)
-                        val atomicCounterBufferIndex = values.getInt(24)
 
                         val entry = Entry(
                             index = i,
@@ -392,8 +388,7 @@ open class ShaderProgram private constructor(
                             type = type,
                             arraySize = arraySize,
                             arrayStride = arrayStride,
-                            matrixStride = matrixStride,
-                            atomicCounterBufferIndex = atomicCounterBufferIndex
+                            matrixStride = matrixStride
                         )
                         nameToEntryMap.put(name, entry)
                         entries.put(i, entry)
@@ -548,75 +543,6 @@ open class ShaderProgram private constructor(
                             )
                         )
                         bindingIndex++
-                    }
-                }
-                this.entries = Int2ObjectMaps.unmodifiable(entries)
-            }
-        }
-
-        class AtomicCounter internal constructor(resources: Resources) : ResourceInterface<AtomicCounter.Entry>() {
-            data class Entry(
-                override val index: Int,
-                val bufferBinding: Int,
-                val dataSize: Int,
-                val numActiveVariables: Int,
-                val activeVariableIndices: List<Int>,
-            ) : ResourceInterface.Entry
-
-            override val entries: Int2ObjectMap<Entry>
-
-            init {
-                val entries = Int2ObjectOpenHashMap<Entry>()
-                val propCount = 3
-                MemoryStack {
-                    val properties = malloc(propCount * 4L).ptr
-                    properties.setIntInc(GL_BUFFER_BINDING)
-                        .setIntInc(GL_BUFFER_DATA_SIZE)
-                        .setIntInc(GL_NUM_ACTIVE_VARIABLES)
-
-                    val values = malloc(propCount * 4L).ptr
-
-                    val temp = malloc(4L).ptr
-                    glGetProgramInterfaceiv(
-                        resources.programID,
-                        GL_ATOMIC_COUNTER_BUFFER,
-                        GL_MAX_NUM_ACTIVE_VARIABLES,
-                        temp
-                    )
-                    val maxNumActiveVariables = temp.getInt() * 4
-                    val activeVariableIndicesPtr = calloc(maxNumActiveVariables.toLong()).ptr
-
-                    iterateResourceIndex(resources.programID, GL_ATOMIC_COUNTER_BUFFER) { i ->
-                        glGetProgramResourceiv(
-                            resources.programID, GL_ATOMIC_COUNTER_BUFFER, i,
-                            propCount, properties,
-                            propCount, Ptr.NULL, values
-                        )
-                        val bufferBinding = values.getInt(0)
-                        val dataSize = values.getInt(4)
-                        val numActiveVariables = values.getInt(8)
-                        glGetProgramResourceiv(
-                            resources.programID,
-                            GL_ATOMIC_COUNTER_BUFFER,
-                            i,
-                            1,
-                            properties,
-                            maxNumActiveVariables,
-                            Ptr.NULL,
-                            activeVariableIndicesPtr
-                        )
-                        val activeVariableIndices = List(numActiveVariables) { j ->
-                            activeVariableIndicesPtr.getInt(j * 4L)
-                        }
-                        entries.put(
-                            i, Entry(
-                                index = i,
-                                bufferBinding = bufferBinding,
-                                dataSize = dataSize,
-                                numActiveVariables = numActiveVariables,
-                                activeVariableIndices = activeVariableIndices
-                            )
-                        )
                     }
                 }
                 this.entries = Int2ObjectMaps.unmodifiable(entries)
@@ -838,11 +764,6 @@ open class ShaderProgram private constructor(
             private val bindingPointMap = mutableMapOf<BufferTarget.Shader, MutableList<BindingPoint>>()
 
             init {
-                for (entry in resources.uniformResource.entries.values) {
-                    if (entry.type !is GLSLDataType.Opaque.AtomicCounter) continue
-                    bindingPointMap.getOrPut(BufferTarget.AtomicCounter, ::mutableListOf)
-                        .add(BindingPoint(entry.name, entry.atomicCounterBufferIndex))
-                }
                 for (entry in resources.shaderStorageBlockResource.entries.values) {
                     bindingPointMap.getOrPut(BufferTarget.ShaderStorage, ::mutableListOf)
                         .add(BindingPoint(entry.name, entry.bindingIndex))
