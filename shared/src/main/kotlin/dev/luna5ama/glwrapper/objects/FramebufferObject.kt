@@ -47,11 +47,6 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         delegate.destroy()
     }
 
-    fun attachRenderbuffer(renderbuffer: RenderbufferObject, attachment: Int) {
-        updateAttachment(attachment, renderbuffer)
-        glNamedFramebufferRenderbuffer(id, attachment, GL_RENDERBUFFER, renderbuffer.id)
-    }
-
     fun attachLayerAll(texture: LayeredAttachment, attachment: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
         glNamedFramebufferTexture(id, attachment, texture.id, level)
