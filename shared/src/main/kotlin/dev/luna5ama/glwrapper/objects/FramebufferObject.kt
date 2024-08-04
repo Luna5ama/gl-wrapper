@@ -47,17 +47,21 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         delegate.destroy()
     }
 
-    fun attachLayerAll(texture: LayeredAttachment, attachment: Int, level: Int = 0) {
+    fun parameteri(pname: Int, param: Int) {
+        glNamedFramebufferParameteri(id, pname, param)
+    }
+
+    fun attach(texture: LayeredAttachment, attachment: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
 
-    fun attachLayerSingle(texture: LayeredAttachment, attachment: Int, layer: Int, level: Int = 0) {
+    fun attach(texture: LayeredAttachment, attachment: Int, layer: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
         glNamedFramebufferTextureLayer(id, attachment, texture.id, level, layer)
     }
 
-    fun attachNonLayered(texture: NonLayeredAttachment, attachment: Int, level: Int = 0) {
+    fun attach(texture: NonLayeredAttachment, attachment: Int, level: Int = 0) {
         updateAttachment(attachment, texture)
         glNamedFramebufferTexture(id, attachment, texture.id, level)
     }
@@ -67,6 +71,10 @@ class FramebufferObject private constructor(private val delegate: IGLObject.Impl
         val index = attachment - GL_COLOR_ATTACHMENT0
         require(colorAttachments[index] != null) { "Attachment not set: $index" }
         glNamedFramebufferReadBuffer(id, attachment)
+    }
+
+    fun setReadBufferNone() {
+        glNamedFramebufferReadBuffer(id, GL_NONE)
     }
 
     fun setDrawBuffer(attachment: Int) {
