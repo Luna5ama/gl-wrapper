@@ -1,12 +1,10 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 allprojects {
     group = "dev.luna5ama"
     version = "1.1.0"
 }
 
 plugins {
-    id("dev.fastmc.mod-setup").version("1.3.1")
+    id("dev.fastmc.mod-setup").version("1.3.2")
     id("dev.fastmc.maven-repo").version("1.0.0")
 }
 
@@ -16,23 +14,22 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
-        mavenCentral()
         maven("https://maven.luna5ama.dev")
+        mavenCentral()
         maven("https://libraries.minecraft.net/")
     }
 
-    tasks {
-        withType<KotlinCompile> {
-            kotlinOptions {
-                freeCompilerArgs = listOf(
+    kotlin {
+            compilerOptions {
+                freeCompilerArgs.map {
+                    it + listOf(
                     "-opt-in=kotlin.RequiresOptIn",
                     "-opt-in=kotlin.contracts.ExperimentalContracts",
                     "-Xbackend-threads=0"
-                )
+                    )
+                }
                 javaParameters = true
             }
-        }
     }
 
     base {
