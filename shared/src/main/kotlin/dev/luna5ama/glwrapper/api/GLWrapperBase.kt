@@ -50,9 +50,4 @@ abstract class GLWrapperControl {
         } else {
             instance0.get()!!
         }
-
-    fun init(block: (GLWrapper) -> GLWrapper) {
-        val wrapper = block(provider.create())
-        instance0.set(wrapper)
-    }
 }
