@@ -136,143 +136,178 @@ open class ShaderProgram private constructor(
     }
 
     fun uniform1i(name: String, value: Int) {
-        glProgramUniform1i(id, resources.locateUniform(name).location, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1i(id, entry, value)
     }
 
     fun uniform1iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1iv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1iv(id, entry, count, value)
     }
 
     fun uniform2i(name: String, value1: Int, value2: Int) {
-        glProgramUniform2i(id, resources.locateUniform(name).location, value1, value2)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2i(id, entry, value1, value2)
     }
 
     fun uniform2iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2iv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2iv(id, entry, count, value)
     }
 
     fun uniform3i(name: String, value1: Int, value2: Int, value3: Int) {
-        glProgramUniform3i(id, resources.locateUniform(name).location, value1, value2, value3)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3i(id, entry, value1, value2, value3)
     }
 
     fun uniform3iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3iv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3iv(id, entry, count, value)
     }
 
     fun uniform4i(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
-        glProgramUniform4i(id, resources.locateUniform(name).location, value1, value2, value3, value4)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4i(id, entry, value1, value2, value3, value4)
     }
 
     fun uniform4iv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4iv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4iv(id, entry, count, value)
     }
 
     fun uniform1ui(name: String, value: Int) {
-        glProgramUniform1ui(id, resources.locateUniform(name).location, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1ui(id, entry, value)
     }
 
     fun uniform1uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1uiv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1uiv(id, entry, count, value)
     }
 
     fun uniform2ui(name: String, value1: Int, value2: Int) {
-        glProgramUniform2ui(id, resources.locateUniform(name).location, value1, value2)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2ui(id, entry, value1, value2)
     }
 
     fun uniform2uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2uiv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2uiv(id, entry, count, value)
     }
 
     fun uniform3ui(name: String, value1: Int, value2: Int, value3: Int) {
-        glProgramUniform3ui(id, resources.locateUniform(name).location, value1, value2, value3)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3ui(id, entry, value1, value2, value3)
     }
 
     fun uniform3uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3uiv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3uiv(id, entry, count, value)
     }
 
     fun uniform4ui(name: String, value1: Int, value2: Int, value3: Int, value4: Int) {
-        glProgramUniform4ui(id, resources.locateUniform(name).location, value1, value2, value3, value4)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4ui(id, entry, value1, value2, value3, value4)
     }
 
     fun uniform4uiv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4uiv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4uiv(id, entry, count, value)
     }
 
     fun uniformHandle(name: String, value: Long) {
-        glProgramUniformHandleui64ARB(id, resources.locateUniform(name).location, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformHandleui64ARB(id, entry, value)
     }
 
     fun uniformHandle(name: String, count: Int, value: Ptr) {
-        glProgramUniformHandleui64vARB(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformHandleui64vARB(id, entry, count, value)
     }
 
     fun uniform1f(name: String, value: Float) {
-        glProgramUniform1f(id, resources.locateUniform(name).location, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1f(id, entry, value)
     }
 
     fun uniform1fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform1fv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform1fv(id, entry, count, value)
     }
 
     fun uniform2f(name: String, value1: Float, value2: Float) {
-        glProgramUniform2f(id, resources.locateUniform(name).location, value1, value2)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2f(id, entry, value1, value2)
     }
 
     fun uniform2fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform2fv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform2fv(id, entry, count, value)
     }
 
     fun uniform3f(name: String, value1: Float, value2: Float, value3: Float) {
-        glProgramUniform3f(id, resources.locateUniform(name).location, value1, value2, value3)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3f(id, entry, value1, value2, value3)
     }
 
     fun uniform3fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform3fv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform3fv(id, entry, count, value)
     }
 
     fun uniform4f(name: String, value1: Float, value2: Float, value3: Float, value4: Float) {
-        glProgramUniform4f(id, resources.locateUniform(name).location, value1, value2, value3, value4)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4f(id, entry, value1, value2, value3, value4)
     }
 
     fun uniform4fv(name: String, count: Int, value: Ptr) {
-        glProgramUniform4fv(id, resources.locateUniform(name).location, count, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniform4fv(id, entry, count, value)
     }
 
     fun uniformMatrix2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix2fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix2fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix3fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix3fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix4fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix4fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix2x3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix2x3fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix2x3fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix3x2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix3x2fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix3x2fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix2x4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix2x4fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix2x4fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix4x2fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix4x2fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix4x2fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix3x4fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix3x4fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix3x4fv(id, entry, count, transpose, value)
     }
 
     fun uniformMatrix4x3fv(name: String, count: Int, transpose: Boolean, value: Ptr) {
-        glProgramUniformMatrix4x3fv(id, resources.locateUniform(name).location, count, transpose, value)
+        val entry = resources.locateUniform(name)?.location ?: return
+        glProgramUniformMatrix4x3fv(id, entry, count, transpose, value)
     }
 
     override fun bind() {
@@ -291,13 +326,13 @@ open class ShaderProgram private constructor(
         private var uniformLookUpCacheName: String? = null
         private var uniformLookUpCache: ResourceInterface.Uniform.Entry? = null
 
-        fun locateUniform(name: String): ResourceInterface.Uniform.Entry {
+        fun locateUniform(name: String): ResourceInterface.Uniform.Entry? {
             if (uniformLookUpCacheName == name) {
-                return uniformLookUpCache!!
+                return uniformLookUpCache
             }
 
             val entry = resources.uniformResource.nameToEntryMap[name]
-            require(entry != null) { "Uniform not found: $name" }
+            require(!Config.checks || entry != null) { "Uniform not found: $name" }
 
             uniformLookUpCacheName = name
             uniformLookUpCache = entry

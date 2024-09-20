@@ -180,7 +180,7 @@ class FramebufferObject : AbstractFramebufferObject() {
     }
 
     override fun check() {
-        if (!FBO_CHECK) return
+        if (!Config.checks) return
         checkCreated()
         if (colorAttachments.all { it == null } && depthAttachment == null && stencilAttachment == null) {
             throw IllegalStateException("Framebuffer has no attachments")
@@ -269,7 +269,7 @@ class FramebufferObject : AbstractFramebufferObject() {
         }
 
         override fun check() {
-            if (!FBO_CHECK) return
+            if (!Config.checks) return
             checkCreated()
             if (sizeX == -1 || sizeY == -1) {
                 throw IllegalStateException("Framebuffer size not set")
@@ -294,8 +294,4 @@ class FramebufferObject : AbstractFramebufferObject() {
     }
 
     sealed interface NonLayeredAttachment : Attachment
-
-    private companion object {
-        val FBO_CHECK = System.getenv("GLWRAPPER_FBO_CHECK")?.toBoolean() ?: false
-    }
 }
