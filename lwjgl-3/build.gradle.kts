@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":shared"))
+    api(project(":base"))
     compileOnly("org.lwjgl:lwjgl-opengl:3.3.3") {
         isTransitive = false
     }

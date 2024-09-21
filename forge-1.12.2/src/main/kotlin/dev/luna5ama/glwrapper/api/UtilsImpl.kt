@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package dev.luna5ama.glwrapper.api
+package dev.luna5ama.glwrapper.base
 
 import net.minecraft.client.renderer.GlStateManager
 import sun.misc.Unsafe

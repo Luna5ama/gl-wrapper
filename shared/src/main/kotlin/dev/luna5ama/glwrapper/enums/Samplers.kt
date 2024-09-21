@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.enums
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.base.*
 
 enum class WrapMode(override val value: Int) : GLEnum {
     ClampToEdge(GL_CLAMP_TO_EDGE),

@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.enums
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.base.*
 import kotlin.reflect.KClass
 
 @Suppress("ClassName")

@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.GLDataType
 import dev.luna5ama.glwrapper.objects.VertexArrayObject
 

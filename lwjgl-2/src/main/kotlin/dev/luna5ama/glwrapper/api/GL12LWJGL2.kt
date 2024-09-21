@@ -1,4 +1,4 @@
-package dev.luna5ama.glwrapper.api
+package dev.luna5ama.glwrapper.base
 
 import dev.luna5ama.kmogus.Arr
 import org.lwjgl.opengl.GL12

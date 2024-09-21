@@ -17,6 +17,7 @@ pluginManagement {
     }
 }
 
+include("base", "base:codegen")
 include("shared", "shared:codegen")
 //include("lwjgl-2", "lwjgl-2:codegen")
 include("lwjgl-3", "lwjgl-3:codegen")

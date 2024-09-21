@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package dev.luna5ama.glwrapper.api
+package dev.luna5ama.glwrapper.base
 
 import dev.luna5ama.kmogus.Ptr
 import dev.luna5ama.kmogus.asByteBuffer

@@ -1,6 +1,7 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.api.GLWrapper
+import dev.luna5ama.glwrapper.base.GLWrapper
+import dev.luna5ama.glwrapper.base.ShaderPathResolver
 import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.asByteBuffer
@@ -9,13 +10,11 @@ import dev.luna5ama.kmogus.nullByteBuffer
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.lang.ref.SoftReference
-import java.net.URI
-import java.net.URL
 import java.nio.charset.CodingErrorAction
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
-sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val sourceKey: SourceKey) {
+sealed class ShaderSource(internal val provider: Provider<*>, internal val sourceKey: SourceKey) {
     val name = with(sourceKey.path.url.toString()) {
         substring(lastIndexOf('/') + 1, lastIndexOf('.'))
     }
@@ -31,166 +30,106 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
         return "[$typeName]$name"
     }
 
-    class Vert private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Vert private constructor(provider: Provider<Vert>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.VertexShader
         override val typeName get() = "Vert"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Vert>(providers) {
+        companion object : Provider<Vert>() {
             override fun newInstance(sourceKey: SourceKey): Vert {
                 return Vert(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Vert>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.vert
-        }
     }
 
-    class Geom private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Geom private constructor(provider: Provider<Geom>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.GeometryShader
         override val typeName get() = "Geom"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Geom>(providers) {
+        companion object : Provider<Geom>() {
             override fun newInstance(sourceKey: SourceKey): Geom {
                 return Geom(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Geom>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.geom
-        }
     }
 
-    class TessCtrl private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class TessCtrl private constructor(provider: Provider<TessCtrl>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.TessCtrlShader
         override val typeName get() = "TessCtrl"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<TessCtrl>(providers) {
+        companion object : Provider<TessCtrl>() {
             override fun newInstance(sourceKey: SourceKey): TessCtrl {
                 return TessCtrl(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<TessCtrl>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.tessCtrl
-        }
     }
 
-    class TessEval private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class TessEval private constructor(provider: Provider<TessEval>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.TessEvalShader
         override val typeName get() = "TessEval"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<TessEval>(providers) {
+        companion object : Provider<TessEval>() {
             override fun newInstance(sourceKey: SourceKey): TessEval {
                 return TessEval(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<TessEval>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.tessEval
-        }
     }
 
-    class Frag private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Frag private constructor(provider: Provider<Frag>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.FragmentShader
         override val typeName get() = "Frag"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Frag>(providers) {
+        companion object : Provider<Frag>() {
             override fun newInstance(sourceKey: SourceKey): Frag {
                 return Frag(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Frag>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.frag
-        }
     }
 
-    class Comp private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Comp private constructor(provider: Provider<Comp>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.ComputeShader
         override val typeName get() = "Comp"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Comp>(providers) {
+        companion object : Provider<Comp>() {
             override fun newInstance(sourceKey: SourceKey): Comp {
                 return Comp(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Comp>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.comp
-        }
     }
 
-    class Task private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Task private constructor(provider: Provider<Task>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.TaskShader
         override val typeName get() = "Task"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Task>(providers) {
+        companion object : Provider<Task>() {
             override fun newInstance(sourceKey: SourceKey): Task {
                 return Task(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Task>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.task
-        }
     }
 
-    class Mesh private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Mesh private constructor(provider: Provider<Mesh>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = ShaderStage.MeshShader
         override val typeName get() = "Mesh"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Mesh>(providers) {
+        companion object : Provider<Mesh>() {
             override fun newInstance(sourceKey: SourceKey): Mesh {
                 return Mesh(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Mesh>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.mesh
-        }
     }
 
-    class Lib private constructor(provider: Provider, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
+    class Lib private constructor(provider: Provider<Lib>, sourceKey: SourceKey) : ShaderSource(provider, sourceKey) {
         override val shaderStage get() = null
         override val typeName = "Lib"
 
-        class Provider internal constructor(providers: Providers) : ProviderBase<Lib>(providers) {
+        companion object : Provider<Lib>() {
             override fun newInstance(sourceKey: SourceKey): Lib {
                 return Lib(this, sourceKey)
             }
         }
-
-        companion object : ProviderAccessor<Lib>() {
-            override val provider get() = GLWrapper.instance.shaderSrcProviders.lib
-        }
     }
 
-    abstract class ProviderAccessor<T : ShaderSource> {
-        abstract val provider: ProviderBase<T>
-
-        operator fun invoke(path: String): T {
-            return invoke(provider.providers.pathResolver, path)
-        }
-
-        inline operator fun invoke(path: String, block: DefineBuilder.() -> Unit): T {
-            return invoke(provider.providers.pathResolver, path, block)
-        }
-
-        operator fun invoke(pathResolver: PathResolver, path: String): T {
-            return provider.newInstance(SourceKey(pathResolver.resolve(path), ""))
-        }
-
-        inline operator fun invoke(
-            pathResolver: PathResolver,
-            path: String,
-            block: DefineBuilder.() -> Unit
-        ): T {
-            return provider.newInstance(SourceKey(pathResolver.resolve(path), DefineBuilder().apply(block).build()))
-        }
-    }
-
-    abstract class ProviderBase<T : ShaderSource>(val providers: Providers) {
+    abstract class Provider<T : ShaderSource> {
         private val cacheMap = Object2ObjectOpenHashMap<SourceKey, SoftReference<Cache>>()
 
         private val bufferArr = Arr.malloc(1024)
@@ -239,13 +178,13 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
 
             val newHash = MD5Hash(md5.digest())
 
-            fun resolveIncludeURL(includePath: String): PathResolver.Path {
+            fun resolveIncludeURL(includePath: String): ShaderPathResolver.Path {
                 return sourceKey.path.resolve(includePath)
             }
 
             fun processLines(input: String): Any {
                 return includeRegex.matchEntire(input)?.let {
-                    providers.lib.newInstance(SourceKey(resolveIncludeURL(it.groupValues[1]), ""))
+                    Lib.newInstance(SourceKey(resolveIncludeURL(it.groupValues[1]), ""))
                 } ?: input
             }
 
@@ -275,29 +214,18 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
             }
         }
 
-        private inner class Cache(val srcHash: MD5Hash, val lines: List<Any>)
-    }
-    
-    class Providers(val pathResolver: PathResolver) {
-        val vert = Vert.Provider(this)
-        val geom = Geom.Provider(this)
-        val tessCtrl = TessCtrl.Provider(this)
-        val tessEval = TessEval.Provider(this)
-        val frag = Frag.Provider(this)
-        val comp = Comp.Provider(this)
-        val task = Task.Provider(this)
-        val mesh = Mesh.Provider(this)
-        val lib = Lib.Provider(this)
-
-        fun clearCache() {
-            vert.clearCache()
-            geom.clearCache()
-            tessCtrl.clearCache()
-            tessEval.clearCache()
-            frag.clearCache()
-            comp.clearCache()
-            lib.clearCache()
+        operator fun invoke(path: String): T {
+            return newInstance(SourceKey(GLWrapper.pathResolver.resolve(path), ""))
         }
+
+        inline operator fun invoke(
+            path: String,
+            block: DefineBuilder.() -> Unit
+        ): T {
+            return newInstance(SourceKey(GLWrapper.pathResolver.resolve(path), DefineBuilder().apply(block).build()))
+        }
+
+        private inner class Cache(val srcHash: MD5Hash, val lines: List<Any>)
     }
 
     class DefineBuilder {
@@ -384,37 +312,7 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
         }
     }
 
-    data class SourceKey(val path: PathResolver.Path, val defines: String)
-    interface PathResolver {
-        fun resolve(path: String): Path
-
-        object Default : PathResolver {
-            override fun resolve(path: String): Path {
-                return PathImpl(URI("/$path"))
-            }
-
-            private class PathImpl : Path {
-                private val uri: URI
-                override val url: URL
-
-                constructor(uri: URI) {
-                    this.uri = uri
-                    this.url = uri.path.let {
-                        Default::class.java.getResource(it) ?: throw IllegalArgumentException("Invalid shader path: $it")
-                    }
-                }
-
-                override fun resolve(path: String): Path {
-                    return PathImpl(uri.resolve(path))
-                }
-            }
-        }
-
-        interface Path {
-            val url: URL
-            fun resolve(path: String): Path
-        }
-    }
+    data class SourceKey(val path: ShaderPathResolver.Path, val defines: String)
 
     companion object {
 
@@ -430,6 +328,10 @@ sealed class ShaderSource(internal val provider: ProviderBase<*>, internal val s
                 @Suppress("UNCHECKED_CAST")
                 provider.newInstance(SourceKey(sourceKey.path, sourceKey.defines + "\n" + definesStr)) as T
             }
+        }
+
+        fun clearCache() {
+
         }
     }
 }

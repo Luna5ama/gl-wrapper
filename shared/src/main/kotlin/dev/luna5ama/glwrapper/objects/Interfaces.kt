@@ -1,6 +1,6 @@
 package dev.luna5ama.glwrapper.objects
 
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
 
 interface IGLBinding {

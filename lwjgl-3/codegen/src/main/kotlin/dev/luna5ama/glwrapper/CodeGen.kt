@@ -1,7 +1,7 @@
 package dev.luna5ama.glwrapper
 
 import com.squareup.kotlinpoet.*
-import dev.luna5ama.glwrapper.api.*
+import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.ktgen.KtgenProcessor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
@@ -11,12 +11,11 @@ import kotlin.streams.asSequence
 
 class CodeGen : KtgenProcessor {
     private val glCoreRegex = "GL(\\d{2})".toRegex()
+    private val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.base", "GLWrapper")
 
-    @OptIn(DelicateKotlinPoetApi::class)
     override fun process(inputs: List<Path>, outputDir: Path) {
         val glBaseClass = GLBase::class.java
 
-        val glBaseImplClassName = ClassName("dev.luna5ama.glwrapper.api", "GLBase", "Impl")
         val kmogusPtrClassName = ClassName("dev.luna5ama.kmogus", "Ptr")
 
         val ptrReturnClass = PtrReturn::class
@@ -28,15 +27,26 @@ class CodeGen : KtgenProcessor {
         val nullableReturnAnnotationSpec = AnnotationSpec.builder(nullableReturnClass).build()
 
 
-        val types = ClassUtils.findClasses("dev.luna5ama.glwrapper.api").parallelStream().asSequence()
+        val types = ClassUtils.findClasses("dev.luna5ama.glwrapper.base").parallelStream().asSequence()
             .filter { it.isInterface }
             .filter { it.interfaces.contains(glBaseClass) }
             .onEach { interfaceClass ->
                 val simpleName = interfaceClass.simpleName
                 val implName = "${simpleName}LWJGL3"
+                @OptIn(DelicateKotlinPoetApi::class)
                 val typeSpecBuilder = TypeSpec.classBuilder(implName)
-                    .superclass(glBaseImplClassName)
                     .addSuperinterface(interfaceClass)
+                    .addProperty(
+                        PropertySpec.builder("glWrapperInstance", glWrapperClassName)
+                            .initializer("glWrapperInstance")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .build()
+                    )
+                    .primaryConstructor(
+                        FunSpec.constructorBuilder()
+                            .addParameter("glWrapperInstance", glWrapperClassName)
+                            .build()
+                    )
 
                 val targetClassName = if (simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)) {
                     "${simpleName}C"
@@ -101,7 +111,7 @@ class CodeGen : KtgenProcessor {
                                             addAnnotation(
                                                 AnnotationSpec.builder(
                                                     ClassName(
-                                                        "dev.luna5ama.glwrapper.api",
+                                                        "dev.luna5ama.glwrapper.base",
                                                         "PtrParameter"
                                                     )
                                                 )
@@ -159,7 +169,7 @@ class CodeGen : KtgenProcessor {
 
                     }
 
-                FileSpec.builder("dev.luna5ama.glwrapper.api", implName)
+                FileSpec.builder("dev.luna5ama.glwrapper.base", implName)
                     .addType(typeSpecBuilder.build())
                     .build()
                     .writeTo(outputDir)
@@ -167,40 +177,35 @@ class CodeGen : KtgenProcessor {
             .map { it.simpleName to "${it.simpleName}LWJGL3" }
             .toList()
 
-        FileSpec.builder("dev.luna5ama.glwrapper.api", "GLWrapperProviderLWJGL3")
+        val initializerImplClassName = ClassName("dev.luna5ama.glwrapper.base", "GLWrapperInitializerLWJGL3")
+        FileSpec.builder(initializerImplClassName)
             .addType(
-                TypeSpec.classBuilder("GLWrapperProviderLWJGL3")
-                    .addSuperinterface(ClassName("dev.luna5ama.glwrapper.api", "GLWrapperProvider"))
+                TypeSpec.classBuilder(initializerImplClassName)
+                    .addSuperinterface(ClassName("dev.luna5ama.glwrapper.base", "GLWrapperInitializer"))
                     .addProperty(
                         PropertySpec.builder("priority", Int::class)
                             .addModifiers(KModifier.OVERRIDE)
                             .initializer("0")
                             .build()
                     )
-                    .generateGLWrapper(types)
+                    .buildCreateWrapperFunc(types)
                     .build()
             )
             .build()
             .writeTo(outputDir)
     }
 
-    private fun TypeSpec.Builder.generateGLWrapper(types: List<Pair<String, String>>): TypeSpec.Builder {
-        val shaderSrcPathResolverClassName = ClassName("dev.luna5ama.glwrapper", "ShaderSource", "PathResolver")
-        val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.api", "GLWrapper")
+    private fun TypeSpec.Builder.buildCreateWrapperFunc(types: List<Pair<String, String>>): TypeSpec.Builder {
         this.addFunction(
-            FunSpec.builder("create")
+            FunSpec.builder("createWrapperInstance")
                 .addModifiers(KModifier.OVERRIDE)
-                .addParameter(
-                    ParameterSpec.builder("shaderSrcPathResolver", shaderSrcPathResolverClassName)
-                        .build()
-                )
                 .returns(glWrapperClassName)
                 .addCode(
                     CodeBlock.builder()
-                        .add("return %T(%N, ", glWrapperClassName, "shaderSrcPathResolver")
+                        .add("return %T(", glWrapperClassName)
                         .apply {
                             for ((interfaceName, implName) in types) {
-                                add("%N = %T(), ", interfaceName, ClassName("dev.luna5ama.glwrapper.api", implName))
+                                add("%N = ::%T, ", interfaceName, ClassName("dev.luna5ama.glwrapper.base", implName))
                             }
                         }
                         .add(")\n")
@@ -212,11 +217,11 @@ class CodeGen : KtgenProcessor {
     }
 
     private fun Class<*>.typeName(nullable: Boolean): TypeName {
-        when (this) {
-            java.lang.Void.TYPE -> return UNIT.copy(nullable = nullable)
-            java.lang.String::class.java -> return STRING.copy(nullable = nullable)
-            java.lang.CharSequence::class.java -> return CHAR_SEQUENCE.copy(nullable = nullable)
-            else -> return asTypeName().copy(nullable = nullable)
+        return when (this) {
+            Void.TYPE -> UNIT.copy(nullable = nullable)
+            java.lang.String::class.java -> STRING.copy(nullable = nullable)
+            java.lang.CharSequence::class.java -> CHAR_SEQUENCE.copy(nullable = nullable)
+            else -> asTypeName().copy(nullable = nullable)
         }
     }
 
