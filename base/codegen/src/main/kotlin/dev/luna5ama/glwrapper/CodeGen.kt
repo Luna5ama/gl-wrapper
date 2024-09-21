@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper
 
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.sun.source.tree.*
 import com.sun.source.util.JavacTask
@@ -416,7 +415,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
                             val safeReturnType = if (isPtrReturn) kmogusPtrClassName else returnType
 
-                            addFuncWithTopLevel(funcName, safeParameters, safeReturnType) {
+                            addFuncWithTopLevel(funcName, safeReturnType, safeParameters) {
                                 if (isPtrReturn) {
                                     addAnnotation(ptrReturnAnnotationSpec)
                                 }
@@ -431,15 +430,13 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                             }
 
                             if (!isPtrReturn) {
-                                addFuncWithTopLevel(funcName, parameters, returnType) {
+                                addFuncWithTopLevel(funcName, returnType, parameters) {
                                     addModifiers(KModifier.ABSTRACT)
                                     addUnsafeAnnotation()
                                 }
                             }
                         } else {
-                            addFuncWithTopLevel(funcName, parameters, returnType) {
-                                addModifiers(KModifier.ABSTRACT)
-                            }
+                            addFuncWithTopLevel(funcName, returnType, parameters)
                         }
                     }
                 }, null)
@@ -497,8 +494,18 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
         fun addFuncWithTopLevel(
             funcName: String,
-            params: List<Pair<TypeName, String>>,
             returnType: TypeName,
+            params: List<Pair<TypeName, String>>
+        ) {
+            addFuncWithTopLevel(funcName, returnType, params) {
+                addModifiers(KModifier.ABSTRACT)
+            }
+        }
+
+        fun addFuncWithTopLevel(
+            funcName: String,
+            returnType: TypeName,
+            params: List<Pair<TypeName, String>>,
             block: FunSpec.Builder.() -> Unit = {},
         ) {
             typeBuilder!!.addFunction(
@@ -564,8 +571,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
     private fun hardcodedOverloads(visitor: GLClassVisitor) {
         fun getScalar(funcName: String, orginalName: String, type: TypeName, params: List<Pair<TypeName, String>>) {
-
-            visitor.addFuncWithTopLevel(funcName, params, type) {
+            visitor.addFuncWithTopLevel(funcName, type, params) {
                 addStatement(
                     "%N.%M(%L, %L)",
                     "tempArr",
@@ -603,7 +609,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             params: List<Pair<TypeName, String>>,
             vparams: List<String>
         ) {
-            visitor.addFuncWithTopLevel(funcName, params + vparams.map { type to it }, UNIT) {
+            visitor.addFuncWithTopLevel(funcName, UNIT, params + vparams.map { type to it }) {
                 addStatement(
                     "%N.%M(%L, %L)",
                     "tempArr",
@@ -646,7 +652,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             "GL11" -> {
                 visitor.addConst(INT, "GL_TEXTURE", "0x1702")
 
-                visitor.addFuncWithTopLevel("glGetBoolean", listOf(INT to "pname"), BOOLEAN) {
+                visitor.addFuncWithTopLevel("glGetBoolean", BOOLEAN, listOf(INT to "pname")) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement("%N(%N, %N.%N)", "glGetBooleanv", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N() != %L", "tempArr", "ptr", "getInt", 0)
@@ -656,7 +662,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 getScalar("glGetFloat", "glGetFloatv", FLOAT, listOf(INT to "pname"))
                 getScalar("glGetDouble", "glGetDoublev", DOUBLE, listOf(INT to "pname"))
 
-                visitor.addFuncWithTopLevel("glGetPointer", listOf(INT to "pname"), kmogusPtrClassName) {
+                visitor.addFuncWithTopLevel("glGetPointer", kmogusPtrClassName, listOf(INT to "pname")) {
                     addAnnotation(ptrReturnAnnotationSpec)
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("%N(%N, %N.%N)", "glGetPointerv", "pname", "tempArr", "ptr")
@@ -666,81 +672,49 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 visitor.typeBuilder!!.funSpecs.removeIf { it.name == "glGetString" }
                 visitor.functions.removeIf { it.name == "glGetString" }
 
-                visitor.addFuncWithTopLevel("glGetString", listOf(INT to "name"), STRING.copy(true)) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glGetString", STRING.copy(true), listOf(INT to "name"))
 
-                visitor.addFuncWithTopLevel("glGenTextures", emptyList(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glGenTextures", INT, emptyList())
 
-                visitor.addFuncWithTopLevel("glDeleteTextures", listOf(INT to "texture"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glDeleteTextures", UNIT, listOf(INT to "texture"))
             }
             "GL15" -> {
-                visitor.addFuncWithTopLevel("glDeleteQueries", listOf(INT to "query"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
-                visitor.addFuncWithTopLevel("glDeleteBuffers", listOf(INT to "buffer"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
-                visitor.addFuncWithTopLevel("glGetQueryObjecti", listOf(INT to "id", INT to "pname"), INT) {
-                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
-                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectiv", "id", "pname", "tempArr", "ptr")
-                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
-                }
-                visitor.addFuncWithTopLevel("glGetQueryObjectui", listOf(INT to "id", INT to "pname"), INT) {
-                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
-                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectuiv", "id", "pname", "tempArr", "ptr")
-                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
-                }
+                visitor.addFuncWithTopLevel("glDeleteQueries", UNIT, listOf(INT to "query"))
+                visitor.addFuncWithTopLevel("glDeleteBuffers", UNIT, listOf(INT to "buffer"))
+                getScalar("glGetQueryObjecti", "glGetQueryObjectiv", INT, listOf(INT to "id", INT to "pname"))
+                getScalar("glGetQueryObjectui", "glGetQueryObjectuiv", INT, listOf(INT to "id", INT to "pname"))
             }
             "GL20" -> {
                 getScalar("glGetShaderi", "glGetShaderiv", INT, listOf(INT to "shader", INT to "pname"))
                 getScalar("glGetProgrami", "glGetProgramiv", INT, listOf(INT to "program", INT to "pname"))
 
-                visitor.addFuncWithTopLevel("glGetShaderInfoLog", listOf(INT to "shader", INT to "maxLength"), STRING) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glGetShaderInfoLog", STRING, listOf(INT to "shader", INT to "maxLength"))
 
                 visitor.addFuncWithTopLevel(
                     "glGetProgramInfoLog",
-                    listOf(INT to "program", INT to "maxLength"),
-                    STRING
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    STRING,
+                    listOf(INT to "program", INT to "maxLength")
+                )
 
                 visitor.addFuncWithTopLevel(
                     "glGetUniformLocation",
-                    listOf(INT to "program", CHAR_SEQUENCE to "name"),
-                    INT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    INT,
+                    listOf(INT to "program", CHAR_SEQUENCE to "name")
+                )
 
                 visitor.addFuncWithTopLevel(
                     "glShaderSource",
-                    listOf(INT to "shader", CHAR_SEQUENCE to "string"),
-                    UNIT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    UNIT,
+                    listOf(INT to "shader", CHAR_SEQUENCE to "string")
+                )
             }
             "GL30" -> {
-                visitor.addFuncWithTopLevel("glDeleteRenderbuffers", listOf(INT to "renderbuffer"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
-                visitor.addFuncWithTopLevel("glDeleteVertexArrays", listOf(INT to "array"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
-                visitor.addFuncWithTopLevel("glDeleteFramebuffers", listOf(INT to "framebuffer"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glDeleteRenderbuffers", UNIT, listOf(INT to "renderbuffer"))
+                visitor.addFuncWithTopLevel("glDeleteVertexArrays", UNIT, listOf(INT to "array"))
+                visitor.addFuncWithTopLevel("glDeleteFramebuffers", UNIT, listOf(INT to "framebuffer"))
             }
             "GL32" -> {
-                visitor.addFuncWithTopLevel("glGetSynci", listOf(LONG to "sync", INT to "pname"), INT) {
+                visitor.addFuncWithTopLevel("glGetSynci", INT, listOf(LONG to "sync", INT to "pname")) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("val ptr = %N.%N", "tempArr", "ptr")
                     addStatement("%N.%N(%L)", "ptr", "setInt", 1)
@@ -763,43 +737,27 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf(INT to "sampler", INT to "pname"),
                     listOf("v1", "v2", "v3", "v4")
                 )
-                visitor.addFuncWithTopLevel("glGetQueryObjecti64", listOf(INT to "id", INT to "pname"), LONG) {
-                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
-                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
-                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
-                }
-                visitor.addFuncWithTopLevel("glGetQueryObjectui64", listOf(INT to "id", INT to "pname"), LONG) {
-                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
-                    addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
-                    addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
-                }
-                visitor.addFuncWithTopLevel("glDeleteSamplers", listOf(INT to "sampler"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                getScalar("glGetQueryObjecti64", "glGetQueryObjecti64v", LONG, listOf(INT to "id", INT to "pname"))
+                getScalar("glGetQueryObjectui64", "glGetQueryObjectui64v", LONG, listOf(INT to "id", INT to "pname"))
+                visitor.addFuncWithTopLevel("glDeleteSamplers", UNIT, listOf(INT to "sampler"))
             }
             "GL40" -> {
                 visitor.addFuncWithTopLevel(
                     "glGetSubroutineIndex",
-                    listOf(INT to "program", INT to "shadertype", CHAR_SEQUENCE to "name"),
-                    INT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    INT,
+                    listOf(INT to "program", INT to "shadertype", CHAR_SEQUENCE to "name")
+                )
 
-                visitor.addFuncWithTopLevel("glDeleteTransformFeedbacks", listOf(INT to "transformFeedback"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glDeleteTransformFeedbacks", UNIT, listOf(INT to "transformFeedback"))
             }
             "GL41" -> {
-                visitor.addFuncWithTopLevel("glDeleteProgramPipelines", listOf(INT to "pipeline"), UNIT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glDeleteProgramPipelines", UNIT, listOf(INT to "pipeline"))
             }
             "GL42" -> {
                 visitor.addFuncWithTopLevel(
                     "glGetInternalformati",
-                    listOf(INT to "target", INT to "internalformat", INT to "pname"),
-                    INT
+                    INT,
+                    listOf(INT to "target", INT to "internalformat", INT to "pname")
                 ) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement(
@@ -816,8 +774,8 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 }
                 visitor.addFuncWithTopLevel(
                     "glGetInternalformati64",
-                    listOf(INT to "target", INT to "internalformat", INT to "pname"),
-                    LONG
+                    LONG,
+                    listOf(INT to "target", INT to "internalformat", INT to "pname")
                 ) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement(
@@ -836,64 +794,40 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             "GL43" -> {
                 visitor.addFuncWithTopLevel(
                     "glObjectLabel",
-                    listOf(INT to "identifier", INT to "name", CHAR_SEQUENCE to "label"),
-                    UNIT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    UNIT,
+                    listOf(INT to "identifier", INT to "name", CHAR_SEQUENCE to "label")
+                )
 
                 visitor.addFuncWithTopLevel(
                     "glGetProgramResourceIndex",
-                    listOf(INT to "program", INT to "programInterface", CHAR_SEQUENCE to "name"),
-                    INT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    INT,
+                    listOf(INT to "program", INT to "programInterface", CHAR_SEQUENCE to "name")
+                )
 
                 visitor.addFuncWithTopLevel(
                     "glPushDebugGroup",
-                    listOf(INT to "source", INT to "id", CHAR_SEQUENCE to "message"),
-                    UNIT
-                ) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                    UNIT,
+                    listOf(INT to "source", INT to "id", CHAR_SEQUENCE to "message")
+                )
             }
             "GL45" -> {
-                visitor.addFuncWithTopLevel("glCreateBuffers", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateBuffers", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateRenderbuffers", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateRenderbuffers", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateSamplers", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateSamplers", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateFramebuffers", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateFramebuffers", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateVertexArrays", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateVertexArrays", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateTextures", listOf(INT to "target"), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateTextures", INT, listOf(INT to "target"))
 
-                visitor.addFuncWithTopLevel("glCreateProgramPipelines", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateProgramPipelines", INT, listOf())
 
-                visitor.addFuncWithTopLevel("glCreateQueries", listOf(INT to "target"), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateQueries", INT, listOf(INT to "target"))
 
-                visitor.addFuncWithTopLevel("glCreateTransformFeedbacks", listOf(), INT) {
-                    addModifiers(KModifier.ABSTRACT)
-                }
+                visitor.addFuncWithTopLevel("glCreateTransformFeedbacks", INT, listOf())
 
                 setScalar(
                     "glTextureParameterfv",
@@ -938,8 +872,8 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
                 visitor.addFuncWithTopLevel(
                     "nglMapNamedBufferRange",
-                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access"),
-                    kmogusPtrClassName
+                    kmogusPtrClassName,
+                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access")
                 ) {
                     addAnnotation(ptrReturnAnnotationSpec)
                     addModifiers(KModifier.ABSTRACT)
@@ -947,8 +881,8 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
                 visitor.addFuncWithTopLevel(
                     "glMapNamedBufferRange",
-                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access"),
-                    kmogusArrClassName
+                    kmogusArrClassName,
+                    listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access")
                 ) {
                     addAnnotation(coreOverloadAnnotationSpec)
                     addStatement(
