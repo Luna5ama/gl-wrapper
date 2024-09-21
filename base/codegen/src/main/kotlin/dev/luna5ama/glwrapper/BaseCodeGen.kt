@@ -492,6 +492,18 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 }.build()
         }
 
+        fun addOverloadFunc(
+            funcName: String,
+            returnType: TypeName,
+            params: List<Pair<TypeName, String>>,
+            block: FunSpec.Builder.() -> Unit,
+        ) {
+            addFuncWithTopLevel(funcName, returnType, params) {
+                addAnnotation(coreOverloadAnnotationSpec)
+                block()
+            }
+        }
+
         fun addFuncWithTopLevel(
             funcName: String,
             returnType: TypeName,
@@ -506,7 +518,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             funcName: String,
             returnType: TypeName,
             params: List<Pair<TypeName, String>>,
-            block: FunSpec.Builder.() -> Unit = {},
+            block: FunSpec.Builder.() -> Unit,
         ) {
             typeBuilder!!.addFunction(
                 FunSpec.builder(funcName)
@@ -571,7 +583,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
     private fun hardcodedOverloads(visitor: GLClassVisitor) {
         fun getScalar(funcName: String, orginalName: String, type: TypeName, params: List<Pair<TypeName, String>>) {
-            visitor.addFuncWithTopLevel(funcName, type, params) {
+            visitor.addOverloadFunc(funcName, type, params) {
                 addStatement(
                     "%N.%M(%L, %L)",
                     "tempArr",
@@ -609,7 +621,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             params: List<Pair<TypeName, String>>,
             vparams: List<String>
         ) {
-            visitor.addFuncWithTopLevel(funcName, UNIT, params + vparams.map { type to it }) {
+            visitor.addOverloadFunc(funcName, UNIT, params + vparams.map { type to it }) {
                 addStatement(
                     "%N.%M(%L, %L)",
                     "tempArr",
@@ -652,7 +664,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             "GL11" -> {
                 visitor.addConst(INT, "GL_TEXTURE", "0x1702")
 
-                visitor.addFuncWithTopLevel("glGetBoolean", BOOLEAN, listOf(INT to "pname")) {
+                visitor.addOverloadFunc("glGetBoolean", BOOLEAN, listOf(INT to "pname")) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement("%N(%N, %N.%N)", "glGetBooleanv", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N() != %L", "tempArr", "ptr", "getInt", 0)
@@ -662,7 +674,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 getScalar("glGetFloat", "glGetFloatv", FLOAT, listOf(INT to "pname"))
                 getScalar("glGetDouble", "glGetDoublev", DOUBLE, listOf(INT to "pname"))
 
-                visitor.addFuncWithTopLevel("glGetPointer", kmogusPtrClassName, listOf(INT to "pname")) {
+                visitor.addOverloadFunc("glGetPointer", kmogusPtrClassName, listOf(INT to "pname")) {
                     addAnnotation(ptrReturnAnnotationSpec)
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("%N(%N, %N.%N)", "glGetPointerv", "pname", "tempArr", "ptr")
@@ -714,7 +726,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 visitor.addFuncWithTopLevel("glDeleteFramebuffers", UNIT, listOf(INT to "framebuffer"))
             }
             "GL32" -> {
-                visitor.addFuncWithTopLevel("glGetSynci", INT, listOf(LONG to "sync", INT to "pname")) {
+                visitor.addOverloadFunc("glGetSynci", INT, listOf(LONG to "sync", INT to "pname")) {
                     addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("val ptr = %N.%N", "tempArr", "ptr")
                     addStatement("%N.%N(%L)", "ptr", "setInt", 1)
@@ -754,7 +766,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 visitor.addFuncWithTopLevel("glDeleteProgramPipelines", UNIT, listOf(INT to "pipeline"))
             }
             "GL42" -> {
-                visitor.addFuncWithTopLevel(
+                visitor.addOverloadFunc(
                     "glGetInternalformati",
                     INT,
                     listOf(INT to "target", INT to "internalformat", INT to "pname")
@@ -772,7 +784,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     )
                     addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
                 }
-                visitor.addFuncWithTopLevel(
+                visitor.addOverloadFunc(
                     "glGetInternalformati64",
                     LONG,
                     listOf(INT to "target", INT to "internalformat", INT to "pname")
@@ -879,12 +891,11 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     addModifiers(KModifier.ABSTRACT)
                 }
 
-                visitor.addFuncWithTopLevel(
+                visitor.addOverloadFunc(
                     "glMapNamedBufferRange",
                     kmogusArrClassName,
                     listOf(INT to "buffer", LONG to "offset", LONG to "length", INT to "access")
                 ) {
-                    addAnnotation(coreOverloadAnnotationSpec)
                     addStatement(
                         "return %T.%N(%N(%N, %N, %N, %N).%N, %N)",
                         kmogusArrClassName,

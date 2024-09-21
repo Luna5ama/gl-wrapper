@@ -32,7 +32,6 @@ class LWJGL3CodeGen : KtgenProcessor {
             .filter { it.interfaces.contains(glBaseClass) }
             .onEach { interfaceClass ->
                 try {
-
                     val simpleName = interfaceClass.simpleName
                     val implName = "${simpleName}LWJGL3"
 
@@ -98,9 +97,7 @@ class LWJGL3CodeGen : KtgenProcessor {
                             val nullableReturn = method.annotations.any { it.annotationClass == nullableReturnClass }
 
                             if (targetMethod == null) {
-                                check(method.modifiers and Modifier.ABSTRACT != 0) {
-                                    "Method $methodName not found in $targetClassName"
-                                }
+                                error("Method $methodName not found in $targetClassName")
                             } else {
                                 typeSpecBuilder.addFunction(
                                     FunSpec.builder(methodName)
