@@ -9,7 +9,7 @@ import java.lang.reflect.Modifier
 import java.nio.file.Path
 import kotlin.streams.asSequence
 
-class CodeGen : KtgenProcessor {
+class LWJGL3CodeGen : KtgenProcessor {
     private val glCoreRegex = "GL(\\d{2})".toRegex()
     private val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.base", "GLWrapper")
 

@@ -12,7 +12,7 @@ import javax.tools.JavaFileObject
 import javax.tools.ToolProvider
 import kotlin.io.path.extension
 
-class CodeGen : KtgenProcessor {
+class BaseCodeGen : KtgenProcessor {
     private val glCoreRegex = "GL(\\d{2})C".toRegex()
     private val kmogusArrClassName = ClassName("dev.luna5ama.kmogus", "Arr")
     private val kmogusPtrClassName = ClassName("dev.luna5ama.kmogus", "Ptr")
