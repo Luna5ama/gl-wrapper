@@ -147,7 +147,6 @@ ARB_framebuffer_object
 ARB_vertex_array_object
 NV_conditional_render
 ARB_color_buffer_float
-NV_depth_buffer_float
 ARB_texture_float
 EXT_packed_float
 EXT_texture_shared_exponent
@@ -162,12 +161,9 @@ EXT_framebuffer_sRGB
 ARB_pixel_buffer_object
 EXT_texture_sRGB
 ARB_shader_objects
-heavily modified
 ARB_vertex_shader
 ARB_fragment_shader
-heavily modified
 ARB_shading_language_100
-heavily modified
 ARB_draw_buffers
 ARB_texture_non_power_of_two
 ARB_point_sprite
