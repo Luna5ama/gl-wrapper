@@ -31,148 +31,151 @@ class LWJGL3CodeGen : KtgenProcessor {
             .filter { it.isInterface }
             .filter { it.interfaces.contains(glBaseClass) }
             .onEach { interfaceClass ->
-                val simpleName = interfaceClass.simpleName
-                val implName = "${simpleName}LWJGL3"
-                @OptIn(DelicateKotlinPoetApi::class)
-                val typeSpecBuilder = TypeSpec.classBuilder(implName)
-                    .addSuperinterface(interfaceClass)
-                    .addProperty(
-                        PropertySpec.builder("glWrapperInstance", glWrapperClassName)
-                            .initializer("glWrapperInstance")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .build()
-                    )
-                    .primaryConstructor(
-                        FunSpec.constructorBuilder()
-                            .addParameter("glWrapperInstance", glWrapperClassName)
-                            .build()
-                    )
+                try {
 
-                val targetClassName = if (simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)) {
-                    "${simpleName}C"
-                } else {
-                    simpleName
-                }
+                    val simpleName = interfaceClass.simpleName
+                    val implName = "${simpleName}LWJGL3"
 
-                val targetPoetClassName = ClassName("org.lwjgl.opengl", targetClassName)
+                    @OptIn(DelicateKotlinPoetApi::class)
+                    val typeSpecBuilder = TypeSpec.classBuilder(implName)
+                        .addSuperinterface(interfaceClass)
+                        .addProperty(
+                            PropertySpec.builder("glWrapperInstance", glWrapperClassName)
+                                .initializer("glWrapperInstance")
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build()
+                        )
+                        .primaryConstructor(
+                            FunSpec.constructorBuilder()
+                                .addParameter("glWrapperInstance", glWrapperClassName)
+                                .build()
+                        )
 
-                val targetClassNode = ClassNode()
-                ClassReader("org.lwjgl.opengl.$targetClassName").accept(targetClassNode, 0)
-
-                val filterMethods = targetClassNode.methods.asSequence()
-                    .filter { it.name.startsWith("ngl") || it.name.startsWith("gl") }
-                    .toList()
-
-                interfaceClass.methods.asSequence()
-                    .filter { it.name.startsWith("gl") || it.name.startsWith("ngl") }
-                    .filter { method -> method.annotations.none { it.annotationClass == coreOverloadClass } }
-                    .forEach { method ->
-                        val methodName = method.name.substringBefore('-')
-                        val returnType = method.returnType
-                        val searchDesc = getMethodDescriptor(returnType, method.parameterTypes)
-
-                        val name2 = "n$methodName"
-
-                        val targetMethod = filterMethods.find {
-                            (it.name == methodName || it.name == name2) && it.desc == searchDesc
-                        }
-
-                        val ptrParamIdx = method.annotations.find {
-                            it.annotationClass == ptrParameterClass
-                        }?.let {
-                            (it as PtrParameter).ptrParamIdx
-                        } ?: intArrayOf()
-
-                        val realParameters = method.parameters.mapIndexed { index, parameter ->
-                            if (index in ptrParamIdx) {
-                                ParameterSpec.builder(parameter.name, kmogusPtrClassName).build()
-                            } else {
-                                ParameterSpec.builder(parameter.name, parameter.type.typeName(false)).build()
-                            }
-                        }
-
-                        val ptrReturn = method.annotations.any { it.annotationClass == ptrReturnClass }
-                        val nullableReturn = method.annotations.any { it.annotationClass == nullableReturnClass }
-
-                        if (targetMethod == null) {
-                            check(method.modifiers and Modifier.ABSTRACT != 0) {
-                                "Method $methodName not found in $targetClassName"
-                            }
-                        } else {
-                            typeSpecBuilder.addFunction(
-                                FunSpec.builder(methodName)
-                                    .addModifiers(KModifier.OVERRIDE)
-                                    .apply {
-                                        if (ptrReturn) {
-                                            addAnnotation(ptrReturnAnnotationSpec)
-                                        }
-
-                                        if (ptrParamIdx.isNotEmpty()) {
-                                            addAnnotation(
-                                                AnnotationSpec.builder(
-                                                    ClassName(
-                                                        "dev.luna5ama.glwrapper.base",
-                                                        "PtrParameter"
-                                                    )
-                                                )
-                                                    .addMember(
-                                                        "%L",
-                                                        ptrParamIdx.joinToString(prefix = "[", postfix = "]")
-                                                    )
-                                                    .build()
-                                            )
-                                        }
-
-                                        if (nullableReturn) {
-                                            addAnnotation(nullableReturnAnnotationSpec)
-                                        }
-                                    }
-                                    .addParameters(realParameters)
-                                    .addCode(
-                                        CodeBlock.builder()
-                                            .apply {
-                                                if (ptrReturn) {
-                                                    add(
-                                                        "return %T(%T.%L(",
-                                                        kmogusPtrClassName,
-                                                        targetPoetClassName,
-                                                        targetMethod.name
-                                                    )
-                                                } else {
-                                                    add("return %T.%L(", targetPoetClassName, targetMethod.name)
-                                                }
-                                                realParameters.forEachIndexed { index, parameter ->
-                                                    if (index > 0) {
-                                                        add(", ")
-                                                    }
-                                                    if (parameter.type == kmogusPtrClassName) {
-                                                        add("%N.%N", parameter.name, "address")
-                                                    } else {
-                                                        add("%N", parameter.name)
-                                                    }
-                                                }
-                                                if (ptrReturn) {
-                                                    add("))\n")
-                                                } else {
-                                                    add(")\n")
-                                                }
-                                            }
-                                            .build()
-                                    )
-                                    .returns(
-                                        if (ptrReturn) kmogusPtrClassName else returnType.typeName(nullableReturn)
-                                    )
-                                    .build()
-                            )
-                        }
-
-
+                    val targetClassName = if (simpleName.startsWith("GL") && simpleName.contains(glCoreRegex)) {
+                        "${simpleName}C"
+                    } else {
+                        simpleName
                     }
 
-                FileSpec.builder("dev.luna5ama.glwrapper.base", implName)
-                    .addType(typeSpecBuilder.build())
-                    .build()
-                    .writeTo(outputDir)
+                    val targetPoetClassName = ClassName("org.lwjgl.opengl", targetClassName)
+
+                    val targetClassNode = ClassNode()
+                    ClassReader("org.lwjgl.opengl.$targetClassName").accept(targetClassNode, 0)
+
+                    val filterMethods = targetClassNode.methods.asSequence()
+                        .filter { it.name.startsWith("ngl") || it.name.startsWith("gl") }
+                        .toList()
+
+                    interfaceClass.methods.asSequence()
+                        .filter { it.name.startsWith("gl") || it.name.startsWith("ngl") }
+                        .filter { method -> method.annotations.none { it.annotationClass == coreOverloadClass } }
+                        .forEach { method ->
+                            val methodName = method.name.substringBefore('-')
+                            val returnType = method.returnType
+                            val searchDesc = getMethodDescriptor(returnType, method.parameterTypes)
+
+                            val name2 = "n$methodName"
+
+                            val targetMethod = filterMethods.find {
+                                (it.name == methodName || it.name == name2) && it.desc == searchDesc
+                            }
+
+                            val ptrParamIdx = method.annotations.find {
+                                it.annotationClass == ptrParameterClass
+                            }?.let {
+                                (it as PtrParameter).ptrParamIdx
+                            } ?: intArrayOf()
+
+                            val realParameters = method.parameters.mapIndexed { index, parameter ->
+                                if (index in ptrParamIdx) {
+                                    ParameterSpec.builder(parameter.name, kmogusPtrClassName).build()
+                                } else {
+                                    ParameterSpec.builder(parameter.name, parameter.type.typeName(false)).build()
+                                }
+                            }
+
+                            val ptrReturn = method.annotations.any { it.annotationClass == ptrReturnClass }
+                            val nullableReturn = method.annotations.any { it.annotationClass == nullableReturnClass }
+
+                            if (targetMethod == null) {
+                                check(method.modifiers and Modifier.ABSTRACT != 0) {
+                                    "Method $methodName not found in $targetClassName"
+                                }
+                            } else {
+                                typeSpecBuilder.addFunction(
+                                    FunSpec.builder(methodName)
+                                        .addModifiers(KModifier.OVERRIDE)
+                                        .apply {
+                                            if (ptrReturn) {
+                                                addAnnotation(ptrReturnAnnotationSpec)
+                                            }
+
+                                            if (ptrParamIdx.isNotEmpty()) {
+                                                addAnnotation(
+                                                    AnnotationSpec.builder(
+                                                        ClassName(
+                                                            "dev.luna5ama.glwrapper.base",
+                                                            "PtrParameter"
+                                                        )
+                                                    )
+                                                        .addMember(
+                                                            "%L",
+                                                            ptrParamIdx.joinToString(prefix = "[", postfix = "]")
+                                                        )
+                                                        .build()
+                                                )
+                                            }
+
+                                            if (nullableReturn) {
+                                                addAnnotation(nullableReturnAnnotationSpec)
+                                            }
+                                        }
+                                        .addParameters(realParameters)
+                                        .addCode(
+                                            CodeBlock.builder()
+                                                .apply {
+                                                    if (ptrReturn) {
+                                                        add(
+                                                            "return %T(%T.%L(",
+                                                            kmogusPtrClassName,
+                                                            targetPoetClassName,
+                                                            targetMethod.name
+                                                        )
+                                                    } else {
+                                                        add("return %T.%L(", targetPoetClassName, targetMethod.name)
+                                                    }
+                                                    realParameters.forEachIndexed { index, parameter ->
+                                                        if (index > 0) {
+                                                            add(", ")
+                                                        }
+                                                        if (parameter.type == kmogusPtrClassName) {
+                                                            add("%N.%N", parameter.name, "address")
+                                                        } else {
+                                                            add("%N", parameter.name)
+                                                        }
+                                                    }
+                                                    if (ptrReturn) {
+                                                        add("))\n")
+                                                    } else {
+                                                        add(")\n")
+                                                    }
+                                                }
+                                                .build()
+                                        )
+                                        .returns(
+                                            if (ptrReturn) kmogusPtrClassName else returnType.typeName(nullableReturn)
+                                        )
+                                        .build()
+                                )
+                            }
+                        }
+                    FileSpec.builder("dev.luna5ama.glwrapper.base", implName)
+                        .addType(typeSpecBuilder.build())
+                        .build()
+                        .writeTo(outputDir)
+                } catch (e: Exception) {
+                    throw RuntimeException("Error processing class ${interfaceClass.simpleName}", e)
+                }
             }
             .map { it.simpleName to "${it.simpleName}LWJGL3" }
             .toList()
