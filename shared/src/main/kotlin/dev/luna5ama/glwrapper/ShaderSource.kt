@@ -315,7 +315,6 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
     data class SourceKey(val path: ShaderPathResolver.Path, val defines: String)
 
     companion object {
-
         inline operator fun <T : ShaderSource> T.invoke(crossinline block: DefineBuilder.() -> Unit): T {
             return this.withDefines(DefineBuilder().apply(block))
         }
@@ -331,7 +330,15 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
         }
 
         fun clearCache() {
-
+            Vert.clearCache()
+            Geom.clearCache()
+            TessCtrl.clearCache()
+            TessEval.clearCache()
+            Frag.clearCache()
+            Comp.clearCache()
+            Task.clearCache()
+            Mesh.clearCache()
+            Lib.clearCache()
         }
     }
 }
