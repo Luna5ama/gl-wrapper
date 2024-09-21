@@ -97,7 +97,7 @@ class LWJGL3CodeGen : KtgenProcessor {
                             val nullableReturn = method.annotations.any { it.annotationClass == nullableReturnClass }
 
                             if (targetMethod == null) {
-                                error("Method $methodName not found in $targetClassName")
+                                error("Method $method not found in $targetClassName")
                             } else {
                                 typeSpecBuilder.addFunction(
                                     FunSpec.builder(methodName)
