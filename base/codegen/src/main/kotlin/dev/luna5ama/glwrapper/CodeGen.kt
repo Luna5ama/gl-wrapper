@@ -19,6 +19,7 @@ class CodeGen : KtgenProcessor {
     private val kmogusPtrClassName = ClassName("dev.luna5ama.kmogus", "Ptr")
     private val glBaseClassName = ClassName("dev.luna5ama.glwrapper.base", "GLBase")
     private val glWrapperClassName = ClassName("dev.luna5ama.glwrapper.base", "GLWrapper")
+    private val ensureCapacityMemeberName = MemberName("dev.luna5ama.kmogus", "ensureCapacity")
 
     private val nativeTypePtrMethodRegex = "@NativeType\\(\".+? \\*\"\\)[\\W\n]+public static ".toRegex()
     private val unsafeAnnotationSpec =
@@ -211,10 +212,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     globalTypeSpecList.add(typeSpec)
 
                     val fileBuilder = FileSpec.builder(className)
-                    fileBuilder.addAnnotation(
-                        suppressAnnotation
-                    )
-                    fileBuilder.addImport("dev.luna5ama.kmogus", "ensureCapacity")
+                    fileBuilder.addAnnotation(suppressAnnotation)
                     fileBuilder.addType(typeSpec)
                     visitor.properties.forEach {
                         if (globalPropertyNameSet.add(it.name)) {
@@ -569,9 +567,9 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
             visitor.addFuncWithTopLevel(funcName, params, type) {
                 addStatement(
-                    "%N.%L(%L, %L)",
+                    "%N.%M(%L, %L)",
                     "tempArr",
-                    "ensureCapacity",
+                    ensureCapacityMemeberName,
                     type.byteSize,
                     false
                 )
@@ -607,9 +605,9 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
         ) {
             visitor.addFuncWithTopLevel(funcName, params + vparams.map { type to it }, UNIT) {
                 addStatement(
-                    "%N.%L(%L, %L)",
+                    "%N.%M(%L, %L)",
                     "tempArr",
-                    "ensureCapacity",
+                    ensureCapacityMemeberName,
                     type.byteSize * vparams.size,
                     false
                 )
@@ -649,7 +647,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                 visitor.addConst(INT, "GL_TEXTURE", "0x1702")
 
                 visitor.addFuncWithTopLevel("glGetBoolean", listOf(INT to "pname"), BOOLEAN) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement("%N(%N, %N.%N)", "glGetBooleanv", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N() != %L", "tempArr", "ptr", "getInt", 0)
                 }
@@ -660,7 +658,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
 
                 visitor.addFuncWithTopLevel("glGetPointer", listOf(INT to "pname"), kmogusPtrClassName) {
                     addAnnotation(ptrReturnAnnotationSpec)
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("%N(%N, %N.%N)", "glGetPointerv", "pname", "tempArr", "ptr")
                     addStatement("return %T(%N.%N.%N())", kmogusPtrClassName, "tempArr", "ptr", "getLong")
                 }
@@ -688,12 +686,12 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     addModifiers(KModifier.ABSTRACT)
                 }
                 visitor.addFuncWithTopLevel("glGetQueryObjecti", listOf(INT to "id", INT to "pname"), INT) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectiv", "id", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
                 }
                 visitor.addFuncWithTopLevel("glGetQueryObjectui", listOf(INT to "id", INT to "pname"), INT) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjectuiv", "id", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N()", "tempArr", "ptr", "getInt")
                 }
@@ -743,7 +741,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
             }
             "GL32" -> {
                 visitor.addFuncWithTopLevel("glGetSynci", listOf(LONG to "sync", INT to "pname"), INT) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("val ptr = %N.%N", "tempArr", "ptr")
                     addStatement("%N.%N(%L)", "ptr", "setInt", 1)
                     addStatement("%N(%N, %N, 1, %N, %N + %L)", "glGetSynciv", "sync", "pname", "ptr", "ptr", 4L)
@@ -766,12 +764,12 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf("v1", "v2", "v3", "v4")
                 )
                 visitor.addFuncWithTopLevel("glGetQueryObjecti64", listOf(INT to "id", INT to "pname"), LONG) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
                 }
                 visitor.addFuncWithTopLevel("glGetQueryObjectui64", listOf(INT to "id", INT to "pname"), LONG) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement("%N(%N, %N, %N.%N)", "glGetQueryObjecti64v", "id", "pname", "tempArr", "ptr")
                     addStatement("return %N.%N.%N()", "tempArr", "ptr", "getLong")
                 }
@@ -803,7 +801,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf(INT to "target", INT to "internalformat", INT to "pname"),
                     INT
                 ) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 4L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 4L, false)
                     addStatement(
                         "%N(%N, %N, %N, %L, %N.%N)",
                         "glGetInternalformativ",
@@ -821,7 +819,7 @@ GL_EXT_semaphore""".lineSequence().map { it.removePrefix("GL_").replace("_", "")
                     listOf(INT to "target", INT to "internalformat", INT to "pname"),
                     LONG
                 ) {
-                    addStatement("%N.%N(%L, %L)", "tempArr", "ensureCapacity", 8L, false)
+                    addStatement("%N.%M(%L, %L)", "tempArr", ensureCapacityMemeberName, 8L, false)
                     addStatement(
                         "%N(%N, %N, %N, %L, %N.%N)",
                         "glGetInternalformati64v",
