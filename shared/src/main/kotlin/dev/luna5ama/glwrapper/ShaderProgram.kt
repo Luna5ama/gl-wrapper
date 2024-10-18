@@ -27,7 +27,17 @@ open class ShaderProgram private constructor(
     override val type: GLObjectType
         get() = GLObjectType.Program
 
-    private var labelName: String? = null
+    final override var label: String = ""
+        set(value) {
+            if (field != value) {
+                if (value.isNotEmpty()) {
+                    glObjectLabel(type.identifier, id, value)
+                } else {
+                    glObjectLabel(type.identifier, id, 0, Ptr.NULL)
+                }
+            }
+            field = value
+        }
 
     private val shaderStages: Set<ShaderStage> = shaderSources.mapTo(EnumSet.noneOf(ShaderStage::class.java)) {
         it.shaderStage ?: throw IllegalArgumentException("Shader type is not specified $it")
@@ -72,8 +82,8 @@ open class ShaderProgram private constructor(
         }
 
         val programID = glCreateProgram()
-        if (labelName != null) {
-            glObjectLabel(type.identifier, programID, labelName!!)
+        if (label != null) {
+            glObjectLabel(type.identifier, programID, label!!)
         }
         val shaderIDs = IntArray(shaderSources.size) { i ->
             createShader(shaderSources[i]).also {
@@ -110,13 +120,6 @@ open class ShaderProgram private constructor(
 
     inline fun applyBinding(block: ShaderBindingSpecs.Builder.() -> Unit) {
         applyBinding(ShaderBindingSpecs.Builder().apply(block).build())
-    }
-
-    override fun label(label: String) {
-        if (label != labelName) {
-            glObjectLabel(type.identifier, id, label)
-        }
-        labelName = label
     }
 
     override fun create() {

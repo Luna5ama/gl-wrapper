@@ -2,6 +2,7 @@ package dev.luna5ama.glwrapper.objects
 
 import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.GLObjectType
+import dev.luna5ama.kmogus.Ptr
 
 interface IGLBinding {
     fun bind()
@@ -11,8 +12,7 @@ interface IGLBinding {
 interface IGLObject {
     val id: Int
     val type: GLObjectType
-
-    fun label(label: String)
+    var label: String
 
     fun create()
     fun destroy()
@@ -23,7 +23,17 @@ interface IGLObject {
     fun resetID()
 
     class Impl(override val type: GLObjectType, private val createArg: Int = -1) : IGLObject {
-        private var labelName: String? = null
+        override var label = ""
+            set(value) {
+                if (field != value) {
+                    if (value.isNotEmpty()) {
+                        glObjectLabel(type.identifier, id, value)
+                    } else {
+                        glObjectLabel(type.identifier, id, 0, Ptr.NULL)
+                    }
+                }
+                field = value
+            }
 
         internal var id0 = 0; private set
         override val id: Int
@@ -32,18 +42,11 @@ interface IGLObject {
                 return id0
             }
 
-        override fun label(label: String) {
-            if (id0 != 0 && label != labelName) {
-                glObjectLabel(type.identifier, id0, label)
-            }
-            labelName = label
-        }
-
         override fun create() {
             check(id0 == 0) { "Object already created" }
             id0 = type.create(createArg)
-            if (labelName != null) {
-                glObjectLabel(type.identifier, id0, labelName!!)
+            if (label != null) {
+                glObjectLabel(type.identifier, id0, label!!)
             }
         }
 
