@@ -45,8 +45,8 @@ interface IGLObject {
         override fun create() {
             check(id0 == 0) { "Object already created" }
             id0 = type.create(createArg)
-            if (label != null) {
-                glObjectLabel(type.identifier, id0, label!!)
+            if (label.isNotEmpty()) {
+                glObjectLabel(type.identifier, id0, label)
             }
         }
 
