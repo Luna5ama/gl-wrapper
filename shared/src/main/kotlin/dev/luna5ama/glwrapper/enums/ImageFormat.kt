@@ -230,344 +230,343 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8_G8_UN : RG(GL_RG8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_16Bit {
+    data object R8G8_UN : RG(GL_RG8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_16Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R8_G8_SN : RG(GL_RG8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_16Bit {
+    data object R8G8_SN : RG(GL_RG8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_16Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R8_G8_UI : RG(GL_RG8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R8G8_UI : RG(GL_RG8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_16Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R8_G8_SI : RG(GL_RG8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R8G8_SI : RG(GL_RG8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_16Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R16_G16_UN : RG(GL_RG16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R16G16_UN : RG(GL_RG16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R16_G16_SN : RG(GL_RG16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R16G16_SN : RG(GL_RG16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_32Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R16_G16_UI : RG(GL_RG16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R16G16_UI : RG(GL_RG16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R16_G16_SI : RG(GL_RG16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R16G16_SI : RG(GL_RG16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_32Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R16_G16_F : RG(GL_RG16F), Uncompressed, Float, TextureViewAliasing.UC_32Bit {
+    data object R16G16_F : RG(GL_RG16F), Uncompressed, Float, TextureViewAliasing.UC_32Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R32_G32_UI : RG(GL_RG32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R32G32_UI : RG(GL_RG32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_64Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R32G_32_SI : RG(GL_RG32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R32G32_SI : RG(GL_RG32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_64Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R32_G32_F : RG(GL_RG32F), Uncompressed, Float, TextureViewAliasing.UC_64Bit {
+    data object R32G32_F : RG(GL_RG32F), Uncompressed, Float, TextureViewAliasing.UC_64Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 0
         override val aBits = 0
     }
 
-    data object R8_G8_B8_UN : RGB(GL_RGB8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_UN : RGB(GL_RGB8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_24Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 0
     }
 
-    data object R8_G8_B8_SN : RGB(GL_RGB8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_SN : RGB(GL_RGB8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_24Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 0
     }
 
-    data object R8_G8_B8_UI : RGB(GL_RGB8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_UI : RGB(GL_RGB8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_24Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 0
     }
 
-    data object R8_G8_B8_SI : RGB(GL_RGB8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_SI : RGB(GL_RGB8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_24Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 0
     }
 
-    data object R16_G16_B16UN : RGB(GL_RGB16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_UN : RGB(GL_RGB16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_48Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 0
     }
 
-    data object R16_G16_B16SN : RGB(GL_RGB16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_SN : RGB(GL_RGB16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_48Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 0
     }
 
-    data object R16_G16_B16_UI : RGB(GL_RGB16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_UI : RGB(GL_RGB16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_48Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 0
     }
 
-    data object R16_G16_B16_SI : RGB(GL_RGB16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_SI : RGB(GL_RGB16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_48Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 0
     }
 
-    data object R16_G16_B16_F : RGB(GL_RGB16F), Uncompressed, Float, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_F : RGB(GL_RGB16F), Uncompressed, Float, TextureViewAliasing.UC_48Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 0
     }
 
-    data object R32G32B32UI : RGB(GL_RGB32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_96Bit {
-        override val rBits = 32
-        override val gBits = 32
-        override val bBits = 32
-        override val aBits = 0
-    }
-
-    data object R32G32B32SI : RGB(GL_RGB32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_96Bit {
+    data object R32G32B32_UI : RGB(GL_RGB32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_96Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 32
         override val aBits = 0
     }
 
-    data object R32G32B32F : RGB(GL_RGB32F), Uncompressed, Float, TextureViewAliasing.UC_96Bit {
+    data object R32G32B32_SI : RGB(GL_RGB32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_96Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 32
         override val aBits = 0
     }
 
-    data object R8_G8_B8_A8_UN : RGBA(GL_RGBA8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R32G32B32_F : RGB(GL_RGB32F), Uncompressed, Float, TextureViewAliasing.UC_96Bit {
+        override val rBits = 32
+        override val gBits = 32
+        override val bBits = 32
+        override val aBits = 0
+    }
+
+    data object R8G8B8A8_UN : RGBA(GL_RGBA8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 8
     }
 
-    data object R8_G8_B8_A8_SN : RGBA(GL_RGBA8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R8G8B8A8_SN : RGBA(GL_RGBA8_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 8
     }
 
-    data object R8_G8_B8_A8_UI : RGBA(GL_RGBA8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R8G8B8A8_UI : RGBA(GL_RGBA8UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 8
     }
 
-    data object R8_G8_B8_A8_SI : RGBA(GL_RGBA8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R8G8B8A8_SI : RGBA(GL_RGBA8I), Uncompressed, SignedInteger, TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 8
     }
 
-    data object R16_G16_B16_A16_UN : RGBA(GL_RGBA16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_UN : RGBA(GL_RGBA16), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 16
     }
 
-    data object R16_G16_B16_A16_SN : RGBA(GL_RGBA16_SNORM), Uncompressed, SignedNormalized,
-        TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_SN : RGBA(GL_RGBA16_SNORM), Uncompressed, SignedNormalized, TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 16
     }
 
-    data object R16_G16_B16_A16_UI : RGBA(GL_RGBA16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_UI : RGBA(GL_RGBA16UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 16
     }
 
-    data object R16_G16_B16_A16_SI : RGBA(GL_RGBA16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_SI : RGBA(GL_RGBA16I), Uncompressed, SignedInteger, TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 16
     }
 
-    data object R16_G16_B16_A16_F : RGBA(GL_RGBA16F), Uncompressed, Float, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_F : RGBA(GL_RGBA16F), Uncompressed, Float, TextureViewAliasing.UC_64Bit {
         override val rBits = 16
         override val gBits = 16
         override val bBits = 16
         override val aBits = 16
     }
 
-    data object R32_G32_B32_A32_UI : RGBA(GL_RGBA32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_128Bit {
+    data object R32G32B32A32_UI : RGBA(GL_RGBA32UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_128Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 32
         override val aBits = 32
     }
 
-    data object R32_G32_B32_A32_SI : RGBA(GL_RGBA32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_128Bit {
+    data object R32G32B32A32_SI : RGBA(GL_RGBA32I), Uncompressed, SignedInteger, TextureViewAliasing.UC_128Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 32
         override val aBits = 32
     }
 
-    data object R32_G32_B32_A32_F : RGBA(GL_RGBA32F), Uncompressed, Float, TextureViewAliasing.UC_128Bit {
+    data object R32G32B32A32_F : RGBA(GL_RGBA32F), Uncompressed, Float, TextureViewAliasing.UC_128Bit {
         override val rBits = 32
         override val gBits = 32
         override val bBits = 32
         override val aBits = 32
     }
 
-    data object R3_G3_B2_UN : RGB(GL_R3_G3_B2), Uncompressed, UnsignedNormalized {
+    data object R3G3B2_UN : RGB(GL_R3_G3_B2), Uncompressed, UnsignedNormalized {
         override val rBits = 3
         override val gBits = 3
         override val bBits = 2
         override val aBits = 0
     }
 
-    data object R4_G4_B4_UN : RGB(GL_RGB4), Uncompressed, UnsignedNormalized {
+    data object R4G4B4_UN : RGB(GL_RGB4), Uncompressed, UnsignedNormalized {
         override val rBits = 4
         override val gBits = 4
         override val bBits = 4
         override val aBits = 0
     }
 
-    data object R5_G5_B5_UN : RGB(GL_RGB5), Uncompressed, UnsignedNormalized {
+    data object R5G5B5_UN : RGB(GL_RGB5), Uncompressed, UnsignedNormalized {
         override val rBits = 5
         override val gBits = 5
         override val bBits = 5
         override val aBits = 0
     }
 
-    data object R5_G6_B5_UN : RGB(GL_RGB565), Uncompressed, UnsignedNormalized {
+    data object R5G6B5_UN : RGB(GL_RGB565), Uncompressed, UnsignedNormalized {
         override val rBits = 5
         override val gBits = 6
         override val bBits = 5
         override val aBits = 0
     }
 
-    data object R10_G10_B10_UN : RGB(GL_RGB10), Uncompressed, UnsignedNormalized {
+    data object R10G10B10_UN : RGB(GL_RGB10), Uncompressed, UnsignedNormalized {
         override val rBits = 10
         override val gBits = 10
         override val bBits = 10
         override val aBits = 0
     }
 
-    data object R12_G12_B12_UN : RGB(GL_RGB12), Uncompressed, UnsignedNormalized {
+    data object R12G12B12_UN : RGB(GL_RGB12), Uncompressed, UnsignedNormalized {
         override val rBits = 12
         override val gBits = 12
         override val bBits = 12
         override val aBits = 0
     }
 
-    data object R2_G2_B2_A2_UN : RGBA(GL_RGBA2), Uncompressed, UnsignedNormalized {
+    data object R2G2B2A2_UN : RGBA(GL_RGBA2), Uncompressed, UnsignedNormalized {
         override val rBits = 2
         override val gBits = 2
         override val bBits = 2
         override val aBits = 2
     }
 
-    data object R4_G4_B4_A4_UN : RGBA(GL_RGBA4), Uncompressed, UnsignedNormalized {
+    data object R4G4B4A4_UN : RGBA(GL_RGBA4), Uncompressed, UnsignedNormalized {
         override val rBits = 4
         override val gBits = 4
         override val bBits = 4
         override val aBits = 4
     }
 
-    data object R5_G5_B5_A1_UN : RGBA(GL_RGB5_A1), Uncompressed, UnsignedNormalized {
+    data object R5G5B5_1_UN : RGBA(GL_RGB5_A1), Uncompressed, UnsignedNormalized {
         override val rBits = 5
         override val gBits = 5
         override val bBits = 5
         override val aBits = 1
     }
 
-    data object R10_G10_B10_A2_UN : RGBA(GL_RGB10_A2), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
+    data object R10G10B10A2_UN : RGBA(GL_RGB10_A2), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_32Bit {
         override val rBits = 10
         override val gBits = 10
         override val bBits = 10
         override val aBits = 2
     }
 
-    data object R10_G10_B10_A2_UI : RGBA(GL_RGB10_A2UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R10G10B10A2_UI : RGBA(GL_RGB10_A2UI), Uncompressed, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val rBits = 10
         override val gBits = 10
         override val bBits = 10
         override val aBits = 2
     }
 
-    data object R8_G8_B8_SRGB : RGB(GL_SRGB8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_SRGB : RGB(GL_SRGB8), Uncompressed, UnsignedNormalized, TextureViewAliasing.UC_24Bit {
         override val rBits = 8
         override val gBits = 8
         override val bBits = 8
         override val aBits = 0
     }
 
-    data object R8_G8_B8_A8_SRGB : RGBA(GL_SRGB8_ALPHA8), Uncompressed, UnsignedNormalized,
+    data object R8G8B8A8_SRGB : RGBA(GL_SRGB8_ALPHA8), Uncompressed, UnsignedNormalized,
         TextureViewAliasing.UC_32Bit {
         override val rBits = 8
         override val gBits = 8
@@ -575,14 +574,14 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 8
     }
 
-    data object R11_G11_B10_F : RGB(GL_R11F_G11F_B10F), Uncompressed, Float, TextureViewAliasing.UC_32Bit {
+    data object R11G11B10_F : RGB(GL_R11F_G11F_B10F), Uncompressed, Float, TextureViewAliasing.UC_32Bit {
         override val rBits = 11
         override val gBits = 11
         override val bBits = 10
         override val aBits = 0
     }
 
-    data object R9_G9_B9_E5 : RGB(GL_RGB9_E5), Uncompressed, Float {
+    data object R9G9B9E5_UN : RGB(GL_RGB9_E5), Uncompressed, Float {
         override val rBits = 9
         override val gBits = 9
         override val bBits = 9
@@ -652,11 +651,6 @@ sealed interface ImageFormat : GLEnum {
         override val depthBits = 32
     }
 
-    data object Depth32FNV : Depth, Sized, Float {
-        override val value = GL_DEPTH_COMPONENT32F_NV
-        override val depthBits = 32
-    }
-
     data object Depth24Stencil8 : DepthStencil, Sized, UnsignedNormalized {
         override val value = GL_DEPTH24_STENCIL8
         override val depthBits = 24
@@ -665,12 +659,6 @@ sealed interface ImageFormat : GLEnum {
 
     data object Depth32FStencil8 : DepthStencil, Sized, Float {
         override val value = GL_DEPTH32F_STENCIL8
-        override val depthBits = 32
-        override val stencilBits = 8
-    }
-
-    data object Depth32FStencil8NV : DepthStencil, Sized, Float {
-        override val value = GL_DEPTH32F_STENCIL8_NV
         override val depthBits = 32
         override val stencilBits = 8
     }
