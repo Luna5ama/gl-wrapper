@@ -18,6 +18,13 @@ sealed class BufferObject : IGLObject by IGLObject.Impl(GLObjectType.Buffer), IG
     override val viewSize: Long
         get() = -1L
 
+    fun ensureCapacityDiscard(size: Long, flags: Int) {
+        if (this.size < size) {
+            destroy()
+            allocate(size, flags)
+        }
+    }
+
     open fun allocate(size: Long, flags: Int) {
         // Intel workaround
         if (GpuVendor.get() == GpuVendor.INTEL && size != -1L) {
