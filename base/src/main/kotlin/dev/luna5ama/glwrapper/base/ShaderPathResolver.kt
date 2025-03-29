@@ -18,7 +18,7 @@ interface ShaderPathResolver {
 
             override fun resolve(path: String): Path {
                 if (path.startsWith('/')) {
-                    return this@PathImpl.resolve(path)
+                    return PathImpl(URI(path))
                 }
                 return PathImpl(uri.resolve(path))
             }
