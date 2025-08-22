@@ -141,7 +141,7 @@ sealed interface ImageFormat : GLEnum {
     }
 
     sealed class RGBA(override val value: Int) : Color {
-        override val channels get() = 4
+        final override val channels get() = 4
 
         companion object : RGBA(GL_RGBA), Base
     }
