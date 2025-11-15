@@ -22,14 +22,13 @@ buildscript {
 }
 
 subprojects {
-
     apply {
         plugin("dev.fastmc.maven-repo")
     }
 
     repositories {
-        maven("https://maven.luna5ama.dev")
         mavenCentral()
+        maven("https://maven.luna5ama.dev")
         maven("https://libraries.minecraft.net/")
     }
 

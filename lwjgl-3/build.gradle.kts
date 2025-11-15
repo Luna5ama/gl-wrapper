@@ -11,6 +11,16 @@ dependencies {
     ktgen(project(":lwjgl-3:codegen"))
 }
 
+val launcher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+tasks {
+    ktgen {
+        javaLauncher.set(launcher)
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>(project.name) {

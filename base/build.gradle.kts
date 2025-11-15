@@ -15,6 +15,16 @@ dependencies {
     ktgenInput("org.lwjgl:lwjgl-opengl:3.3.3:sources")
 }
 
+val launcher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+tasks {
+    ktgen {
+        javaLauncher.set(launcher)
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>(project.name) {
