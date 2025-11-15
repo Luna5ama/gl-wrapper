@@ -2,25 +2,24 @@ package dev.luna5ama.glwrapper.base
 
 import java.net.URI
 import java.net.URL
+import kotlin.io.path.Path
 
 interface ShaderPathResolver {
     fun resolve(path: String): Path
 
     object Default : ShaderPathResolver {
         override fun resolve(path: String): Path {
-            return PathImpl(URI("/$path"))
+            return PathImpl(Default::class.java.getResource("/$path") ?: Path(path).toUri().toURL())
         }
 
-        private class PathImpl(private val uri: URI) : Path {
-            override val url: URL = uri.path.let {
-                Default::class.java.getResource(it) ?: throw IllegalArgumentException("Invalid shader path: $it")
-            }
+        private class PathImpl(override val url: URL) : Path {
+            private val uri: URI = url.toURI()
 
             override fun resolve(path: String): Path {
                 if (path.startsWith('/')) {
-                    return PathImpl(URI(path))
+                    return Default.resolve(path)
                 }
-                return PathImpl(uri.resolve(path))
+                return PathImpl(uri.resolve(path).toURL())
             }
         }
     }

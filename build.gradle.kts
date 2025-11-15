@@ -8,7 +8,21 @@ plugins {
     id("dev.fastmc.maven-repo").version("1.0.0")
 }
 
+buildscript {
+    val kotlinVersion: String by rootProject
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "org.jetbrains.kotlin") {
+                    useVersion(kotlinVersion)
+                }
+            }
+        }
+    }
+}
+
 subprojects {
+
     apply {
         plugin("dev.fastmc.maven-repo")
     }
