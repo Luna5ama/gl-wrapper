@@ -46,15 +46,14 @@ open class ShaderProgram private constructor(
     private lateinit var resources: Resources
 
     init {
-        initialize()
+        initialize(false)
     }
 
     fun reload() {
-        destroy()
-        initialize()
+        initialize(true)
     }
 
-    private fun initialize() {
+    private fun initialize(destroy: Boolean) {
         fun createShader(source: ShaderSource): Int {
             val id = glCreateShader(source.shaderStage!!.value)
 
@@ -96,8 +95,14 @@ open class ShaderProgram private constructor(
         if (linked == 0) {
             System.err.print(glGetProgramInfoLog(programID, glGetProgrami(programID, GL_INFO_LOG_LENGTH)))
             glDeleteProgram(programID)
+            shaderIDs.forEach {
+                glDetachShader(programID, it)
+                glDeleteShader(it)
+            }
             throw IllegalStateException("Shader program failed to link")
         }
+
+        destroy()
         this.id = programID
 
         shaderIDs.forEach {
