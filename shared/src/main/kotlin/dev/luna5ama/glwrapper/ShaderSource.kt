@@ -1,7 +1,6 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.base.GLWrapper
-import dev.luna5ama.glwrapper.base.ShaderPathResolver
+import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.ShaderStage
 import dev.luna5ama.kmogus.Arr
 import dev.luna5ama.kmogus.asByteBuffer
@@ -11,11 +10,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.lang.ref.SoftReference
 import java.nio.charset.CodingErrorAction
+import java.nio.file.Path
 import java.security.DigestInputStream
 import java.security.MessageDigest
+import kotlin.io.path.inputStream
 
 sealed class ShaderSource(internal val provider: Provider<*>, internal val sourceKey: SourceKey) {
-    val name = with(sourceKey.path.url.toString()) {
+    val name = with(sourceKey.path.toString()) {
         substring(lastIndexOf('/') + 1, lastIndexOf('.'))
     }
 
@@ -163,7 +164,7 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
             val md5 = MessageDigest.getInstance("MD5")
             var offset = 0L
 
-            sourceKey.path.url.openStream().use { inputStream ->
+            sourceKey.path.inputStream().use { inputStream ->
                 DigestInputStream(inputStream, md5).use {
                     var byte = it.read()
                     while (byte != -1) {
@@ -174,12 +175,13 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
                 }
             }
 
-            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path.url})")
+            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path})")
 
             val newHash = MD5Hash(md5.digest())
 
-            fun resolveIncludeURL(includePath: String): ShaderPathResolver.Path {
-                return sourceKey.path.resolve(includePath)
+            fun resolveIncludeURL(includePath: String): Path {
+                val a = sourceKey.path.resolve(includePath)
+                return a
             }
 
             fun processLines(input: String): Any {
@@ -312,7 +314,7 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
         }
     }
 
-    data class SourceKey(val path: ShaderPathResolver.Path, val defines: String)
+    data class SourceKey(val path: Path, val defines: String)
 
     companion object {
         inline operator fun <T : ShaderSource> T.invoke(crossinline block: DefineBuilder.() -> Unit): T {
