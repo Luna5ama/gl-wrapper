@@ -284,12 +284,7 @@ abstract class ShaderPathResolver {
                 other.startsWith("/") -> {
                     resolver.resolve(other.removePrefix("/"))
                 }
-
-                !other.contains(RELATIVE_PATH_PREFIX) -> {
-                    delegate.parent.resolve(other)
-                }
-
-                else -> delegate.resolve(other)
+                else -> delegate.parent.resolve(other).normalize()
             }
             return PathImpl(resolver, resultRawPath)
         }
@@ -300,10 +295,6 @@ abstract class ShaderPathResolver {
 
         override fun spliterator(): Spliterator<Path?> {
             return delegate.spliterator()
-        }
-
-        companion object {
-            val RELATIVE_PATH_PREFIX = """\.+/""".toRegex()
         }
     }
 
