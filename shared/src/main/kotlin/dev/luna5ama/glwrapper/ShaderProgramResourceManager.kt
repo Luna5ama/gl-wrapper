@@ -39,7 +39,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMaps
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import kotlin.collections.iterator
 
-internal class ShaderProgramResourceManager(val programID: Int) {
+class ShaderProgramResourceManager(val programID: Int) {
     private var uniformLookUpCacheName: String? = null
     private var uniformLookUpCache: ResourceInterface.Uniform.Entry? = null
 
