@@ -4,17 +4,18 @@ import dev.luna5ama.glwrapper.base.*
 
 enum class ShaderStage(
     override val value: Int,
+    val shortName: String,
     val subroutine: Subroutine,
     val subroutineUniform: SubroutineUniform
 ) : GLEnum {
-    VertexShader(GL_VERTEX_SHADER, Subroutine.VertexShader, SubroutineUniform.VertexShader),
-    TessCtrlShader(GL_TESS_CONTROL_SHADER, Subroutine.TessCtrlShader, SubroutineUniform.TessCtrlShader),
-    TessEvalShader(GL_TESS_EVALUATION_SHADER, Subroutine.TessEvalShader, SubroutineUniform.TessEvalShader),
-    GeometryShader(GL_GEOMETRY_SHADER, Subroutine.GeometryShader, SubroutineUniform.GeometryShader),
-    FragmentShader(GL_FRAGMENT_SHADER, Subroutine.FragmentShader, SubroutineUniform.FragmentShader),
-    ComputeShader(GL_COMPUTE_SHADER, Subroutine.ComputeShader, SubroutineUniform.ComputeShader),
-    TaskShader(GL_TASK_SHADER_NV, Subroutine.TaskShader, SubroutineUniform.TaskShader),
-    MeshShader(GL_MESH_SHADER_NV, Subroutine.MeshShader, SubroutineUniform.MeshShader),;
+    VertexShader(GL_VERTEX_SHADER, "vert", Subroutine.VertexShader, SubroutineUniform.VertexShader),
+    TessCtrlShader(GL_TESS_CONTROL_SHADER, "tesc", Subroutine.TessCtrlShader, SubroutineUniform.TessCtrlShader),
+    TessEvalShader(GL_TESS_EVALUATION_SHADER, "tese", Subroutine.TessEvalShader, SubroutineUniform.TessEvalShader),
+    GeometryShader(GL_GEOMETRY_SHADER, "geom", Subroutine.GeometryShader, SubroutineUniform.GeometryShader),
+    FragmentShader(GL_FRAGMENT_SHADER, "frag", Subroutine.FragmentShader, SubroutineUniform.FragmentShader),
+    ComputeShader(GL_COMPUTE_SHADER, "comp", Subroutine.ComputeShader, SubroutineUniform.ComputeShader),
+    TaskShader(GL_TASK_SHADER_NV, "task", Subroutine.TaskShader, SubroutineUniform.TaskShader),
+    MeshShader(GL_MESH_SHADER_NV, "mesh", Subroutine.MeshShader, SubroutineUniform.MeshShader),;
 
     enum class Subroutine(override val value: Int, shaderStage: () -> ShaderStage) : GLEnum {
         VertexShader(GL_VERTEX_SUBROUTINE, { ShaderStage.VertexShader }),
