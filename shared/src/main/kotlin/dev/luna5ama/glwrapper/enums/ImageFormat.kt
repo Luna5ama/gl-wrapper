@@ -667,4 +667,119 @@ sealed interface ImageFormat : GLEnum {
         override val value = GL_STENCIL_INDEX8
         override val stencilBits = 8
     }
+
+    companion object {
+        operator fun get(enum: Int): ImageFormat = when (enum) {
+            GL_R8 -> R8_UN
+            GL_R8_SNORM -> R8_SN
+            GL_R8UI -> R8_UI
+            GL_R8I -> R8_SI
+
+            GL_R16 -> R16_UN
+            GL_R16_SNORM -> R16_SN
+            GL_R16UI -> R16_UI
+            GL_R16I -> R16_SI
+            GL_R16F -> R16_F
+
+            GL_R32UI -> R32_UI
+            GL_R32I -> R32_SI
+            GL_R32F -> R32_F
+
+            GL_RG8 -> R8G8_UN
+            GL_RG8_SNORM -> R8G8_SN
+            GL_RG8UI -> R8G8_UI
+            GL_RG8I -> R8G8_SI
+
+            GL_RG16 -> R16G16_UN
+            GL_RG16_SNORM -> R16G16_SN
+            GL_RG16UI -> R16G16_UI
+            GL_RG16I -> R16G16_SI
+            GL_RG16F -> R16G16_F
+
+            GL_RG32UI -> R32G32_UI
+            GL_RG32I -> R32G32_SI
+            GL_RG32F -> R32G32_F
+
+            GL_RGB8 -> R8G8B8_UN
+            GL_RGB8_SNORM -> R8G8B8_SN
+            GL_RGB8UI -> R8G8B8_UI
+            GL_RGB8I -> R8G8B8_SI
+
+            GL_RGB16 -> R16G16B16_UN
+            GL_RGB16_SNORM -> R16G16B16_SN
+            GL_RGB16UI -> R16G16B16_UI
+            GL_RGB16I -> R16G16B16_SI
+            GL_RGB16F -> R16G16B16_F
+
+            GL_RGB32UI -> R32G32B32_UI
+            GL_RGB32I -> R32G32B32_SI
+            GL_RGB32F -> R32G32B32_F
+
+            GL_RGBA8 -> R8G8B8A8_UN
+            GL_RGBA8_SNORM -> R8G8B8A8_SN
+            GL_RGBA8UI -> R8G8B8A8_UI
+            GL_RGBA8I -> R8G8B8A8_SI
+
+            GL_RGBA16 -> R16G16B16A16_UN
+            GL_RGBA16_SNORM -> R16G16B16A16_SN
+            GL_RGBA16UI -> R16G16B16A16_UI
+            GL_RGBA16I -> R16G16B16A16_SI
+            GL_RGBA16F -> R16G16B16A16_F
+
+            GL_RGBA32UI -> R32G32B32A32_UI
+            GL_RGBA32I -> R32G32B32A32_SI
+            GL_RGBA32F -> R32G32B32A32_F
+
+            GL_R3_G3_B2 -> R3G3B2_UN
+            GL_RGB4 -> R4G4B4_UN
+            GL_RGB5 -> R5G5B5_UN
+            GL_RGB565 -> R5G6B5_UN
+            GL_RGB10 -> R10G10B10_UN
+            GL_RGB12 -> R12G12B12_UN
+
+            GL_RGBA2 -> R2G2B2A2_UN
+            GL_RGBA4 -> R4G4B4A4_UN
+            GL_RGB5_A1 -> R5G5B5_1_UN
+            GL_RGB10_A2 -> R10G10B10A2_UN
+            GL_RGB10_A2UI -> R10G10B10A2_UI
+
+            GL_SRGB8 -> R8G8B8_SRGB
+            GL_SRGB8_ALPHA8 -> R8G8B8A8_SRGB
+
+            GL_R11F_G11F_B10F -> R11G11B10_F
+            GL_RGB9_E5 -> R9G9B9E5_UN
+
+            GL_COMPRESSED_RED -> R_UN_C
+            GL_COMPRESSED_RG -> RG_UN_C
+            GL_COMPRESSED_RGB -> RGB_UN_C
+            GL_COMPRESSED_RGBA -> RGBA_UN_C
+            GL_COMPRESSED_SRGB -> RGB_SRGB_C
+            GL_COMPRESSED_SRGB_ALPHA -> RGBA_SRGB_C
+
+            GL_COMPRESSED_RED_RGTC1 -> R_UN_RGTC1
+            GL_COMPRESSED_SIGNED_RED_RGTC1 -> R_SN_RGTC1
+            GL_COMPRESSED_RG_RGTC2 -> RG_UN_RGTC2
+            GL_COMPRESSED_SIGNED_RG_RGTC2 -> RG_SN_RGTC2
+
+            GL_COMPRESSED_RGBA_BPTC_UNORM -> RGBA_UN_BPTC
+            GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM -> RGBA_SRGB_BPTC
+            GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT -> RGB_SF_BPTC
+            GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT -> RGB_UF_BPTC
+
+            GL_COMPRESSED_RGB_S3TC_DXT1_EXT -> RGB_S3TC_DXT1
+            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT -> RGBA_S3TC_DXT1
+            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT -> RGBA_S3TC_DXT3
+            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT -> RGBA_S3TC_DXT5
+
+            GL_DEPTH_COMPONENT16 -> Depth16
+            GL_DEPTH_COMPONENT24 -> Depth24
+            GL_DEPTH_COMPONENT32 -> Depth32
+            GL_DEPTH_COMPONENT32F -> Depth32F
+            GL_DEPTH24_STENCIL8 -> Depth24Stencil8
+            GL_DEPTH32F_STENCIL8 -> Depth32FStencil8
+            GL_STENCIL_INDEX8 -> Stencil8
+
+            else -> throw UnsupportedOperationException("Unsupported image format: $enum")
+        }
+    }
 }
