@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import java.util.BitSet
+import java.util.*
 
 class ShaderProgramResourceManager(val programID: Int) {
     private var uniformLookUpCacheName: String? = null
@@ -117,7 +117,8 @@ class ShaderProgramResourceManager(val programID: Int) {
             }
         }
 
-        class UniformBlock internal constructor(manager: ShaderProgramResourceManager) : ResourceInterface<UniformBlock.Entry>() {
+        class UniformBlock internal constructor(manager: ShaderProgramResourceManager) :
+            ResourceInterface<UniformBlock.Entry>() {
             data class Entry(
                 override val index: Int,
                 val name: String,
@@ -363,13 +364,31 @@ class ShaderProgramResourceManager(val programID: Int) {
             private val bindingPoints = mutableListOf<BindingPoint>()
 
             init {
-                var bindingIndex = 0
-                for (entry in manager.uniformResource.entries.values) {
-                    if (entry.type !is GLSLDataType.Opaque.Sampler) continue
-                    if (entry.blockIndex != -1) continue
-                    glProgramUniform1i(manager.programID, entry.location, bindingIndex)
-                    bindingPoints.add(BindingPoint(entry.name, bindingIndex))
-                    bindingIndex++
+                val samplerUniforms = manager.uniformResource.entries.values.asSequence()
+                    .filter { it.type is GLSLDataType.Opaque.Sampler }
+                    .filter { it.blockIndex == -1 }
+                    .toList()
+
+                val usedTextureUnits = BitSet()
+                MemoryStack {
+                    val temp = malloc(4L)
+                    val tempPtr = temp.ptr
+                    samplerUniforms.filter {
+                        glGetUniformiv(manager.programID, it.location, tempPtr)
+                        val bindingIndex = tempPtr.getInt()
+                        if (bindingIndex >= 0 && !usedTextureUnits.get(bindingIndex)) {
+                            usedTextureUnits.set(bindingIndex, true)
+                            bindingPoints.add(BindingPoint(it.name, bindingIndex))
+                            false
+                        } else {
+                            true
+                        }
+                    }.forEach {
+                        val bindingIndex = usedTextureUnits.nextClearBit(0)
+                        usedTextureUnits.set(bindingIndex, true)
+                        glProgramUniform1i(manager.programID, it.location, bindingIndex)
+                        bindingPoints.add(BindingPoint(it.name, bindingIndex))
+                    }
                 }
             }
 
@@ -395,12 +414,30 @@ class ShaderProgramResourceManager(val programID: Int) {
             private val bindingPoints = mutableListOf<BindingPoint>()
 
             init {
-                var bindingIndex = 0
-                for (entry in manager.uniformResource.entries.values) {
-                    if (entry.type !is GLSLDataType.Opaque.Image) continue
-                    glProgramUniform1i(manager.programID, entry.location, bindingIndex)
-                    bindingPoints.add(BindingPoint(entry.name, bindingIndex))
-                    bindingIndex++
+                val imageUniforms = manager.uniformResource.entries.values.asSequence()
+                    .filter { it.type is GLSLDataType.Opaque.Image }
+                    .toList()
+
+                val usedImageUnits = BitSet()
+                MemoryStack {
+                    val temp = malloc(4L)
+                    val tempPtr = temp.ptr
+                    imageUniforms.filter {
+                        glGetUniformiv(manager.programID, it.location, tempPtr)
+                        val bindingIndex = tempPtr.getInt()
+                        if (bindingIndex >= 0 && !usedImageUnits.get(bindingIndex)) {
+                            usedImageUnits.set(bindingIndex, true)
+                            bindingPoints.add(BindingPoint(it.name, bindingIndex))
+                            false
+                        } else {
+                            true
+                        }
+                    }.forEach {
+                        val bindingIndex = usedImageUnits.nextClearBit(0)
+                        usedImageUnits.set(bindingIndex, true)
+                        glProgramUniform1i(manager.programID, it.location, bindingIndex)
+                        bindingPoints.add(BindingPoint(it.name, bindingIndex))
+                    }
                 }
             }
 
