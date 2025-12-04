@@ -1,30 +1,6 @@
 package dev.luna5ama.glwrapper
 
-import dev.luna5ama.glwrapper.base.GL_ACTIVE_RESOURCES
-import dev.luna5ama.glwrapper.base.GL_ARRAY_SIZE
-import dev.luna5ama.glwrapper.base.GL_ARRAY_STRIDE
-import dev.luna5ama.glwrapper.base.GL_BLOCK_INDEX
-import dev.luna5ama.glwrapper.base.GL_BUFFER_DATA_SIZE
-import dev.luna5ama.glwrapper.base.GL_LOCATION
-import dev.luna5ama.glwrapper.base.GL_MATRIX_STRIDE
-import dev.luna5ama.glwrapper.base.GL_MAX_NAME_LENGTH
-import dev.luna5ama.glwrapper.base.GL_MAX_NUM_ACTIVE_VARIABLES
-import dev.luna5ama.glwrapper.base.GL_NAME_LENGTH
-import dev.luna5ama.glwrapper.base.GL_NUM_ACTIVE_VARIABLES
-import dev.luna5ama.glwrapper.base.GL_SHADER_STORAGE_BLOCK
-import dev.luna5ama.glwrapper.base.GL_TYPE
-import dev.luna5ama.glwrapper.base.GL_UNIFORM
-import dev.luna5ama.glwrapper.base.GL_UNIFORM_BLOCK
-import dev.luna5ama.glwrapper.base.glBindBuffersRange
-import dev.luna5ama.glwrapper.base.glBindImageTextures
-import dev.luna5ama.glwrapper.base.glBindSamplers
-import dev.luna5ama.glwrapper.base.glBindTextures
-import dev.luna5ama.glwrapper.base.glGetProgramInterfaceiv
-import dev.luna5ama.glwrapper.base.glGetProgramResourceName
-import dev.luna5ama.glwrapper.base.glGetProgramResourceiv
-import dev.luna5ama.glwrapper.base.glProgramUniform1i
-import dev.luna5ama.glwrapper.base.glShaderStorageBlockBinding
-import dev.luna5ama.glwrapper.base.glUniformBlockBinding
+import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.BufferTarget
 import dev.luna5ama.glwrapper.enums.GLSLDataType
 import dev.luna5ama.glwrapper.enums.ShaderStage
@@ -37,7 +13,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import kotlin.collections.iterator
+import java.util.BitSet
 
 class ShaderProgramResourceManager(val programID: Int) {
     private var uniformLookUpCacheName: String? = null
@@ -92,7 +68,7 @@ class ShaderProgramResourceManager(val programID: Int) {
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
                 val nameToEntryMap = Object2ObjectOpenHashMap<String, Entry>()
-                MemoryStack.Companion {
+                MemoryStack {
                     val propCount = 6
                     val properties = malloc(propCount * 4L).ptr
                     properties.setIntInc(GL_BLOCK_INDEX)
@@ -112,12 +88,12 @@ class ShaderProgramResourceManager(val programID: Int) {
                             propCount,
                             properties,
                             propCount,
-                            Ptr.Companion.NULL,
+                            Ptr.NULL,
                             values
                         )
                         val blockIndex = values.getInt(0)
                         val location = values.getInt(4)
-                        val type = GLSLDataType.Companion[values.getInt(8)]
+                        val type = GLSLDataType[values.getInt(8)]
                         val arraySize = values.getInt(12)
                         val arrayStride = values.getInt(16)
                         val matrixStride = values.getInt(20)
@@ -155,11 +131,13 @@ class ShaderProgramResourceManager(val programID: Int) {
 
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
-                MemoryStack.Companion {
-                    val propCount = 2
+                MemoryStack {
+                    val propCount = 3
                     val properties = malloc(propCount * 4L).ptr
                     properties.setIntInc(GL_BUFFER_DATA_SIZE)
                         .setIntInc(GL_NUM_ACTIVE_VARIABLES)
+                        .setInt(GL_BUFFER_BINDING)
+
                     val values = malloc(propCount * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
@@ -167,16 +145,17 @@ class ShaderProgramResourceManager(val programID: Int) {
                     val maxNumActiveVariables = temp.getInt()
 
                     val activeVariableIndicesPtr = malloc(maxNumActiveVariables * 4L).ptr
-                    var bindingIndex = 0
+                    val usedBindingIndices = BitSet()
 
                     iterateResourceNamedIndex(manager.programID, GL_UNIFORM_BLOCK) { (i, name) ->
                         glGetProgramResourceiv(
                             manager.programID, GL_UNIFORM_BLOCK, i,
                             propCount, properties,
-                            propCount, Ptr.Companion.NULL, values
+                            propCount, Ptr.NULL, values
                         )
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
+                        var bindingIndex = values.getInt(8)
                         glGetProgramResourceiv(
                             manager.programID,
                             GL_UNIFORM_BLOCK,
@@ -184,7 +163,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                             1,
                             properties,
                             1,
-                            Ptr.Companion.NULL,
+                            Ptr.NULL,
                             activeVariableIndicesPtr
                         )
 
@@ -192,7 +171,11 @@ class ShaderProgramResourceManager(val programID: Int) {
                             activeVariableIndicesPtr.getInt(j * 4L)
                         }
 
-                        glUniformBlockBinding(manager.programID, i, bindingIndex)
+                        if (usedBindingIndices.get(bindingIndex)) {
+                            bindingIndex = usedBindingIndices.nextClearBit(bindingIndex)
+                            glUniformBlockBinding(manager.programID, i, bindingIndex)
+                        }
+                        usedBindingIndices.set(bindingIndex, true)
                         entries.put(
                             i, Entry(
                                 index = i,
@@ -203,7 +186,6 @@ class ShaderProgramResourceManager(val programID: Int) {
                                 activeVariableIndices = activeVariableIndices
                             )
                         )
-                        bindingIndex++
                     }
                 }
                 this.entries = Int2ObjectMaps.unmodifiable(entries)
@@ -225,11 +207,12 @@ class ShaderProgramResourceManager(val programID: Int) {
 
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
-                MemoryStack.Companion {
-                    val propN = 2
+                MemoryStack {
+                    val propN = 3
                     val properties = malloc(propN * 4L).ptr
                     properties.setIntInc(GL_BUFFER_DATA_SIZE)
                         .setIntInc(GL_NUM_ACTIVE_VARIABLES)
+                        .setInt(GL_BUFFER_BINDING)
                     val values = malloc(propN * 4L).ptr
 
                     val temp = malloc(1 * 4L).ptr
@@ -242,7 +225,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                     val maxNumActiveVariables = temp.getInt()
 
                     val activeVariableIndicesPtr = calloc(maxNumActiveVariables * 4L).ptr
-                    var bindingIndex = 0
+                    val usedBindingIndices = BitSet()
 
                     iterateResourceNamedIndex(manager.programID, GL_SHADER_STORAGE_BLOCK) { (i, name) ->
                         glGetProgramResourceiv(
@@ -252,11 +235,12 @@ class ShaderProgramResourceManager(val programID: Int) {
                             propN,
                             properties,
                             propN,
-                            Ptr.Companion.NULL,
+                            Ptr.NULL,
                             values
                         )
                         val dataSize = values.getInt(0)
                         val numActiveVariables = values.getInt(4)
+                        var bindingIndex = values.getInt(8)
                         glGetProgramResourceiv(
                             manager.programID,
                             GL_SHADER_STORAGE_BLOCK,
@@ -264,7 +248,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                             1,
                             properties,
                             1,
-                            Ptr.Companion.NULL,
+                            Ptr.NULL,
                             activeVariableIndicesPtr
                         )
 
@@ -272,8 +256,11 @@ class ShaderProgramResourceManager(val programID: Int) {
                             activeVariableIndicesPtr.getInt(j * 4L)
                         }
 
-
-                        glShaderStorageBlockBinding(manager.programID, i, bindingIndex)
+                        if (usedBindingIndices.get(bindingIndex)) {
+                            bindingIndex = usedBindingIndices.nextClearBit(bindingIndex)
+                            glShaderStorageBlockBinding(manager.programID, i, bindingIndex)
+                        }
+                        usedBindingIndices.set(bindingIndex, true)
                         entries.put(
                             i, Entry(
                                 index = i,
@@ -302,7 +289,7 @@ class ShaderProgramResourceManager(val programID: Int) {
 
             init {
                 val entries = Int2ObjectOpenHashMap<Entry>()
-                MemoryStack.Companion {
+                MemoryStack {
                     iterateResourceNamedIndex(manager.programID, stage.subroutine.value) { (i, name) ->
                         entries.put(i, Entry(i, name))
                     }
@@ -317,7 +304,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                 resourceType: Int,
                 block: (IndexedValue<String>) -> Unit,
             ) {
-                MemoryStack.Companion {
+                MemoryStack {
                     val properties = malloc(1 * 4L).ptr
                     val values = malloc(1 * 4L).ptr
 
@@ -331,7 +318,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                     val byteArray = ByteArray(maxNameLength)
 
                     for (i in 0 until numUniforms) {
-                        glGetProgramResourceiv(program, resourceType, i, 1, properties, 1, Ptr.Companion.NULL, values)
+                        glGetProgramResourceiv(program, resourceType, i, 1, properties, 1, Ptr.NULL, values)
                         val nameLength = values.getInt(0)
 
                         glGetProgramResourceName(
@@ -339,7 +326,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                             resourceType,
                             i,
                             maxNameLength,
-                            Ptr.Companion.NULL,
+                            Ptr.NULL,
                             nameBuffer
                         )
                         memcpy(nameBuffer, 0L, byteArray, 0L, nameLength.toLong())
@@ -355,7 +342,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                 resourceType: Int,
                 block: (Int) -> Unit,
             ) {
-                MemoryStack.Companion {
+                MemoryStack {
                     val singleBuffer = malloc(4L).ptr
                     glGetProgramInterfaceiv(program, resourceType, GL_ACTIVE_RESOURCES, singleBuffer)
                     val numUniforms = singleBuffer.getInt()
@@ -387,7 +374,7 @@ class ShaderProgramResourceManager(val programID: Int) {
             }
 
             override fun apply(specs: ShaderBindingSpecs) {
-                MemoryStack.Companion {
+                MemoryStack {
                     val bindings = specs.samplers
                     val count = bindingPoints.size
                     val textures = malloc(count * 4L).ptr
@@ -418,7 +405,7 @@ class ShaderProgramResourceManager(val programID: Int) {
             }
 
             override fun apply(specs: ShaderBindingSpecs) {
-                MemoryStack.Companion {
+                MemoryStack {
                     val bindings = specs.images
                     val count = bindingPoints.size
                     val textures = malloc(count * 4L).ptr
@@ -451,7 +438,7 @@ class ShaderProgramResourceManager(val programID: Int) {
                 for ((target, bindingPoints) in bindingPointMap) {
                     val bindings = bindingMap[target]
                     require(bindings != null) { "Missing bindings for targer: $target" }
-                    MemoryStack.Companion {
+                    MemoryStack {
                         val targetBindingCount = bindingPoints.size
                         val buffers = malloc(targetBindingCount * 4L).ptr
                         val offsets = malloc(targetBindingCount * 8L).ptr
