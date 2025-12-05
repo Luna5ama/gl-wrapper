@@ -296,6 +296,10 @@ abstract class ShaderPathResolver {
         override fun spliterator(): Spliterator<Path?> {
             return delegate.spliterator()
         }
+
+        override fun toString(): String {
+            return delegate.toString()
+        }
     }
 
     object Default : ShaderPathResolver() {

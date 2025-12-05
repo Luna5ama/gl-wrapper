@@ -14,12 +14,11 @@ import java.nio.file.Path
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import kotlin.io.path.inputStream
+import kotlin.io.path.name
+import kotlin.io.path.nameWithoutExtension
 
 sealed class ShaderSource(internal val provider: Provider<*>, internal val sourceKey: SourceKey) {
-    val name = with(sourceKey.path.toString()) {
-        substring(lastIndexOf('/') + 1, lastIndexOf('.'))
-    }
-
+    val name = sourceKey.path.nameWithoutExtension
     fun resolveCodeSrc(): String {
         return provider.resolveCodeSrc(sourceKey)
     }
