@@ -117,6 +117,21 @@ sealed interface ImageFormat : GLEnum {
             get() = depthBits
         override val channels: Int
             get() = 1
+
+        override val pixelFormat: Base
+            get() = Companion.pixelFormat
+
+
+        companion object : Depth, Base {
+            override val depthBits: Int
+                get() = throw UnsupportedOperationException()
+            override val value: Int
+                get() = GL_DEPTH_COMPONENT
+            override val pixelFormat: Base
+                get() = this
+            override val pixelType: Int
+                get() = throw UnsupportedOperationException()
+        }
     }
 
     sealed interface Stencil : ImageFormat, Uncompressed {
@@ -125,6 +140,20 @@ sealed interface ImageFormat : GLEnum {
             get() = stencilBits
         override val channels: Int
             get() = 1
+
+        override val pixelFormat: Base
+            get() = Companion.pixelFormat
+
+        companion object : Stencil, Base {
+            override val stencilBits: Int
+                get() = throw UnsupportedOperationException()
+            override val value: Int
+                get() = GL_STENCIL_INDEX
+            override val pixelFormat: Base
+                get() = this
+            override val pixelType: Int
+                get() = throw UnsupportedOperationException()
+        }
     }
 
     sealed interface DepthStencil : Depth, Stencil, Uncompressed {
@@ -132,6 +161,21 @@ sealed interface ImageFormat : GLEnum {
             get() = depthBits + stencilBits
         override val channels: Int
             get() = 2
+        override val pixelFormat: Base
+            get() = Companion.pixelFormat
+
+        companion object : DepthStencil, Base {
+            override val depthBits: Int
+                get() = throw UnsupportedOperationException()
+            override val value: Int
+                get() = GL_DEPTH_STENCIL
+            override val pixelFormat: Base
+                get() = this
+            override val pixelType: Int
+                get() = throw UnsupportedOperationException()
+            override val stencilBits: Int
+                get() = throw UnsupportedOperationException()
+        }
     }
 
     sealed class R(override val value: Int) : Color {
@@ -1049,9 +1093,6 @@ sealed interface ImageFormat : GLEnum {
         override val value = GL_DEPTH_COMPONENT16
         override val depthBits = 16
 
-        override val pixelFormat: Base
-            get() = R
-
         override val pixelType: Int
             get() = GL_UNSIGNED_SHORT
     }
@@ -1059,9 +1100,6 @@ sealed interface ImageFormat : GLEnum {
     data object Depth24 : Depth, Sized, UnsignedNormalized {
         override val value = GL_DEPTH_COMPONENT24
         override val depthBits = 24
-
-        override val pixelFormat: Base
-            get() = R
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
@@ -1071,9 +1109,6 @@ sealed interface ImageFormat : GLEnum {
         override val value = GL_DEPTH_COMPONENT32
         override val depthBits = 32
 
-        override val pixelFormat: Base
-            get() = R
-
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
     }
@@ -1081,9 +1116,6 @@ sealed interface ImageFormat : GLEnum {
     data object Depth32F : Depth, Sized, Float {
         override val value = GL_DEPTH_COMPONENT32F
         override val depthBits = 32
-
-        override val pixelFormat: Base
-            get() = R
 
         override val pixelType: Int
             get() = GL_FLOAT
@@ -1094,9 +1126,6 @@ sealed interface ImageFormat : GLEnum {
         override val depthBits = 24
         override val stencilBits = 8
 
-        override val pixelFormat: Base
-            get() = R
-
         override val pixelType: Int
             get() = GL_UNSIGNED_INT_24_8
     }
@@ -1106,9 +1135,6 @@ sealed interface ImageFormat : GLEnum {
         override val depthBits = 32
         override val stencilBits = 8
 
-        override val pixelFormat: Base
-            get() = R
-
         override val pixelType: Int
             get() = GL_FLOAT_32_UNSIGNED_INT_24_8_REV
     }
@@ -1116,9 +1142,6 @@ sealed interface ImageFormat : GLEnum {
     data object Stencil8 : Stencil, Sized {
         override val value = GL_STENCIL_INDEX8
         override val stencilBits = 8
-
-        override val pixelFormat: Base
-            get() = R
 
         override val pixelType: Int
             get() = GL_UNSIGNED_BYTE
