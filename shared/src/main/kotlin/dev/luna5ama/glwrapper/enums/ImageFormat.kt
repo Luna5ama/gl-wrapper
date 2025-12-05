@@ -139,11 +139,23 @@ sealed interface ImageFormat : GLEnum {
 
         companion object : R(GL_RED), Base
     }
+    
+    sealed class RInt(override val value: Int) : Color {
+        override val channels get() = 1
+
+        companion object : RInt(GL_RED_INTEGER), Base
+    }
 
     sealed class RG(override val value: Int) : Color {
         override val channels get() = 2
 
         companion object : RG(GL_RG), Base
+    }
+    
+    sealed class RGInt(override val value: Int) : Color {
+        override val channels get() = 2
+
+        companion object : RGInt(GL_RG_INTEGER), Base
     }
 
     sealed class RGB(override val value: Int) : Color {
@@ -151,11 +163,23 @@ sealed interface ImageFormat : GLEnum {
 
         companion object : RGB(GL_RGB), Base
     }
+    
+    sealed class RGBInt(override val value: Int) : Color {
+        override val channels get() = 3
+
+        companion object : RGBInt(GL_RGB_INTEGER), Base
+    }
 
     sealed class RGBA(override val value: Int) : Color {
         final override val channels get() = 4
 
         companion object : RGBA(GL_RGBA), Base
+    }
+    
+    sealed class RGBAInt(override val value: Int) : Color {
+        final override val channels get() = 4
+
+        companion object : RGBAInt(GL_RGBA_INTEGER), Base
     }
 
     data object R8_UN : R(GL_R8), UncompressedColor, TextureViewAliasing.UC_8Bit {
@@ -184,9 +208,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8_UI : R(GL_R8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_8Bit {
+    data object R8_UI : RInt(GL_R8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_8Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_BYTE
@@ -197,9 +221,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8_SI : R(GL_R8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_8Bit {
+    data object R8_SI : RInt(GL_R8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_8Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_BYTE
@@ -236,9 +260,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16_UI : R(GL_R16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R16_UI : RInt(GL_R16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_16Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_SHORT
@@ -249,9 +273,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16_SI : R(GL_R16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R16_SI : RInt(GL_R16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_16Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_SHORT
@@ -275,9 +299,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32_UI : R(GL_R32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R32_UI : RInt(GL_R32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
@@ -288,9 +312,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32_SI : R(GL_R32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R32_SI : RInt(GL_R32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = R
+            get() = RInt
 
         override val pixelType: Int
             get() = GL_INT
@@ -340,9 +364,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8G8_UI : RG(GL_RG8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R8G8_UI : RGInt(GL_RG8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_16Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_BYTE
@@ -353,9 +377,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8G8_SI : RG(GL_RG8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_16Bit {
+    data object R8G8_SI : RGInt(GL_RG8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_16Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_BYTE
@@ -392,9 +416,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16G16_UI : RG(GL_RG16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R16G16_UI : RGInt(GL_RG16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_SHORT
@@ -405,9 +429,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16G16_SI : RG(GL_RG16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R16G16_SI : RGInt(GL_RG16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_SHORT
@@ -431,9 +455,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32G32_UI : RG(GL_RG32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R32G32_UI : RGInt(GL_RG32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_64Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
@@ -444,9 +468,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32G32_SI : RG(GL_RG32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R32G32_SI : RGInt(GL_RG32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_64Bit {
         override val pixelFormat: Base
-            get() = RG
+            get() = RGInt
 
         override val pixelType: Int
             get() = GL_INT
@@ -496,9 +520,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8G8B8_UI : RGB(GL_RGB8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_UI : RGBInt(GL_RGB8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_24Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_BYTE
@@ -509,9 +533,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R8G8B8_SI : RGB(GL_RGB8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_24Bit {
+    data object R8G8B8_SI : RGBInt(GL_RGB8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_24Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_BYTE
@@ -548,9 +572,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16G16B16_UI : RGB(GL_RGB16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_UI : RGBInt(GL_RGB16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_48Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_SHORT
@@ -561,9 +585,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R16G16B16_SI : RGB(GL_RGB16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_48Bit {
+    data object R16G16B16_SI : RGBInt(GL_RGB16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_48Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_SHORT
@@ -587,9 +611,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32G32B32_UI : RGB(GL_RGB32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_96Bit {
+    data object R32G32B32_UI : RGBInt(GL_RGB32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_96Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
@@ -600,9 +624,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 0
     }
 
-    data object R32G32B32_SI : RGB(GL_RGB32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_96Bit {
+    data object R32G32B32_SI : RGBInt(GL_RGB32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_96Bit {
         override val pixelFormat: Base
-            get() = RGB
+            get() = RGBInt
 
         override val pixelType: Int
             get() = GL_INT
@@ -652,9 +676,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 8
     }
 
-    data object R8G8B8A8_UI : RGBA(GL_RGBA8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R8G8B8A8_UI : RGBAInt(GL_RGBA8UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_BYTE
@@ -665,9 +689,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 8
     }
 
-    data object R8G8B8A8_SI : RGBA(GL_RGBA8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R8G8B8A8_SI : RGBAInt(GL_RGBA8I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_BYTE
@@ -704,9 +728,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 16
     }
 
-    data object R16G16B16A16_UI : RGBA(GL_RGBA16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_UI : RGBAInt(GL_RGBA16UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_64Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_SHORT
@@ -717,9 +741,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 16
     }
 
-    data object R16G16B16A16_SI : RGBA(GL_RGBA16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_64Bit {
+    data object R16G16B16A16_SI : RGBAInt(GL_RGBA16I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_64Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_SHORT
@@ -743,9 +767,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 16
     }
 
-    data object R32G32B32A32_UI : RGBA(GL_RGBA32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_128Bit {
+    data object R32G32B32A32_UI : RGBAInt(GL_RGBA32UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_128Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT
@@ -756,9 +780,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 32
     }
 
-    data object R32G32B32A32_SI : RGBA(GL_RGBA32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_128Bit {
+    data object R32G32B32A32_SI : RGBAInt(GL_RGBA32I), UncompressedColor, SignedInteger, TextureViewAliasing.UC_128Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_INT
@@ -912,9 +936,9 @@ sealed interface ImageFormat : GLEnum {
         override val aBits = 2
     }
 
-    data object R10G10B10A2_UI : RGBA(GL_RGB10_A2UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
+    data object R10G10B10A2_UI : RGBAInt(GL_RGB10_A2UI), UncompressedColor, UnsignedInteger, TextureViewAliasing.UC_32Bit {
         override val pixelFormat: Base
-            get() = RGBA
+            get() = RGBAInt
 
         override val pixelType: Int
             get() = GL_UNSIGNED_INT_2_10_10_10_REV
