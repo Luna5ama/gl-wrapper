@@ -35,6 +35,7 @@ open class ShaderProgram private constructor(
     }
 
     private lateinit var resourceManager: ShaderProgramResourceManager
+    private lateinit var bindingManager: ShaderProgramResourceBindingManager
 
     init {
         initialize(false)
@@ -102,13 +103,14 @@ open class ShaderProgram private constructor(
         }
 
         resourceManager = ShaderProgramResourceManager(programID)
+        bindingManager = ShaderProgramResourceBindingManager(resourceManager)
     }
 
     fun applyBinding(spec: ShaderBindingSpecs) {
         runCatching {
-            resourceManager.samplerBindings.apply(spec)
-            resourceManager.imageBindings.apply(spec)
-            resourceManager.bufferBindings.apply(spec)
+            bindingManager.samplerBindings.apply(spec)
+            bindingManager.imageBindings.apply(spec)
+            bindingManager.bufferBindings.apply(spec)
         }.onFailure {
             it.printStackTrace()
         }
