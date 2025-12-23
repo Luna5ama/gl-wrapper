@@ -13,6 +13,7 @@ import java.nio.charset.CodingErrorAction
 import java.nio.file.Path
 import java.security.DigestInputStream
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
@@ -130,10 +131,7 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
     }
 
     abstract class Provider<T : ShaderSource> {
-        private val cacheMap = Object2ObjectOpenHashMap<SourceKey, SoftReference<Cache>>()
-
-        private val bufferArr = Arr.malloc(1024)
-        private val byteBuffer = nullByteBuffer()
+        private val cacheMap = ConcurrentHashMap<SourceKey, SoftReference<Cache>>()
 
         abstract fun newInstance(sourceKey: SourceKey): T
 
@@ -161,20 +159,12 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
 
         private fun getCache(sourceKey: SourceKey): Cache {
             val md5 = MessageDigest.getInstance("MD5")
-            var offset = 0L
 
-            sourceKey.path.inputStream().use { inputStream ->
+            val bytes = sourceKey.path.inputStream().use { inputStream ->
                 DigestInputStream(inputStream, md5).use {
-                    var byte = it.read()
-                    while (byte != -1) {
-                        bufferArr.ensureCapacity(offset + 1L, false)
-                        bufferArr.ptr.setByte(offset++, byte.toByte())
-                        byte = it.read()
-                    }
+                    it.readBytes()
                 }
             }
-
-            if (offset == 0L) throw IllegalArgumentException("Shader file is empty (${sourceKey.path})")
 
             val newHash = MD5Hash(md5.digest())
 
@@ -189,30 +179,22 @@ sealed class ShaderSource(internal val provider: Provider<*>, internal val sourc
                 } ?: input
             }
 
-            synchronized(this) {
-                var source = cacheMap[sourceKey]?.get()
-                if (source == null || source.srcHash != newHash) {
-                    val decoder = Charsets.UTF_8.newDecoder()
-                        .onMalformedInput(CodingErrorAction.REPORT)
-                        .onUnmappableCharacter(CodingErrorAction.REPORT)
+            var source = cacheMap[sourceKey]?.get()
+            if (source == null || source.srcHash != newHash) {
+                val lines = bytes.toString(Charsets.UTF_8).lineSequence()
+                    .mapTo(ObjectArrayList()) { processLines(it) }
 
-                    val lines = decoder.decode(bufferArr.ptr.asByteBuffer(offset.toInt(), byteBuffer)).lineSequence()
-                        .mapTo(ObjectArrayList()) { processLines(it) }
-
-                    source = Cache(newHash, lines)
-                    cacheMap[sourceKey] = SoftReference(source)
-                }
-
-                return source
+                source = Cache(newHash, lines)
+                cacheMap[sourceKey] = SoftReference(source)
             }
+
+            return source
         }
 
         private val includeRegex = "#include\\s+\"([^\"]+)\"".toRegex()
 
         fun clearCache() {
-            synchronized(this) {
-                cacheMap.clear()
-            }
+            cacheMap.clear()
         }
 
         operator fun invoke(path: String): T {
