@@ -1,10 +1,9 @@
 package dev.luna5ama.glwrapper
 
 import dev.luna5ama.glwrapper.enums.BufferTarget
-import dev.luna5ama.glwrapper.enums.ShaderStage
-import dev.luna5ama.glwrapper.objects.BufferObject
 import dev.luna5ama.glwrapper.objects.SamplerObject
 import dev.luna5ama.glwrapper.objects.TextureObject
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -15,16 +14,19 @@ data class ShaderBindingSpecs(
 ) {
     data class Sampler(
         val name: String,
-        val texture: TextureObject,
-        val sampler: SamplerObject?
+        val texture: Int,
+        val sampler: SamplerObject? = null
     ) {
-        constructor(name: String, texture: TextureObject) : this(name, texture, null)
+        constructor(name: String, texture: TextureObject) : this(name, texture.id, null)
+        constructor(name: String, texture: TextureObject, sampler: SamplerObject? = null) : this(name, texture.id, sampler)
     }
 
     data class Image(
         val name: String,
-        val texture: TextureObject
-    )
+        val texture: Int
+    ) {
+        constructor(name: String, texture: TextureObject) : this(name, texture.id)
+    }
 
     data class Buffer(
         val name: String,
@@ -33,9 +35,9 @@ data class ShaderBindingSpecs(
     )
 
     class Builder {
-        private val samplers = mutableMapOf<String, Sampler>()
-        private val images = mutableMapOf<String, Image>()
-        private val buffers = mutableMapOf<BufferTarget.Shader, MutableMap<String, Buffer>>()
+        private val samplers = Object2ObjectOpenHashMap<String, Sampler>()
+        private val images = Object2ObjectOpenHashMap<String, Image>()
+        private val buffers = Object2ObjectOpenHashMap<BufferTarget.Shader, MutableMap<String, Buffer>>()
 
         fun sampler(binding: Sampler) {
             val v = samplers.put(binding.name, binding)
@@ -46,6 +48,10 @@ data class ShaderBindingSpecs(
 
         fun sampler(name: String, texture: TextureObject, sampler: SamplerObject) {
             sampler(Sampler(name, texture, sampler))
+        }
+
+        fun sampler(name: String, texture: Int) {
+            sampler(Sampler(name, texture))
         }
 
         fun sampler(name: String, texture: TextureObject) {
@@ -67,6 +73,10 @@ data class ShaderBindingSpecs(
             }
         }
 
+        fun image(name: String, texture: Int) {
+            image(Image(name, texture))
+        }
+
         fun image(name: String, texture: TextureObject) {
             image(Image(name, texture))
         }
@@ -76,7 +86,7 @@ data class ShaderBindingSpecs(
         }
 
         fun buffer(binding: Buffer) {
-            val map = buffers.getOrPut(binding.target, ::mutableMapOf)
+            val map = buffers.getOrPut(binding.target) { Object2ObjectOpenHashMap() }
             val v = map.put(binding.name, binding)
             require(v == null) {
                 "Duplicated ${binding.target} buffer name: ${binding.name}, existing: $v, new: $binding"

@@ -12,6 +12,7 @@ import java.util.*
 open class ShaderProgram private constructor(
     val shaderSources: List<ShaderSource>,
 ) : IGLObject, IGLBinding {
+
     constructor(vararg shaderSources: ShaderSource) : this(shaderSources.toList())
 
     final override var id = 0; private set

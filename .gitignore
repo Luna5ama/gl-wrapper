@@ -275,3 +275,5 @@ gradle-app.setting
 /logs/
 
 .architectury-transformer
+
+.kotlin

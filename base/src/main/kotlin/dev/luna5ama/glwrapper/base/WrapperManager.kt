@@ -1,9 +1,12 @@
 package dev.luna5ama.glwrapper.base
 
-import java.util.*
+import java.util.ServiceLoader
 
 sealed class WrapperManager {
-    private val provider by lazy { ServiceLoader.load(GLWrapperInitializer::class.java).maxBy { it.priority } }
+
+    private val provider by lazy {
+        ServiceLoader.load(GLWrapperInitializer::class.java).maxBy { it.priority }
+    }
 
     private var instanceFastPath: GLWrapper? = null
     private var instanceFastPathThread: Thread? = null
@@ -30,4 +33,5 @@ sealed class WrapperManager {
         }
 
     val pathResolver = provider.createPathResolver()
+
 }

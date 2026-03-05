@@ -1,8 +1,18 @@
+import dev.luna5ama.ktgen.KtgenTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 dependencies {
     implementation("dev.luna5ama:ktgen-api:1.0.2")
     implementation("org.lwjgl:lwjgl-opengl:3.3.3")
+}
+
+val launcher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+}
+tasks {
+    withType<KtgenTask> {
+        javaLauncher.set(launcher)
+    }
 }
 
 java {

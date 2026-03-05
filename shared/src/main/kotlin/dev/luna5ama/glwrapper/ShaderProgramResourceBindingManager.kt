@@ -4,6 +4,8 @@ import dev.luna5ama.glwrapper.base.*
 import dev.luna5ama.glwrapper.enums.BufferTarget
 import dev.luna5ama.glwrapper.enums.GLSLDataType
 import dev.luna5ama.kmogus.MemoryStack
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.util.*
 
 internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgramResourceManager) {
@@ -17,7 +19,7 @@ internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgra
         data class BindingPoint(val name: String, val index: Int)
 
         class Samplers internal constructor(manager: ShaderProgramResourceManager) : BindingManager() {
-            private val bindingPoints = mutableListOf<BindingPoint>()
+            private val bindingPoints = ObjectArrayList<BindingPoint>()
 
             init {
                 val samplerUniforms = manager.uniformResource.entries.values.asSequence()
@@ -57,7 +59,7 @@ internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgra
                     for ((name, index) in bindingPoints) {
                         val binding = bindings[name]
                         require(binding != null) { "Missing binding for sampler unit: $name" }
-                        textures.setInt(index * 4L, binding.texture.id)
+                        textures.setInt(index * 4L, binding.texture)
                         samplers.setInt(index * 4L, binding.sampler?.id ?: 0)
                     }
                     glBindTextures(0, count, textures)
@@ -67,7 +69,7 @@ internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgra
         }
 
         class Images internal constructor(manager: ShaderProgramResourceManager) : BindingManager() {
-            private val bindingPoints = mutableListOf<BindingPoint>()
+            private val bindingPoints = ObjectArrayList<BindingPoint>()
 
             init {
                 val imageUniforms = manager.uniformResource.entries.values.asSequence()
@@ -105,7 +107,7 @@ internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgra
                     for ((name, index) in bindingPoints) {
                         val binding = bindings[name]
                         require(binding != null) { "Missing binding for image unit: $name" }
-                        textures.setInt(index * 4L, binding.texture.id)
+                        textures.setInt(index * 4L, binding.texture)
                     }
                     glBindImageTextures(0, count, textures)
                 }
@@ -113,15 +115,15 @@ internal class ShaderProgramResourceBindingManager(resourceManager: ShaderProgra
         }
 
         class Buffers internal constructor(manager: ShaderProgramResourceManager) : BindingManager() {
-            private val bindingPointMap = mutableMapOf<BufferTarget.Shader, MutableList<BindingPoint>>()
+            private val bindingPointMap = Object2ObjectOpenHashMap<BufferTarget.Shader, MutableList<BindingPoint>>()
 
             init {
                 for (entry in manager.shaderStorageBlockResource.entries.values) {
-                    bindingPointMap.getOrPut(BufferTarget.ShaderStorage, ::mutableListOf)
+                    bindingPointMap.getOrPut(BufferTarget.ShaderStorage, ::ObjectArrayList)
                         .add(BindingPoint(entry.name, entry.bindingIndex))
                 }
                 for (entry in manager.uniformBlockResource.entries.values) {
-                    bindingPointMap.getOrPut(BufferTarget.Uniform, ::mutableListOf)
+                    bindingPointMap.getOrPut(BufferTarget.Uniform, ::ObjectArrayList)
                         .add(BindingPoint(entry.name, entry.bindingIndex))
                 }
             }
