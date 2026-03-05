@@ -1,5 +1,5 @@
 plugins {
-    id("dev.luna5ama.ktgen").version("1.0.0")
+    id("dev.luna5ama.ktgen").version("1.0.2")
 }
 
 dependencies {
